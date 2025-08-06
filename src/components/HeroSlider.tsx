@@ -43,8 +43,11 @@ export default function HeroSlider() {
         setStartX(null)
     }
 
-    const handleTouchStart = (e) => setStartX(e.touches[0].clientX)
-    const handleTouchEnd = (e) => {
+    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+        setStartX(e.touches[0].clientX)
+    }
+
+    const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
         if (startX === null) return
         const endX = e.changedTouches[0].clientX
         const deltaX = endX - startX
@@ -56,6 +59,7 @@ export default function HeroSlider() {
                 setCurrent((prev) => (prev + 1) % slides.length)
             }
         }
+
         setStartX(null)
     }
 
