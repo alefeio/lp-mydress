@@ -42,15 +42,14 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
           fbq('init', '754061187167582');
           fbq('track', 'PageView');
           `,
-          }}>
-        </script>
+          }}/>
         <noscript dangerouslySetInnerHTML={{
           __html:
             `<img height="1" width="1" style="display:none"
           src="https://www.facebook.com/tr?id=754061187167582&ev=PageView&noscript=1"
           />
               `,
-        }}></noscript>
+        }}/>
       </Head>
       <body>
         <div className="min-h-screen font-sans">

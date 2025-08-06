@@ -102,15 +102,6 @@ export default function DressesGallery() {
                     <p className="px-2 text-gray-700">Aqui você pode visualizar os modelos disponíveis, explorar por cores, tamanhos e estilos antes mesmo de vir até a loja.</p>
                 </div>
                 <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
-                    <button
-                        onClick={prevDresses}
-                        className="absolute left-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition m-2"
-                        aria-label="Anterior"
-                    >
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
                     <div className="flex gap-2 md: gap-4 md:gap-6">
                         {getVisibleDresses().map((dress, idx) => (
                             <div
@@ -132,6 +123,15 @@ export default function DressesGallery() {
                             </div>
                         ))}
                     </div>
+                    <button
+                        onClick={prevDresses}
+                        className="absolute left-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition m-2"
+                        aria-label="Anterior"
+                    >
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                     <button
                         onClick={nextDresses}
                         className="absolute right-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition m-2"
