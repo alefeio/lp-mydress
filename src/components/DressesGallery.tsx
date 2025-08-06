@@ -50,6 +50,7 @@ export default function DressesGallery() {
     const [currentArticles, setCurrentArticles] = useState(0)
     const [showModal, setShowModal] = useState(false)
     const [modalIdx, setModalIdx] = useState(0)
+    const [modalType, setModalType] = useState<"dresses" | "clutches" | "midisBrancos" | null>(null)
 
     const prevDresses = () => setCurrentDresses((c) => (c === 0 ? dresses.length - 1 : c - 1))
     const nextDresses = () => setCurrentDresses((c) => (c === dresses.length - 1 ? 0 : c + 1))
@@ -117,7 +118,11 @@ export default function DressesGallery() {
                                 className={`h-100 w-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
                 ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
               `}
-                                onClick={() => { setShowModal(true); setModalIdx((currentDresses + idx - 1 + dresses.length) % dresses.length) }}
+                                onClick={() => {
+                                    setShowModal(true)
+                                    setModalIdx((currentDresses + idx - 1 + dresses.length) % dresses.length)
+                                    setModalType("dresses")
+                                }}
                             >
                                 <img
                                     src={dress.img}
@@ -172,7 +177,11 @@ export default function DressesGallery() {
                                 className={`w-40 h-56 md:w-60 md:h-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
                 ${idx === 1 ? "scale-105 z-10" : "opacity-80"}
               `}
-                                onClick={() => { setShowModal(true); setModalIdx((currentClutches + idx - 1 + dresses.length) % dresses.length) }}
+                                onClick={() => {
+                                    setShowModal(true)
+                                    setModalIdx((currentMidisBrancos + idx - 1 + midisBrancos.length) % midisBrancos.length)
+                                    setModalType("midisBrancos")
+                                }}
                             >
                                 <img
                                     src={dress.img}
@@ -227,7 +236,11 @@ export default function DressesGallery() {
                                 className={`w-40 h-56 md:w-60 md:h-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
                 ${idx === 1 ? "scale-105 z-10" : "opacity-80"}
               `}
-                                onClick={() => { setShowModal(true); setModalIdx((currentClutches + idx - 1 + dresses.length) % dresses.length) }}
+                                onClick={() => {
+                                    setShowModal(true)
+                                    setModalIdx((currentClutches + idx - 1 + clutches.length) % clutches.length)
+                                    setModalType("clutches")
+                                }}
                             >
                                 <img
                                     src={dress.img}
@@ -316,13 +329,21 @@ export default function DressesGallery() {
             </article>
 
             {/* Modal de Zoom com navegação */}
-            {showModal && (
+            {showModal && modalType && (
                 <div
                     className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => {
+                        setShowModal(false)
+                        setModalType(null)
+                    }}
                 >
                     <button
-                        onClick={e => { e.stopPropagation(); modalPrev() }}
+                        onClick={e => {
+                            e.stopPropagation()
+                            if (modalType === "dresses") modalPrev()
+                            else if (modalType === "clutches") setModalIdx((idx) => (idx === 0 ? clutches.length - 1 : idx - 1))
+                            else if (modalType === "midisBrancos") setModalIdx((idx) => (idx === 0 ? midisBrancos.length - 1 : idx - 1))
+                        }}
                         className="absolute left-8 md:left-20 bg-white/80 hover:bg-white rounded-full p-2 shadow transition"
                         aria-label="Anterior"
                     >
@@ -330,14 +351,33 @@ export default function DressesGallery() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
+
                     <img
-                        src={dresses[modalIdx].img}
-                        alt={dresses[modalIdx].alt}
+                        src={
+                            modalType === "dresses"
+                                ? dresses[modalIdx].img
+                                : modalType === "clutches"
+                                    ? clutches[modalIdx].img
+                                    : midisBrancos[modalIdx].img
+                        }
+                        alt={
+                            modalType === "dresses"
+                                ? dresses[modalIdx].alt
+                                : modalType === "clutches"
+                                    ? clutches[modalIdx].alt
+                                    : midisBrancos[modalIdx].alt
+                        }
                         className="max-w-3xl max-h-[90vh] rounded-xl shadow-2xl border-4 border-white object-contain"
                         onClick={e => e.stopPropagation()}
                     />
+
                     <button
-                        onClick={e => { e.stopPropagation(); modalNext() }}
+                        onClick={e => {
+                            e.stopPropagation()
+                            if (modalType === "dresses") modalNext()
+                            else if (modalType === "clutches") setModalIdx((idx) => (idx === clutches.length - 1 ? 0 : idx + 1))
+                            else if (modalType === "midisBrancos") setModalIdx((idx) => (idx === midisBrancos.length - 1 ? 0 : idx + 1))
+                        }}
                         className="absolute right-8 md:right-20 bg-white/80 hover:bg-white rounded-full p-2 shadow transition"
                         aria-label="Próximo"
                     >
