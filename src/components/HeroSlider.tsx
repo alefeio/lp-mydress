@@ -22,22 +22,24 @@ const slides = [
 export default function HeroSlider() {
     const [current, setCurrent] = useState(0)
     const [playing, setPlaying] = useState(true)
-    const [startX, setStartX] = useState(null)
+    const [startX, setStartX] = useState<number | null>(null)
 
-    const handleMouseDown = (e) => setStartX(e.clientX)
-    const handleMouseUp = (e) => {
+    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+        setStartX(e.clientX)
+    }
+
+    const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
         if (startX === null) return
         const deltaX = e.clientX - startX
 
         if (Math.abs(deltaX) > 50) {
             if (deltaX > 0) {
-                // Swipe para direita → slide anterior
                 setCurrent((prev) => (prev - 1 + slides.length) % slides.length)
             } else {
-                // Swipe para esquerda → próximo slide
                 setCurrent((prev) => (prev + 1) % slides.length)
             }
         }
+
         setStartX(null)
     }
 
