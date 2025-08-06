@@ -338,6 +338,25 @@ export default function DressesGallery() {
                     }}
                 >
                     <button
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            setShowModal(false)
+                            setModalType(null)
+                        }}
+                        className="absolute top-20 right-8 md:right-20 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
+                        aria-label="Fechar"
+                    >
+                        <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <button
                         onClick={e => {
                             e.stopPropagation()
                             if (modalType === "dresses") modalPrev()
