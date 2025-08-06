@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f9fafb; /* Light gray background */
+    color: #1f2937; /* Dark gray text */
+}
+
+html {
+    scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+h1, h2, h3 {
+    font-weight: 700; /* Bold headings */
+}
+
+a {
+    color: #3b82f6; /* Blue links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
