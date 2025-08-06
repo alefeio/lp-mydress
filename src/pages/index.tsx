@@ -56,8 +56,8 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
           <Menu />
           <HeroSlider />
           <div className="max-w-7xl mx-auto">
-            <Header />
             <DressesGallery />
+            <Header />
             <Testimonials />
             <FAQ />
             <LocationMap />

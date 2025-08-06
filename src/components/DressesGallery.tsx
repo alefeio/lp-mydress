@@ -97,7 +97,7 @@ export default function DressesGallery() {
         <section id="colecao">
             <article className="mt-[2rem] mb-[4rem] md:my-[8rem] mb-8">
                 <div className="mb-6 md:text-center max-w-xs md:max-w-7xl mx-auto">
-                    <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4 text-center">Vestidos Longos</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4 text-center">Alugue seu vestido na MyDress</h2>
                     <p className="px-2 text-gray-700">Na My Dress, você encontra muito mais do que uma vitrine física — temos um catálogo digital completo e sempre atualizado.</p>
                     <p className="px-2 text-gray-700">Aqui você pode visualizar os modelos disponíveis, explorar por cores, tamanhos e estilos antes mesmo de vir até a loja.</p>
                 </div>
@@ -160,22 +160,13 @@ export default function DressesGallery() {
                     <p className="px-2 text-gray-700">Os vestidos midis brancos são perfeitos para eventos diurnos, noivados, batizados ou jantares especiais.</p>
                     <p className="px-2 text-gray-700">Com cortes modernos e tecidos de alta qualidade, eles trazem charme e delicadeza para cada momento. É a escolha ideal para quem busca um look elegante e atemporal.</p>
                 </div>
-                <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-4xl mx-auto">
-                    <button
-                        onClick={prevMidisBrancos}
-                        className="absolute left-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition mx-2"
-                        aria-label="Anterior"
-                    >
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <div className="flex gap-4">
+                <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
+                    <div className="flex gap-2 md: gap-4 md:gap-6">
                         {getVisibleMidisBrancos().map((dress, idx) => (
                             <div
                                 key={idx}
-                                className={`w-40 h-56 md:w-60 md:h-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
-                ${idx === 1 ? "scale-105 z-10" : "opacity-80"}
+                                className={`h-100 w-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
+                ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
               `}
                                 onClick={() => {
                                     setShowModal(true)
@@ -191,6 +182,15 @@ export default function DressesGallery() {
                             </div>
                         ))}
                     </div>
+                    <button
+                        onClick={prevMidisBrancos}
+                        className="absolute left-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition mx-2"
+                        aria-label="Anterior"
+                    >
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                     <button
                         onClick={nextMidisBrancos}
                         className="absolute right-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition mx-2"
@@ -219,22 +219,13 @@ export default function DressesGallery() {
                     <p className="px-2 text-gray-700">Complete o seu visual com nossas clutches exclusivas, que unem sofisticação e funcionalidade.</p>
                     <p className="px-2 text-gray-700">Seja para uma festa elegante ou um evento formal, nossas bolsas são o toque final que vai valorizar ainda mais o seu look.</p>
                 </div>
-                <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-4xl mx-auto">
-                    <button
-                        onClick={prevClutches}
-                        className="absolute left-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition mx-2"
-                        aria-label="Anterior"
-                    >
-                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <div className="flex gap-4">
+                <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
+                    <div className="flex gap-2 md: gap-4 md:gap-6">
                         {getVisibleClutches().map((dress, idx) => (
                             <div
                                 key={idx}
-                                className={`w-40 h-56 md:w-60 md:h-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
-                ${idx === 1 ? "scale-105 z-10" : "opacity-80"}
+                                className={`h-100 w-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
+                ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
               `}
                                 onClick={() => {
                                     setShowModal(true)
@@ -250,6 +241,15 @@ export default function DressesGallery() {
                             </div>
                         ))}
                     </div>
+                    <button
+                        onClick={prevClutches}
+                        className="absolute left-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition mx-2"
+                        aria-label="Anterior"
+                    >
+                        <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                     <button
                         onClick={nextClutches}
                         className="absolute right-0 z-10 bg-white/80 hover:bg-white rounded-full p-2 shadow transition mx-2"
