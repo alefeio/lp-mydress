@@ -27,6 +27,7 @@ export default function Home() {
             `,
           }}
         />
+        {/* Pixel Facebook Ads */}
         <script
           dangerouslySetInnerHTML={{
             __html:
