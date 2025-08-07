@@ -5,10 +5,10 @@ export default function WhatsAppButton() {
                 href="https://www.instagram.com/mydress.aluguel"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="z-50 bg-[#E1306C] hover:bg-pink-600 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg flex items-center justify-center transition"
+                className="z-50 bg-pink-600 text-textcolor-50 hover:bg-pink-700 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg flex items-center justify-center transition"
             >
                 <svg
-                    className="w-5 h-5 md:w-6 md:h-6"
+                    className="w-5 h-5 md:w-6 md:h-6 text-textcolor-50"
                     viewBox="0 0 448 512"
                     fill="currentColor"
                     xmlns="http://www.w3.org/2000/svg"
@@ -20,10 +20,10 @@ export default function WhatsAppButton() {
                 href="https://wa.me//5591985810208?text=Gostaria de mais informações. Estou entrando em contato através do site."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#25D366] hover:bg-green-600 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg transition"
+                className="bg-green-600 text-textcolor-50 hover:bg-green-700 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg transition"
             >
                 <svg
-                    className="w-5 h-5 md:w-6 md:h-6"
+                    className="w-5 h-5 md:w-6 md:h-6 text-textcolor-50"
                     viewBox="0 0 32 32"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="currentColor"
