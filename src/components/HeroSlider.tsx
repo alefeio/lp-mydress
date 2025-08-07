@@ -2,10 +2,6 @@ import { useState, useEffect } from "react"
 
 const slides = [
   {
-    img: "/images/banner/banner1.jpg",
-    caption: "Primeiro você começa... depois você melhora! 💕✨"
-  },
-  {
     img: "/images/banner/banner2.jpg",
     caption: "Coleção 2025 – Cores e Modelos Exclusivos"
   },
