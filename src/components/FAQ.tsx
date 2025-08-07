@@ -2,20 +2,32 @@ import { useState } from "react"
 
 const faqs = [
   {
-    q: "Quais tamanhos de vestidos vocês oferecem?",
-    a: "Temos vestidos do tamanho 36 ao 52, com ajustes inclusos para melhor caimento.",
+    q: "Como funciona o aluguel de vestidos na MyDress?",
+    a: "O processo é bem simples: você agenda uma visita em nosso espaço, experimenta os modelos disponíveis e escolhe o seu favorito. O vestido é reservado para a data do seu evento, e você retira próximo ao dia. Após o uso, é só devolver - a lavagem está incluída no serviço.",
   },
   {
-    q: "Preciso reservar com antecedência?",
-    a: "Sim, recomendamos reservar o quanto antes para garantir o modelo desejado.",
+    q: "Preciso agendar para experimentar os vestidos?",
+    a: "Sim! Atendemos exclusivamente com hora marcada, para garantir um atendimento personalizado e tranquilo. Clique aqui para escolher o melhor horário para você.",
   },
   {
-    q: "Os vestidos já vêm limpos?",
-    a: "Sim! Todos os vestidos passam por higienização profissional antes de cada aluguel.",
+    q: "Com quantos dias de antecedência posso reservar meu vestido?",
+    a: "As reservas podem ser feitas com até 40 dias de antecedência do seu evento. Optamos por esse período, para maior segurança para você, por se tratar de trajes alugáveis. Mas você pode agendar uma visita antes e conhecer pessoalmente nosso acervo, além do catálogo.",
   },
   {
-    q: "Como funciona a retirada e devolução?",
-    a: "A retirada é feita na loja em Belém-PA, e a devolução deve ser feita até o próximo dia útil após o evento.",
+    q: "Quais tipos de vestidos vocês alugam?",
+    a: "Trabalhamos com vestidos para formaturas, casamentos (madrinhas e convidadas), aniversários, festas de gala e eventos especiais.)",
+  },
+  {
+    q: "O que está incluído no valor do aluguel?",
+    a: "O valor do aluguel inclui locação do vestido, higienização completa do traje e ajustes necessários.",
+  },
+  {
+    q: "Vocês fazem ajustes no vestido?",
+    a: "Sim! Fazemos ajustes simples como barra e alça, para que o vestido fique perfeito no seu corpo. Os ajustes são verificados na semana do evento.",
+  },
+  {
+    q: "E se eu sujar ou danificar o vestido?",
+    a: `Manchas comuns de uso já estão previstas e cobertas pela lavagem. Taxa extra de lavagem: A lavanderia não cobre o excesso de sujeira na barra ou manchas no tecido, necessitando de lavagem especial. Danos graves como rasgos, queimaduras ou perdas serão analisadas caso a caso.`,
   },
 ]
 
