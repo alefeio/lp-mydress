@@ -107,8 +107,8 @@ export default function DressesGallery() {
                             <div
                                 key={idx}
                                 className={`h-100 w-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
-                ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
-              `}
+                                    `}
+                                    // ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
                                 onClick={() => {
                                     setShowModal(true)
                                     setModalIdx((currentDresses + idx - 1 + dresses.length) % dresses.length)
@@ -166,8 +166,8 @@ export default function DressesGallery() {
                             <div
                                 key={idx}
                                 className={`h-100 w-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
-                ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
-              `}
+                                    `}
+                                    // ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
                                 onClick={() => {
                                     setShowModal(true)
                                     setModalIdx((currentMidisBrancos + idx - 1 + midisBrancos.length) % midisBrancos.length)
@@ -225,8 +225,8 @@ export default function DressesGallery() {
                             <div
                                 key={idx}
                                 className={`h-100 w-80 rounded-xl overflow-hidden shadow-lg cursor-pointer transition-transform hover:scale-105
-                ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
-              `}
+                                    `}
+                                    // ${idx === 1 ? "md:scale-105 z-10" : "opacity-80 scale-95 md:scale-100"}
                                 onClick={() => {
                                     setShowModal(true)
                                     setModalIdx((currentClutches + idx - 1 + clutches.length) % clutches.length)
