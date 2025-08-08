@@ -1,4 +1,12 @@
+import { useRouter } from "next/router";
+
 export default function LocationMap() {
+    const router = useRouter();
+
+    const handleClick = (pg: string) => {
+        router.push(pg);
+    };
+
     return (
         <section id="localizacao" className="my-32 max-w-xs md:max-w-5xl mx-auto px-4">
             <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
@@ -12,6 +20,7 @@ export default function LocationMap() {
                         target="_blank"
                         rel="noopener noreferrer"
                         href="https://wa.me//5591985810208?text=Gostaria de mais informações. Estou entrando em contato através do site."
+                        onClick={() => handleClick('/whatsapp')}
                     >
                         Clique aqui e fale com a gente no WhatsApp: (91) 98581-0208
                     </a>

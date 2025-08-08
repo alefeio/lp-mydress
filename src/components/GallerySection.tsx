@@ -1,6 +1,7 @@
 import { Product } from "types";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
+import { useRouter } from "next/router";
 
 type GallerySectionProps = {
     title: string;
@@ -26,6 +27,12 @@ export function GallerySection({
     gallery,
 }: GallerySectionProps) {
     const collection = collections[collectionKey] as Product[];
+
+    const router = useRouter();
+
+    const handleClick = (pg: string) => {
+        router.push(pg);
+    };
 
     return (
         <article className={`my-16`}>
@@ -80,6 +87,7 @@ export function GallerySection({
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="self-end inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"
+                                            onClick={() => handleClick('/reservar-vestido')}
                                         >
                                             Reservar
                                         </a>
@@ -129,6 +137,7 @@ export function GallerySection({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center mx-auto mt-8 mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
+                onClick={() => handleClick('solicitar-catalogo')}
             >
                 {buttonText}
             </a>

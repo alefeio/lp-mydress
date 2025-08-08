@@ -1,4 +1,12 @@
+import { useRouter } from "next/router";
+
 export default function Hero() {
+  const router = useRouter();
+
+  const handleClick = (pg: string) => {
+    router.push(pg);
+  };
+
   return (
     <header className="mt-[4.7rem] md:mt-[7.1rem] mb-32 text-center max-w-xs md:max-w-7xl mx-auto">
       <h1 className="font-serif text-4xl md:text-5xl font-bold mb-8">
@@ -15,6 +23,8 @@ export default function Hero() {
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center mx-auto my-6 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-3 px-8 font-bold text-lg transition-colors duration-300"
+        onClick={() => handleClick('/agendar-visita')}
+        aria-label="Agendar visita"
       >
         Agendar Visita
       </a>

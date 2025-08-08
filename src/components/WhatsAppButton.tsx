@@ -1,4 +1,12 @@
+import { useRouter } from "next/router";
+
 export default function WhatsAppButton() {
+    const router = useRouter();
+
+    const handleClick = (pg: string) => {
+        router.push(pg);
+    };
+
     return (
         <div className="fixed flex gap-2 bottom-6 right-6 z-10">
             <a
@@ -6,6 +14,7 @@ export default function WhatsAppButton() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="z-10 bg-pink-600 text-textcolor-50 hover:bg-pink-700 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg flex items-center justify-center transition"
+                onClick={() => handleClick('/instagram')}
             >
                 <svg
                     className="w-5 h-5 md:w-6 md:h-6 text-textcolor-50"
@@ -21,6 +30,7 @@ export default function WhatsAppButton() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-green-600 text-textcolor-50 hover:bg-green-700 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg transition"
+                onClick={() => handleClick('/whatsapp')}
             >
                 <svg
                     className="w-5 h-5 md:w-6 md:h-6 text-textcolor-50"

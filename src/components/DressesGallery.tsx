@@ -3,6 +3,7 @@ import { GallerySection } from "./GallerySection";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
 import { Product } from "types";
+import { useRouter } from "next/router";
 
 type CollectionKey = keyof typeof collections;
 
@@ -13,6 +14,12 @@ export default function DressesGallery() {
     const [lensPos, setLensPos] = useState({ x: 0, y: 0 });
     const [showLens, setShowLens] = useState(false);
     const zoomImgRef = useRef<HTMLImageElement | null>(null);
+
+    const router = useRouter();
+
+    const handleClick = (pg: string) => {
+        router.push(pg);
+    };
 
     const handleMouseMove = (e: React.MouseEvent) => {
         const rect = zoomImgRef.current?.getBoundingClientRect();
@@ -272,6 +279,7 @@ export default function DressesGallery() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center mb-2 bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"
+                                    onClick={() => handleClick('/reservar-vestido')}
                                 >
                                     Reservar
                                 </a>
