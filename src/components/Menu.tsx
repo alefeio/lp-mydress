@@ -28,7 +28,7 @@ export function Menu() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-md ${
+      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${
         isScrolled
           ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
           : "bg-background-100 pt-4 pb-2"

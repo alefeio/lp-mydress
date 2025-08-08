@@ -16,7 +16,7 @@ export default function Hero() {
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center mx-auto my-6 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-3 px-8 font-bold text-lg transition-colors duration-300"
       >
-        Agende uma Visita
+        Agendar Visita
       </a>
     </header>
   )

@@ -1,11 +1,11 @@
 export default function WhatsAppButton() {
     return (
-        <div className="fixed flex gap-2 bottom-6 right-6 z-50">
+        <div className="fixed flex gap-2 bottom-6 right-6 z-10">
             <a
                 href="https://www.instagram.com/mydress.aluguel"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="z-50 bg-pink-600 text-textcolor-50 hover:bg-pink-700 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg flex items-center justify-center transition"
+                className="z-10 bg-pink-600 text-textcolor-50 hover:bg-pink-700 text-white rounded-full shadow-lg flex items-center p-3 font-bold text-lg flex items-center justify-center transition"
             >
                 <svg
                     className="w-5 h-5 md:w-6 md:h-6 text-textcolor-50"

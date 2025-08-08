@@ -56,9 +56,9 @@ export default function Header() {
           </div>
 
           <div className="mx-auto md:mx-0 max-w-2xl">
-            <h3 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
+            <h2 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
               Somos especializadas em aluguel de vestidos para madrinhas, formandas e ocasiões especiais, com peças atuais, elegantes e acessíveis.
-            </h3>
+            </h2>
             <p className="p-5 text-center">
               <strong>Cada detalhe da MyDress é pensado para valorizar sua beleza, seu momento e seu estilo único</strong>, sempre com atendimento acolhedor, qualidade impecável e preços que cabem no seu bolso.
             </p>

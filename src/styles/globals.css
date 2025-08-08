@@ -18,7 +18,7 @@ h1, h2, h3 {
 }
 
 p {
-  @apply text-graytone-700 mb-2;
+  @apply text-graytone-800 mb-2;
 }
 
 a {
@@ -64,7 +64,7 @@ label {
 /* Cards */
 
 .card {
-  @apply bg-background-100 shadow-md rounded-xl p-6;
+  @apply bg-background-100 shadow-lg rounded-xl p-6;
 }
 
 /* Títulos de seção */

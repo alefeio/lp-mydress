@@ -3,11 +3,11 @@ import { useState, useEffect } from "react"
 const slides = [
   {
     img: "/images/banner/banner2.jpg",
-    caption: "Coleção 2025 – Cores e Modelos Exclusivos"
+    caption: "Coleção 2025 – Cores e Modelos Atualizados para Você Brilhar"
   },
   {
     img: "/images/banner/banner4.jpg",
-    caption: "Midis Brancos - Perfeitos para eventos diurnos, noivados, batizados ou jantares especiais"
+    caption: "Midis Brancos - Perfeitos para solenidades, noivados, batizados ou jantares especiais"
   },
   {
     img: "/images/banner/banner5.jpg",
@@ -94,7 +94,7 @@ export default function HeroSlider() {
 
       {/* Botão Play/Pause */}
       <button
-        className="absolute top-4 right-4 bg-textcolor-50/80 opacity-70 rounded-full p-2 shadow hover:bg-textcolor-50 z-10"
+        className="absolute top-4 right-4 bg-textcolor-50/80 opacity-70 rounded-full p-2 shadow-lg hover:bg-textcolor-50 z-10"
         onClick={() => setPlaying((p) => !p)}
         aria-label={playing ? "Pausar" : "Reproduzir"}
       >
