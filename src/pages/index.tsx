@@ -9,6 +9,7 @@ import LocationMap from '../components/LocationMap'
 import Header from 'components/Header'
 import { Menu } from 'components/Menu'
 import Hero from 'components/Hero'
+import { Analytics } from "@vercel/analytics/next"
 
 export default function Home() {
   const jsonLd = {
@@ -95,6 +96,7 @@ export default function Home() {
       </noscript>
 
       <div className="min-h-screen font-sans">
+        <Analytics />
         <Menu />
         <HeroSlider />
         <main className="max-w-7xl mx-auto">
