@@ -192,7 +192,7 @@ export default function DressesGallery() {
                             collectionKey={section.key}
                             bgcolor={section.bgcolor}
                             buttonText={section.buttonText}
-                            buttonHref={`https://wa.me//5591985810208?text='Olá! Gostaria do Catálogo de ${section.title}.'`}
+                            buttonHref={`https://wa.me//5591985810208?text=Olá! Gostaria do Catálogo de ${section.title}.`}
                             gallery={galleryMap[section.key]}
                             onOpenModal={openModal}
                         />
@@ -268,7 +268,7 @@ export default function DressesGallery() {
                                     <p className="text-textcolor-50">Modelo: {currentCollection[modalIdx].productModel}</p>
                                 </div>
                                 <a
-                                    href={`https://wa.me//5591985810208?text='Olá! Gostaria de reservar o modelo ${currentCollection[modalIdx].productModel} - ${currentCollection[modalIdx].productMark}'`}
+                                    href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${currentCollection[modalIdx].productModel} - ${currentCollection[modalIdx].productMark}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center mb-2 bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"

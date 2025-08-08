@@ -76,7 +76,7 @@ export function GallerySection({
                                         </div>
 
                                         <a
-                                            href={`https://wa.me//5591985810208?text='Olá! Gostaria de reservar o modelo ${dress.productModel} - ${dress.productMark} - ${dress.cor}'`}
+                                            href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${dress.productModel} - ${dress.productMark} - ${dress.cor}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="self-end inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"

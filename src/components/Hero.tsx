@@ -11,7 +11,7 @@ export default function Hero() {
         Aqui você pode <strong>visualizar os modelos disponíveis, explorar por cores, tamanhos e estilos</strong> antes mesmo de vir até a loja.
       </p>
       <a
-        href="https://wa.me//5591985810208?text='Olá! Gostaria de agendar uma visita.'"
+        href="https://wa.me//5591985810208?text=Olá! Gostaria de agendar uma visita."
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center mx-auto my-6 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-3 px-8 font-bold text-lg transition-colors duration-300"
