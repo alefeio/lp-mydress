@@ -28,7 +28,7 @@ export function GallerySection({
     const collection = collections[collectionKey] as Product[];
 
     return (
-        <article className="my-16">
+        <article className={`my-16`}>
             <div className="max-w-xs mx-auto mb-6 text-center md:max-w-7xl">
                 <h2 className={`mb-6 font-bold rounded-xl ${bgcolor} text-background-50 px-4 py-2 w-fit m-auto`}>
                     {title}
@@ -76,7 +76,7 @@ export function GallerySection({
                                         </div>
 
                                         <a
-                                            href={`https://wa.me//5591985810208?text='Olá! Gostaria de reservar o modelo ${dress.productModel} - ${dress.productMark}'`}
+                                            href={`https://wa.me//5591985810208?text='Olá! Gostaria de reservar o modelo ${dress.productModel} - ${dress.productMark} - ${dress.cor}'`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="self-end inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"
