@@ -36,12 +36,11 @@ export function GallerySection({
 
     return (
         <article className={`my-16`}>
-            <div className="max-w-xs mx-auto mb-6 text-center md:max-w-7xl">
+            <div className="max-w-xs mx-auto text-center md:max-w-7xl">
                 <h2 className={`mb-6 font-bold rounded-xl ${bgcolor} text-background-50 px-4 py-2 w-fit m-auto`}>
                     {title}
                 </h2>
-                <p className="px-2 mb-6 text-bold text-black-200 font-semibold">{subtitle}</p>
-                {description}
+                <p className="px-2 text-bold text-black-200 font-semibold">{subtitle}</p>
             </div>
 
             <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
@@ -132,11 +131,15 @@ export function GallerySection({
                     </svg>
                 </button>
             </div>
+
+            <div className="py-4">
+                {description}
+            </div>
             <a
                 href={buttonHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center mx-auto mt-8 mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
+                className="inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
                 onClick={() => handleClick('solicitar-catalogo')}
             >
                 {buttonText}
