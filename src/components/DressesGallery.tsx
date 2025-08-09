@@ -114,7 +114,7 @@ export default function DressesGallery() {
                                 description: (
                                     <p className="px-2 text-sm">
                                         Os vestidos verdes trazem frescor, leveza e modernidade. Desde o verde-menta ao esmeralda, <br />
-                                        eles são ideais para eventos ao ar livre ou produções mais ousadas e elegantes.
+                                        eles são ideais para eventos ao ar livre ou produções mais ousadas e elegantes, destacando-se o verde oliva, muito requisitado para madrinhas de casamento, no momento.
                                     </p>
                                 ),
                                 bgcolor: "bg-green-700",
