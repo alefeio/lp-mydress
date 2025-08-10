@@ -1,6 +1,7 @@
 import { collections } from "components/Collections";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
+import { Product } from "types";
 
 type Props = {
   model: string;
@@ -39,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 
   // Busca na coleção correta
-  const collection = collections[collectionKey as keyof typeof collections];
+  const collection = collections[collectionKey as keyof typeof collections] as Product[];
 
   if (!collection) {
     return { notFound: true };
@@ -52,15 +53,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     return { notFound: true };
   }
 
-  // Monta URL WhatsApp para reservar
+  const link = "https://www.mydressbelem.com.br";
+
+  // Monta URL WhatsApp para reservar, usando fallback para productMark
   const whatsappUrl = `https://wa.me/5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(
     dress.productModel || ""
-  )} - ${encodeURIComponent(dress.productMark || "")}`;
+  )} - ${encodeURIComponent(dress.productMark ?? "")} - ${link}`;
 
   return {
     props: {
       model: dress.productModel || "",
-      mark: dress.productMark || "",
+      mark: dress.productMark ?? "",
       img: dress.img || "",
       whatsappUrl,
     },

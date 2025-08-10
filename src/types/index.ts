@@ -25,7 +25,7 @@ export type MidiWhiteDress = {
 export interface Product {
   id: number;
   img: string;
-  productMark?: string;
   productModel?: string;
+  productMark?: string;
   cor: string;
 }
