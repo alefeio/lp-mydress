@@ -21,3 +21,11 @@ export type MidiWhiteDress = {
   price: number;
   imageUrl: string;
 };
+
+export interface Product {
+  id: number;
+  img: string;
+  productMark?: string;
+  productModel?: string;
+  cor: string;
+}

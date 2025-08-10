@@ -4,34 +4,20 @@ import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
 import { Product } from "types";
 import { useRouter } from "next/router";
+import ModalPhotos from "./ModalPhotos";
 
 type CollectionKey = keyof typeof collections;
 
 export default function DressesGallery() {
+    const [modalType, setModalType] = useState<CollectionKey | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [modalIdx, setModalIdx] = useState(0);
-    const [modalType, setModalType] = useState<CollectionKey | null>(null);
-    const [lensPos, setLensPos] = useState({ x: 0, y: 0 });
-    const [showLens, setShowLens] = useState(false);
-    const zoomImgRef = useRef<HTMLImageElement | null>(null);
 
-    const router = useRouter();
-
-    const handleClick = (pg: string) => {
-        router.push(pg);
+    const openModal = (index: number, type: CollectionKey) => {
+        setModalIdx(index);
+        setModalType(type);
+        setShowModal(true);
     };
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const rect = zoomImgRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        setLensPos({ x, y });
-    };
-
-    const lensSize = 350; // diâmetro da lente de zoom
 
     const galleryMap: Record<CollectionKey, ReturnType<typeof useGalleryNavigation<Product>>> = {
         blueDresses: useGalleryNavigation<Product>(collections.blueDresses.length),
@@ -44,26 +30,6 @@ export default function DressesGallery() {
         midisBrancos: useGalleryNavigation<Product>(collections.midisBrancos.length),
         articles: useGalleryNavigation<Product>(collections.articles.length),
     };
-
-    const modalPrev = () => {
-        if (!modalType) return;
-        const items = collections[modalType];
-        setModalIdx((idx) => (idx === 0 ? items.length - 1 : idx - 1));
-    };
-
-    const modalNext = () => {
-        if (!modalType) return;
-        const items = collections[modalType];
-        setModalIdx((idx) => (idx === items.length - 1 ? 0 : idx + 1));
-    };
-
-    const openModal = (index: number, type: CollectionKey) => {
-        setModalIdx(index);
-        setModalType(type);
-        setShowModal(true);
-    };
-
-    const currentCollection: Product[] = modalType ? collections[modalType] : [];
 
     return (
         <section id="colecao">
@@ -80,7 +46,7 @@ export default function DressesGallery() {
                         [
                             {
                                 key: "blueDresses",
-                                title: "Tons Azuis",
+                                title: "Vestidos Azuis",
                                 subtitle: "Tons que transmitem elegância e serenidade",
                                 description: (
                                     <>
@@ -93,11 +59,11 @@ export default function DressesGallery() {
                                     </>
                                 ),
                                 bgcolor: "bg-blue-500",
-                                buttonText: "Solicitar Catálogo de Tons Azuis",
+                                buttonText: "Solicitar Catálogo de Vestidos Azuis",
                             },
                             {
                                 key: "blackDresses",
-                                title: "Tons Pretos",
+                                title: "Vestidos Pretos",
                                 subtitle: "Clássicos, atemporais e indispensáveis",
                                 description: (
                                     <p className="px-2 text-sm">
@@ -105,11 +71,11 @@ export default function DressesGallery() {
                                     </p>
                                 ),
                                 bgcolor: "bg-black/90",
-                                buttonText: "Solicitar Catálogo de Tons Pretos",
+                                buttonText: "Solicitar Catálogo de Vestidos Pretos",
                             },
                             {
                                 key: "greenDresses",
-                                title: "Tons Verdes",
+                                title: "Vestidos Verdes",
                                 subtitle: "Inspira frescor e elegância",
                                 description: (
                                     <p className="px-2 text-sm">
@@ -118,11 +84,11 @@ export default function DressesGallery() {
                                     </p>
                                 ),
                                 bgcolor: "bg-green-700",
-                                buttonText: "Solicitar Catálogo de Tons Verdes",
+                                buttonText: "Solicitar Catálogo de Vestidos Verdes",
                             },
                             {
                                 key: "pinkDresses",
-                                title: "Tons Rosas",
+                                title: "Vestidos Rosas",
                                 subtitle: "Delicadeza com atitude",
                                 description: (
                                     <>
@@ -131,11 +97,11 @@ export default function DressesGallery() {
                                     </>
                                 ),
                                 bgcolor: "bg-pink-700",
-                                buttonText: "Solicitar Catálogo de Tons Rosas",
+                                buttonText: "Solicitar Catálogo de Vestidos Rosas",
                             },
                             {
                                 key: "redDresses",
-                                title: "Tons Vermelhos",
+                                title: "Vestidos Vermelhos",
                                 subtitle: "Para mulheres que não passam despercebidas",
                                 description: (
                                     <p className="px-2 text-sm">
@@ -143,11 +109,11 @@ export default function DressesGallery() {
                                     </p>
                                 ),
                                 bgcolor: "bg-red-700",
-                                buttonText: "Solicitar Catálogo de Tons Vermelhos",
+                                buttonText: "Solicitar Catálogo de Vestidos Vermelhos",
                             },
                             {
                                 key: "orangeDresses",
-                                title: "Tons Laranjas",
+                                title: "Vestidos Laranjas",
                                 subtitle: "Para mulheres cheias de vida e personalidade",
                                 description: (
                                     <p className="px-2 text-sm">
@@ -155,7 +121,7 @@ export default function DressesGallery() {
                                     </p>
                                 ),
                                 bgcolor: "bg-orange-600",
-                                buttonText: "Solicitar Catálogo de Tons Laranjas",
+                                buttonText: "Solicitar Catálogo de Vestidos Laranjas",
                             },
                             {
                                 key: "midisBrancos",
@@ -208,110 +174,13 @@ export default function DressesGallery() {
             </div>
 
             {showModal && modalType && (
-                <div
-                    className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
-                    onClick={() => {
-                        setShowModal(false);
-                        setModalType(null);
-                    }}
-                >
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowModal(false);
-                            setModalType(null);
-                        }}
-                        className="absolute top-8 right-8 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
-                        aria-label="Fechar"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-
-                    {currentCollection.length > 0 && (
-                        <div className="relative" onClick={(e) => e.stopPropagation()}>
-                            <div
-                                className="relative"
-                                onMouseMove={handleMouseMove}
-                                onMouseEnter={() => setShowLens(true)}
-                                onMouseLeave={() => setShowLens(false)}
-                            >
-                                <img
-                                    ref={zoomImgRef}
-                                    src={currentCollection[modalIdx].img}
-                                    alt={`${currentCollection[modalIdx].productMark} - ${currentCollection[modalIdx].productModel}`}
-                                    className="max-w-[90vw] max-h-[80vh] shadow-2xl object-contain rounded-xl"
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-
-                                {showLens && (
-                                    <div
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // não fechar o modal
-                                            setShowLens(false);
-                                        }}
-                                        className="absolute rounded-full border border-gray-300 shadow-lg cursor-pointer"
-                                        style={{
-                                            width: lensSize,
-                                            height: lensSize,
-                                            top: lensPos.y - lensSize / 2,
-                                            left: lensPos.x - lensSize / 2,
-                                            backgroundImage: `url(${currentCollection[modalIdx].img})`,
-                                            backgroundRepeat: "no-repeat",
-                                            backgroundSize: `${zoomImgRef.current?.width! * 2}px ${zoomImgRef.current?.height! * 2}px`,
-                                            backgroundPosition: `-${lensPos.x * 2 - lensSize / 2}px -${lensPos.y * 2 - lensSize / 2}px`,
-                                            zIndex: 60,
-                                            pointerEvents: "auto",
-                                        }}
-                                        title="Clique para ocultar o zoom"
-                                    />
-                                )}
-                            </div>
-
-                            <div className="absolute flex justfy-between gap-2 bottom-0 left-0 w-full bg-gradient-to-t from-graytone-950/60 to-transparent p-2 rounded-b-xl">
-                                <div className="font-semibold text-sm truncate flex-1 text-left">
-                                    <h3 className="text-textcolor-50">{currentCollection[modalIdx].productMark}</h3>
-                                    <p className="text-textcolor-50">Modelo: {currentCollection[modalIdx].productModel}</p>
-                                </div>
-                                <a
-                                    href={`/share/${currentCollection[modalIdx].id}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"
-                                >
-                                    Reservar
-                                </a>
-                            </div>
-                        </div>
-                    )}
-
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            modalPrev();
-                        }}
-                        className="absolute bottom-8 right-[51%] bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition"
-                        aria-label="Anterior"
-                    >
-                        <svg className="w-8 h-8 text-textcolor-600" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            modalNext();
-                        }}
-                        className="absolute bottom-8 left-[51%] bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition"
-                        aria-label="Próximo"
-                    >
-                        <svg className="w-8 h-8 text-textcolor-600" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </div>
+                <ModalPhotos
+                    modalType={modalType}
+                    setModalIdx={setModalIdx}
+                    setShowModal={setShowModal}
+                    setModalType={setModalType}
+                    modalIdx={modalIdx}
+                />
             )
             }
 

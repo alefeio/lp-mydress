@@ -2,7 +2,7 @@ import { useState } from "react"
 
 const faqs = [
   {
-    q: "Como funciona o aluguel de vestidos na MyDress?",
+    q: "Como funciona o aluguel de vestidos na My Dress?",
     a: "O processo é bem simples: você agenda uma visita em nosso espaço, experimenta os modelos disponíveis e escolhe o seu favorito. O vestido é reservado para a data do seu evento, e você retira próximo ao dia. Após o uso, é só devolver - a lavagem está incluída no serviço.",
   },
   {

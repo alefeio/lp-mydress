@@ -10,10 +10,10 @@ export default function Hero() {
   return (
     <header className="mt-[4.7rem] md:mt-[7.1rem] mb-32 text-center max-w-xs md:max-w-7xl mx-auto">
       <h1 className="font-serif text-4xl md:text-5xl font-bold mb-8">
-        Alugue seu vestido na MyDress
+        Alugue seu vestido na My Dress
       </h1>
       <p className="px-2 mb-2 border-t-2 border-textcolor-200 mb-4 pb-2 w-fit m-auto pt-6">
-        <strong>Na MyDress</strong>, você encontra muito mais do que uma vitrine física — <strong>temos um catálogo digital completo e sempre atualizado</strong>.
+        <strong>Na My Dress</strong>, você encontra muito mais do que uma vitrine física — <strong>temos um catálogo digital completo e sempre atualizado</strong>.
       </p>
       <p className="px-2 mb-6">
         Aqui você pode <strong>visualizar os modelos disponíveis, explorar por cores, tamanhos e estilos</strong> antes mesmo de vir até a loja.

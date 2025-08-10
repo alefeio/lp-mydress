@@ -30,17 +30,17 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>MyDress Belém | Aluguel de Vestidos de Festa para Madrinhas, Formandas e Convidadas | O melhor custo-benefício</title>
+        <title>My Dress Belém | Aluguel de Vestidos de Festa para Madrinhas, Formandas e Convidadas | O melhor custo-benefício</title>
         <meta name="description" content="Aluguel de vestidos de festa em Belém‑PA: madrinhas, formandas, convidadas. Atendimento por agendamento, atendimento personalizado, catálogo atualizado, agende via WhatsApp 91 98581-0208." />
-        <meta name="keywords" content="aluguel vestidos festa Belém, aluguel vestidos madrinhas Belém, vestidos formatura Belém, aluguel vestidos convidadas Belém, MyDress Belém, aluguel de trajes finos em belém, aluguel de vestidos de festa belem, aluguel de vestidos de gala belem, aluguel de vestidos de festa para madrinhas belem, aluguel de vestidos de festa para formandas belem, aluguel de vestidos de festa para convidadas belem, loja de aluguel de vestido belem, mydress, vestidos de debutantes, vestidos de festa, aluguel de roupas pedreira, aluguel de roupas marco, aluguel de roupas são brás, aluguel de roupas são braz, aluguel de roupas nazaré, aluguel de roupas umarizal, aluguel de roupas, aluguel roupa festa, aluguel vestidos festa luxo, vestido para alugar" />
-        <meta property="og:title" content="MyDress Belém | Aluguel de Vestidos de Festa" />
+        <meta name="keywords" content="aluguel vestidos festa Belém, aluguel vestidos madrinhas Belém, vestidos formatura Belém, aluguel vestidos convidadas Belém, My Dress Belém, aluguel de trajes finos em belém, aluguel de vestidos de festa belem, aluguel de vestidos de gala belem, aluguel de vestidos de festa para madrinhas belem, aluguel de vestidos de festa para formandas belem, aluguel de vestidos de festa para convidadas belem, loja de aluguel de vestido belem, mydress, vestidos de debutantes, vestidos de festa, aluguel de roupas pedreira, aluguel de roupas marco, aluguel de roupas são brás, aluguel de roupas são braz, aluguel de roupas nazaré, aluguel de roupas umarizal, aluguel de roupas, aluguel roupa festa, aluguel vestidos festa luxo, vestido para alugar" />
+        <meta property="og:title" content="My Dress Belém | Aluguel de Vestidos de Festa" />
         <meta property="og:description" content="Aluguel de vestidos elegantes para madrinhas, formandas e convidadas em Belém‑PA. Atendimento exclusivo por agendamento via WhatsApp." />
         <meta property="og:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
         <meta property="og:url" content="https://www.mydressbelem.com.br" />
         <meta property="og:type" content="website" />
 
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="MyDress Belém | Aluguel de Vestidos de Festa" />
+        <meta name="twitter:title" content="My Dress Belém | Aluguel de Vestidos de Festa" />
         <meta name="twitter:description" content="Aluguel de vestidos elegantes em Belém‑PA. Atendimento por agendamento via WhatsApp." />
         <meta name="twitter:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
 

@@ -1,3 +1,4 @@
+import { collections } from "components/Collections";
 import { GetServerSideProps } from "next";
 import Head from "next/head";
 
@@ -20,32 +21,47 @@ export default function SharePage({ model, mark, img, whatsappUrl }: Props) {
         <meta property="og:url" content={whatsappUrl} />
       </Head>
       <p>Redirecionando para o WhatsApp...</p>
+      {/* Opcional: redirecionar automaticamente */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.location.href = "${whatsappUrl}";`,
+        }}
+      />
     </>
   );
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.query;
+  const { id, collectionKey } = context.query;
 
-  // Aqui você pode buscar os dados do vestido por ID no seu array/BD
-  const dresses = [
-    { id: "1", productModel: "123", productMark: "Marca X", img: "https://seusite.com/images/dress1.jpg" },
-    { id: "2", productModel: "456", productMark: "Marca Y", img: "https://seusite.com/images/dress2.jpg" },
-  ];
+  if (typeof id !== "string" || typeof collectionKey !== "string") {
+    return { notFound: true };
+  }
 
-  const dress = dresses.find((d) => d.id === id);
+  // Busca na coleção correta
+  const collection = collections[collectionKey as keyof typeof collections];
+
+  if (!collection) {
+    return { notFound: true };
+  }
+
+  // Busca pelo id numericamente
+  const dress = collection.find((d) => d.id === Number(id));
 
   if (!dress) {
     return { notFound: true };
   }
 
-  const whatsappUrl = `https://wa.me/5591985810208?text=Olá! Gostaria de reservar o modelo ${dress.productModel} - ${dress.productMark}`;
+  // Monta URL WhatsApp para reservar
+  const whatsappUrl = `https://wa.me/5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(
+    dress.productModel || ""
+  )} - ${encodeURIComponent(dress.productMark || "")}`;
 
   return {
     props: {
-      model: dress.productModel,
-      mark: dress.productMark,
-      img: dress.img,
+      model: dress.productModel || "",
+      mark: dress.productMark || "",
+      img: dress.img || "",
       whatsappUrl,
     },
   };

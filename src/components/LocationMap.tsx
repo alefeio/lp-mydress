@@ -29,7 +29,7 @@ export default function LocationMap() {
             <div className="flex flex-col items-center">
                 <div className="w-full h-72 rounded-xl overflow-hidden shadow-lg mb-4 mb-16">
                     <iframe
-                        title="MyDress Belém"
+                        title="My Dress Belém"
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.565129800439!2d-48.463246!3d-1.4360878!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x92a48d5e3c198ee5%3A0x812a31f7339c020!2sMy%20Dress%20-%20Aluguel%20de%20Vestidos!5e0!3m2!1spt-BR!2sbr!4v1754475609294!5m2!1spt-BR!2sbr"
                         width="100%"
                         height="100%"

@@ -39,7 +39,7 @@ export function Menu() {
         <a href="#inicio" className="flex items-center">
           <img
             src="/images/logo.png"
-            alt="Logomarca MyDress"
+            alt="Logomarca My Dress"
             className={`transition-all duration-300 ${
               isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
             }`}

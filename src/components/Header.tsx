@@ -19,7 +19,7 @@ const faqs = [
     ]
   },
   {
-    q: "Experiência MyDress",
+    q: "Experiência My Dress",
     a: [
       "Aqui, vestir bem é mais do que aparência: é cuidar do seu momento",
       "Acolhimento e confiança fazem parte da sua experiência do início ao fim",
@@ -35,10 +35,10 @@ export default function Header() {
       <div id="empresa" className="w-full mx-auto">
         <div className="mb-6 text-center max-w-xs md:max-w-4xl mx-auto px-4">
           <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-            Seja única com a MyDress
+            Seja única com a My Dress
           </h2>
           <p className="border-t-2 border-textcolor-200 py-6">
-            Na MyDress, você encontra mais do que vestidos — vive uma experiência completa, com estilo, cuidado e o melhor custo-benefício de Belém.
+            Na My Dress, você encontra mais do que vestidos — vive uma experiência completa, com estilo, cuidado e o melhor custo-benefício de Belém.
           </p>
         </div>
 
@@ -56,11 +56,11 @@ export default function Header() {
           </div>
 
           <div className="mx-auto md:mx-0 max-w-2xl">
-            <h2 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
+            <h1 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
               Somos especializadas em aluguel de vestidos para madrinhas, formandas e ocasiões especiais, com peças atuais, elegantes e acessíveis.
-            </h2>
+            </h1>
             <p className="p-5 text-center">
-              <strong>Cada detalhe da MyDress é pensado para valorizar sua beleza, seu momento e seu estilo único</strong>, sempre com atendimento acolhedor, qualidade impecável e preços que cabem no seu bolso.
+              <strong>Cada detalhe da My Dress é pensado para valorizar sua beleza, seu momento e seu estilo único</strong>, sempre com atendimento acolhedor, qualidade impecável e preços que cabem no seu bolso.
             </p>
 
             {faqs.map((faq, idx) => (
