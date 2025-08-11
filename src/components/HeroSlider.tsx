@@ -59,7 +59,7 @@ export default function HeroSlider() {
 
   return (
     <div
-      className="relative w-full h-[380px] md:h-[480px] overflow-hidden shadow-lg mb-8 mt-[4.7rem] md:mt-[7.1rem]"
+      className="relative w-full h-[200px] md:h-[250px] lg:h-[280px] xl:h-[480px] overflow-hidden shadow-lg mb-8 mt-[4.7rem] md:mt-[7.1rem]"
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onTouchStart={handleTouchStart}
