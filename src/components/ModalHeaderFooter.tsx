@@ -1,6 +1,6 @@
 interface ModalHeaderFooterProps {
-  productMark: string;
-  productModel: string;
+  productMark: string | undefined;
+  productModel: string | undefined;
   shareUrl: string;
   modalIdx: number;
   modalType: string | null;
