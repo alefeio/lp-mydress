@@ -16,25 +16,46 @@ export default function DressesGallery() {
     const router = useRouter();
     const { collection, id } = router.query;
 
+    // Função para abrir modal atualizando URL com shallow routing
     const openModal = (index: number, type: CollectionKey) => {
-        setModalIdx(index);
-        setModalType(type);
-        setShowModal(true);
+        router.push(`/${type}/${index}`, undefined, { shallow: true, scroll: false });
     };
 
-    // Abre modal automaticamente se rota for /collection/id
+    // Função para fechar modal e resetar URL para raiz, também com shallow
+    const closeModal = () => {
+        setShowModal(false);
+        setModalType(null);
+        setModalIdx(0);
+        router.push("/", undefined, { shallow: true });
+    };
+
+    // useEffect para abrir modal automaticamente ao detectar query params
     useEffect(() => {
-        if (collection && id) {
+        // Só executa quando collection e id são strings válidas
+        if (typeof collection === "string" && typeof id === "string") {
             const colKey = collection as CollectionKey;
             const idx = Number(id);
 
-            if (collections[colKey] && !isNaN(idx) && idx >= 0 && idx < collections[colKey].length) {
-                openModal(idx, colKey);
+            if (
+                collections[colKey] &&
+                !isNaN(idx) &&
+                idx >= 0 &&
+                idx < collections[colKey].length
+            ) {
+                setModalType(colKey);
+                setModalIdx(idx);
+                setShowModal(true);
+            } else {
+                closeModal();
             }
         }
+        // Não chama closeModal() se query ainda não estiver disponível
     }, [collection, id]);
 
-    const galleryMap: Record<CollectionKey, ReturnType<typeof useGalleryNavigation<Product>>> = {
+    const galleryMap: Record<
+        CollectionKey,
+        ReturnType<typeof useGalleryNavigation<Product>>
+    > = {
         blueDresses: useGalleryNavigation<Product>(collections.blueDresses.length),
         blackDresses: useGalleryNavigation<Product>(collections.blackDresses.length),
         pinkDresses: useGalleryNavigation<Product>(collections.pinkDresses.length),
@@ -55,10 +76,12 @@ export default function DressesGallery() {
                         Conheça nossa Coleção
                     </h2>
                     <p className="border-t-2 border-textcolor-200 text-background-700 px-4 pt-6 w-fit m-auto">
-                        <strong>Vestidos modernos, elegantes e sempre atualizados com as últimas tendências.</strong>
+                        <strong>
+                            Vestidos modernos, elegantes e sempre atualizados com as últimas
+                            tendências.
+                        </strong>
                     </p>
 
-                    {/* Lista de seções */}
                     {Object.keys(collections).map((key) => {
                         const k = key as CollectionKey;
                         return (
@@ -72,9 +95,7 @@ export default function DressesGallery() {
                                 buttonText="Ver Catálogo"
                                 buttonHref={`https://wa.me//5591985810208?text=Olá! Gostaria do Catálogo de ${k}.`}
                                 gallery={galleryMap[k]}
-                                onOpenModal={(index) => {
-                                    router.push(`/${k}/${index}`);
-                                }}
+                                onOpenModal={(index) => openModal(index, k)}
                             />
                         );
                     })}
@@ -87,6 +108,11 @@ export default function DressesGallery() {
                         setShowModal={setShowModal}
                         setModalType={setModalType}
                         modalIdx={modalIdx}
+                        onClose={() => {
+                            setShowModal(false);
+                            setModalType(null);
+                            router.push("/", undefined, { shallow: true, scroll: false });
+                        }}
                     />
                 )}
             </section>

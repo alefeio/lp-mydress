@@ -1,5 +1,6 @@
-import DressesGallery from "components/DressesGallery";
+import Home from "../index";
 
-export default function ProductModalPage() {
-    return <DressesGallery />;
+export default function ProductPage() {
+  // Só reusa o componente Home, que já lida com modal via router.query
+  return <Home />;
 }

@@ -46,6 +46,8 @@ export function GallerySection({
             <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
                 <div className="flex gap-2 md:gap-4">
                     {gallery.getVisibleItems(collection).map((dress, idx) => {
+                        if (!dress) return null;
+                        
                         const actualIndex = (gallery.index + idx - 1 + collection.length) % collection.length;
                         return (
                             <nav key={actualIndex}>

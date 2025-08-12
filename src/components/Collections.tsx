@@ -61,14 +61,5 @@ export const collections = {
         { id: 5, img: "/images/clutches/rosa1.jpg", productMark: "", productModel: "", cor: "Rosa" },
         { id: 6, img: "/images/clutches/verde1.jpg", productMark: "", productModel: "", cor: "Verde" },
     ],
-    articles: [
-        { id: 1, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 2, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 3, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 4, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 5, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 6, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 7, img: "", productMark: "", productModel: "", cor: "" },
-        { id: 8, img: "", productMark: "", productModel: "", cor: "" },
-    ],
+    articles: [],
 };
