@@ -31,67 +31,70 @@ const faqs = [
 export default function Header() {
   const [open, setOpen] = useState<number | null>(null)
   return (
-    <aside className="my-32 max-w-xs md:max-w-5xl mx-auto">
-      <div id="empresa" className="w-full mx-auto">
-        <div className="mb-6 text-center max-w-xs md:max-w-4xl mx-auto px-4">
-          <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-            Seja única com a My Dress
-          </h2>
-          <p className="border-t-2 border-textcolor-200 py-6">
-            Na My Dress, você encontra mais do que vestidos — vive uma experiência completa, com estilo, cuidado e o melhor custo-benefício de Belém.
-          </p>
-        </div>
-
-        <div className="md:flex gap-8 px-4">
-          <div className="max-w-xs rounded-xl mx-auto md:mx-0">
-            <video
-              src="/videos/institucional.mp4"
-              muted
-              controls
-              width="100%"
-              className="shadow-lg rounded-xl"
-            >
-              Seu navegador não suporta a reprodução de vídeos.
-            </video>
-          </div>
-
-          <div className="mx-auto md:mx-0 max-w-2xl">
-            <h1 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
-              Somos especializadas em aluguel de vestidos para madrinhas, formandas e ocasiões especiais, com peças atuais, elegantes e acessíveis.
-            </h1>
-            <p className="p-5 text-center">
-              <strong>Cada detalhe da My Dress é pensado para valorizar sua beleza, seu momento e seu estilo único</strong>, sempre com atendimento acolhedor, qualidade impecável e preços que cabem no seu bolso.
+    <>
+      <div id="empresa">&nbsp;</div>
+      <aside className="my-16 max-w-xs md:max-w-5xl mx-auto">
+        <div className="w-full mx-auto">
+          <div className="mb-6 text-center max-w-xs md:max-w-4xl mx-auto px-4">
+            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
+              Seja única com a My Dress
+            </h2>
+            <p className="border-t-2 border-textcolor-200 py-6">
+              Na My Dress, você encontra mais do que vestidos — vive uma experiência completa, com estilo, cuidado e o melhor custo-benefício de Belém.
             </p>
+          </div>
 
-            {faqs.map((faq, idx) => (
-              <div key={idx} className="mb-4 border-b border-background-1000/20 bg-background-100 px-4 rounded-xl">
-                <button
-                  id={`faq-button-${idx}`}
-                  aria-expanded={open === idx}
-                  aria-controls={`faq-panel-${idx}`}
-                  className="w-full flex justify-between items-center py-4 text-left font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-background-500 focus:ring-offset-2 rounded"
-                  onClick={() => setOpen(open === idx ? null : idx)}
-                >
-                  {faq.q}
-                  <span aria-hidden="true">{open === idx ? "−" : "+"}</span>
-                </button>
-                <div
-                  id={`faq-panel-${idx}`}
-                  role="region"
-                  aria-labelledby={`faq-button-${idx}`}
-                  className={`overflow-hidden transition-all duration-300 ${open === idx ? "max-h-40" : "max-h-0"}`}
-                >
-                  {faq.a.map((topic: string, i: number) => (
-                    <p key={i} className="px-2">
-                      {topic}
-                    </p>
-                  ))}
+          <div className="md:flex gap-8 px-4">
+            <div className="max-w-xs rounded-xl mx-auto md:mx-0">
+              <video
+                src="/videos/institucional.mp4"
+                muted
+                controls
+                width="100%"
+                className="shadow-lg rounded-xl"
+              >
+                Seu navegador não suporta a reprodução de vídeos.
+              </video>
+            </div>
+
+            <div className="mx-auto md:mx-0 max-w-2xl">
+              <h1 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
+                Somos especializadas em aluguel de vestidos para madrinhas, formandas e ocasiões especiais, com peças atuais, elegantes e acessíveis.
+              </h1>
+              <p className="p-5 text-center">
+                <strong>Cada detalhe da My Dress é pensado para valorizar sua beleza, seu momento e seu estilo único</strong>, sempre com atendimento acolhedor, qualidade impecável e preços que cabem no seu bolso.
+              </p>
+
+              {faqs.map((faq, idx) => (
+                <div key={idx} className="mb-4 border-b border-background-1000/20 bg-background-100 px-4 rounded-xl">
+                  <button
+                    id={`faq-button-${idx}`}
+                    aria-expanded={open === idx}
+                    aria-controls={`faq-panel-${idx}`}
+                    className="w-full flex justify-between items-center py-4 text-left font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-background-500 focus:ring-offset-2 rounded"
+                    onClick={() => setOpen(open === idx ? null : idx)}
+                  >
+                    {faq.q}
+                    <span aria-hidden="true">{open === idx ? "−" : "+"}</span>
+                  </button>
+                  <div
+                    id={`faq-panel-${idx}`}
+                    role="region"
+                    aria-labelledby={`faq-button-${idx}`}
+                    className={`overflow-hidden transition-all duration-300 ${open === idx ? "max-h-40" : "max-h-0"}`}
+                  >
+                    {faq.a.map((topic: string, i: number) => (
+                      <p key={i} className="px-2">
+                        {topic}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }
