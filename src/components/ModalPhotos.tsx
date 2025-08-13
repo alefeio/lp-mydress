@@ -1,4 +1,3 @@
-// ModalPhotos.tsx
 import { useEffect, useState } from "react";
 import { collections } from "./Collections";
 import Head from "next/head";
@@ -35,7 +34,7 @@ export default function ModalPhotos({
     
     const currentCollection = getCollectionByKey(modalType);
 
-    // LÓGICA CORRIGIDA: Pegar o timestamp da URL, se existir, para ser consistente
+    // Pegar o timestamp da URL, se existir, para ser consistente
     const urlTimestamp = router.query.v ? String(router.query.v) : Date.now().toString();
 
     useEffect(() => {
@@ -43,8 +42,7 @@ export default function ModalPhotos({
             // A URL de compartilhamento agora usa o timestamp da URL atual
             setShareUrl(`${window.location.origin}/${modalType}/${modalIdx}?v=${urlTimestamp}`);
             
-            // O router.replace continua com a URL "limpa" para a barra de endereço
-            router.replace(`/${modalType}/${modalIdx}`, undefined, { shallow: true });
+            // REMOVIDO: A chamada a router.replace foi removida para não alterar a URL na barra de endereço.
         }
     }, [modalIdx, modalType, router, urlTimestamp]);
 
@@ -77,7 +75,7 @@ export default function ModalPhotos({
                     property="og:description"
                     content={`Confira este modelo da coleção ${currentCollection.title}.`}
                 />
-                {/* LÓGICA CORRIGIDA: Adicionando o timestamp na URL da imagem */}
+                {/* Adicionando o timestamp na URL da imagem */}
                 <meta property="og:image" content={`${product.img}?v=${urlTimestamp}`} />
                 <meta property="og:url" content={shareUrl} />
                 <meta property="og:type" content="website" />

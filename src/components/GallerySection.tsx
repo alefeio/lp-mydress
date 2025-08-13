@@ -1,4 +1,3 @@
-// GallerySection.tsx
 import React, { useEffect, useState } from "react";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
@@ -28,7 +27,6 @@ export function GallerySection({
         if (typeof window !== 'undefined') {
             setCanShare('share' in navigator);
 
-            // GERAÇÃO DA URL MOVIDA PARA O useEffect
             const newShareUrls = gallery.getVisibleItems(collections[collectionKey].items)
                 .map((item, idx) => {
                     const actualIndex = (gallery.index + idx - 1 + collections[collectionKey].items.length) % collections[collectionKey].items.length;
