@@ -29,6 +29,18 @@ const faqs = [
     q: "E se eu sujar ou danificar o vestido?",
     a: `Manchas comuns de uso já estão previstas e cobertas pela lavagem. Taxa extra de lavagem: A lavanderia não cobre o excesso de sujeira na barra ou manchas no tecido, necessitando de lavagem especial. Danos graves como rasgos, queimaduras ou perdas serão analisadas caso a caso.`,
   },
+  {
+    q: "Quais são as formas de pagamento disponíveis?",
+    a: `Pix, dinhheiro ou cartão. No crédito há um pequeno acréscimo da máquina. Parcelamos em até 3x.`,
+  },
+  {
+    q: "Sempre tem novidades?",
+    a: `Sim! Nosso catálogo está sempre atualizando. Todo mês tem vestidos novos chegando.`,
+  },
+  {
+    q: "O atendimento é somente por agendamento mesmo?",
+    a: `Sim! Pois dessa forma conseguimos realizar um atendimento tranquilo e personalizado para cada cliente.`,
+  },
 ]
 
 export default function FAQ() {

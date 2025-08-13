@@ -50,6 +50,7 @@ export default function Header() {
                 src="/videos/institucional.mp4"
                 muted
                 controls
+                poster="/videos/institucional_preview.jpg"
                 width="100%"
                 className="shadow-lg rounded-xl"
               >

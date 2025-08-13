@@ -54,13 +54,13 @@ export function GallerySection({
 
     return (
         <article className="my-16">
-            <div className="max-w-xs mx-auto text-center md:max-w-7xl">
+            <div className="max-w-xs mx-auto text-center max-w-xs md:max-w-7xl">
                 <h2
                     className={`mb-6 font-bold rounded-xl ${collection.bgcolor} text-background-50 px-4 py-2 w-fit m-auto`}
                 >
                     {collection.title}
                 </h2>
-                <p className="px-2 font-semibold text-black">{collection.subtitle}</p>
+                <h3 className="px-2 font-semibold text-black">{collection.subtitle}</h3>
             </div>
 
             <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
@@ -102,7 +102,7 @@ export function GallerySection({
                                         </svg>
                                     </button>
 
-                                    <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full bg-gradient-to-t from-graytone-950/60 to-transparent p-4">
+                                    <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full max-w-xs bg-gradient-to-t from-graytone-950/60 to-transparent p-4">
                                         <div className="font-semibold text-sm flex-1 text-left">
                                             <h3 className="text-textcolor-50">{item.productMark}</h3>
                                             <h3 className="text-textcolor-50">Modelo: {item.productModel}</h3>
