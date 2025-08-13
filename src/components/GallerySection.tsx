@@ -21,12 +21,22 @@ export function GallerySection({
     const router = useRouter();
     const [canShare, setCanShare] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
+    const [shareUrls, setShareUrls] = useState<string[]>([]);
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && 'share' in navigator) {
-            setCanShare(true);
+        if (typeof window !== 'undefined') {
+            setCanShare('share' in navigator);
+
+            // GERAÇÃO DA URL MOVIDA PARA O useEffect
+            const newShareUrls = gallery.getVisibleItems(collections[collectionKey].items)
+                .map((item, idx) => {
+                    const actualIndex = (gallery.index + idx - 1 + collections[collectionKey].items.length) % collections[collectionKey].items.length;
+                    const timestamp = Date.now();
+                    return `${window.location.origin}/${collectionKey}/${actualIndex}?v=${timestamp}`;
+                });
+            setShareUrls(newShareUrls);
         }
-    }, []);
+    }, [collectionKey, gallery.index]);
 
     const collection = collections[collectionKey] as Collection;
 
@@ -69,10 +79,7 @@ export function GallerySection({
                         if (!item) return null;
 
                         const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
-                        
-                        // CORRIGIDO: Adicionando o timestamp para evitar cache e usando a URL correta
-                        const timestamp = Date.now();
-                        const shareUrl = `${window.location.origin}/${collectionKey}/${actualIndex}?v=${timestamp}`;
+                        const shareUrl = shareUrls[idx] || ''; // Use a URL gerada no useEffect
 
                         return (
                             <nav key={actualIndex}>
