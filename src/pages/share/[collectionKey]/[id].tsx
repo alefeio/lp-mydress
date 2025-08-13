@@ -8,6 +8,9 @@ interface SharePageProps {
     title: string;
     description: string;
     imageUrl: string;
+    // CORRIGIDO: Adicionando 'collectionKey' e 'id' à interface de props
+    collectionKey: string;
+    id: string;
   };
 }
 
@@ -27,6 +30,9 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
     title: `Vestido ${product.productModel} - ${product.productMark}`,
     description: `Confira este modelo incrível: ${product.productModel} da marca ${product.productMark}!`,
     imageUrl: product.img,
+    // CORRIGIDO: Adicionando 'collectionKey' e 'id' ao objeto 'shareData'
+    collectionKey: collectionKey,
+    id: id,
   };
 
   return {
@@ -44,8 +50,8 @@ export default function SharePage({ shareData }: SharePageProps) {
         <meta property="og:title" content={shareData.title} />
         <meta property="og:description" content={shareData.description} />
         <meta property="og:image" content={shareData.imageUrl} />
-        {/* CORRIGIDO: O 'og:url' agora usa a URL dinâmica do contexto do servidor */}
-        <meta property="og:url" content={`https://www.mydressbelem.com.br/share/${collectionKey}/${id}`} />
+        {/* CORRIGIDO: Agora a URL usa as props passadas para o componente */}
+        <meta property="og:url" content={`https://www.mydressbelem.com.br/share/${shareData.collectionKey}/${shareData.id}`} />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       
