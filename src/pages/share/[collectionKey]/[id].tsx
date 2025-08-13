@@ -17,7 +17,6 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
   const collection = collections[collectionKey];
   const product = collection?.items[parseInt(id)];
 
-  // Corrigido: Adicionado uma verificação explícita para as propriedades que dão erro
   if (!product || !('productMark' in product)) {
     return {
       notFound: true,
@@ -45,7 +44,8 @@ export default function SharePage({ shareData }: SharePageProps) {
         <meta property="og:title" content={shareData.title} />
         <meta property="og:description" content={shareData.description} />
         <meta property="og:image" content={shareData.imageUrl} />
-        <meta property="og:url" content={`https://www.mydressbelem.com.br/share/${shareData.modalType}/${shareData.modalIdx}`} />
+        {/* CORRIGIDO: O 'og:url' agora usa a URL dinâmica do contexto do servidor */}
+        <meta property="og:url" content={`https://www.mydressbelem.com.br/share/${collectionKey}/${id}`} />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       
