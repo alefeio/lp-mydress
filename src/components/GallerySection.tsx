@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
 import { useRouter } from "next/router";
 import { BaseProduct, Collection, CollectionKey } from "types";
+import { FaWhatsapp, FaShareAlt } from "react-icons/fa";
 
 type GallerySectionProps = {
     collectionKey: CollectionKey;
@@ -18,13 +19,40 @@ export function GallerySection({
     gallery,
 }: GallerySectionProps) {
     const router = useRouter();
+    const [canShare, setCanShare] = useState(false);
+    const [isSharing, setIsSharing] = useState(false); // Novo estado para controlar o compartilhamento
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'share' in navigator) {
+            setCanShare(true);
+        }
+    }, []);
 
     const collection = collections[collectionKey] as Collection;
 
-    // A validação agora checa se a coleção existe diretamente no objeto `collections`
     if (!collection) {
         return <p className="text-center py-8">Coleção não encontrada.</p>;
     }
+
+    const handleShare = async (item, shareUrl) => {
+        // Se já estiver compartilhando, não faz nada
+        if (isSharing) return;
+
+        setIsSharing(true); // Inicia o compartilhamento
+
+        try {
+            await navigator.share({
+                title: `Vestido ${item.productModel ?? ''}`,
+                text: `Confira este modelo incrível: ${item.productModel ?? ''} - ${item.productMark ?? ''}!`,
+                url: shareUrl,
+            });
+        } catch (error) {
+            // Opcional: Tratar erros, como o usuário cancelando o compartilhamento
+            console.error('Falha ao compartilhar:', error);
+        } finally {
+            setIsSharing(false); // Finaliza o compartilhamento, independente do resultado
+        }
+    };
 
     return (
         <article className="my-16">
@@ -42,15 +70,12 @@ export function GallerySection({
                     {gallery.getVisibleItems(collection.items).map((item, idx) => {
                         if (!item) return null;
 
-                        const actualIndex =
-                            (gallery.index + idx - 1 + collection.items.length) %
-                            collection.items.length;
+                        const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
+                        const shareUrl = `https://www.mydressbelem.com.br/share/${collectionKey}/${actualIndex}`;
 
                         return (
                             <nav key={actualIndex}>
-                                <div
-                                    className={`${collection.bgcolor} relative h-100 w-80 rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-105 flex-shrink-0`}
-                                >
+                                <div className={`${collection.bgcolor} relative h-100 w-80 rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-105 flex-shrink-0`}>
                                     <img
                                         src={item.img}
                                         alt={`${item.productMark ?? ""} - ${item.productModel ?? ""}`}
@@ -82,15 +107,28 @@ export function GallerySection({
                                             <h3 className="text-textcolor-50">Modelo: {item.productModel}</h3>
                                         </div>
 
-                                        <a
-                                            href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${item.productModel ?? ""
-                                                } - ${item.productMark ?? ""} - ${item.cor}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="self-end inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"
-                                        >
-                                            Reservar
-                                        </a>
+                                        <div className="flex gap-2">
+                                            <a
+                                                href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(item.productModel ?? "")} - ${encodeURIComponent(item.productMark ?? "")}. Link para a foto: ${encodeURIComponent(shareUrl)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg p-2 font-bold text-xs transition-colors duration-300"
+                                                aria-label="Reservar via WhatsApp"
+                                            >
+                                                <FaWhatsapp className="w-5 h-5 text-background-50" />
+                                            </a>
+
+                                            {canShare && (
+                                                <button
+                                                    onClick={() => handleShare(item, shareUrl)}
+                                                    className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-2 font-semibold text-sm transition-colors duration-300"
+                                                    aria-label="Compartilhar"
+                                                    disabled={isSharing} // O botão é desabilitado se já estiver compartilhando
+                                                >
+                                                    <FaShareAlt className="w-5 h-5 text-background-50" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </nav>
