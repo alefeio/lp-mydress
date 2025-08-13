@@ -36,11 +36,12 @@ export default function ModalPhotos({
 
     useEffect(() => {
         if (modalType !== null) {
-            // CORRIGIDO: Adicionando o timestamp à URL de compartilhamento
+            // LÓGICA CORRIGIDA: A URL de compartilhamento agora aponta para a página inicial
+            // com os parâmetros da foto, incluindo o timestamp para evitar cache.
             const timestamp = Date.now();
-            setShareUrl(`${window.location.origin}/share/${modalType}/${modalIdx}?v=${timestamp}`);
+            setShareUrl(`${window.location.origin}/${modalType}/${modalIdx}?v=${timestamp}`);
             
-            // O router.replace deve usar a URL sem o timestamp, pois é a URL real da página
+            // O router.replace continua com a URL "limpa" para a barra de endereço do navegador.
             router.replace(`/${modalType}/${modalIdx}`, undefined, { shallow: true });
         }
     }, [modalIdx, modalType, router]);
@@ -92,15 +93,10 @@ export default function ModalPhotos({
             >
                 <div
                     className="relative bg-background-100 md:rounded-xl shadow-2xl max-w-[100vw] max-h-[90vh] flex flex-col"
-                    // Remova o onClick daqui
-                    // onClick={(e) => e.stopPropagation()} 
+                    onClick={(e) => e.stopPropagation()} 
                     style={{ width: "min(900px, 100%)" }}
                 >
-                    <div
-                        // Adicione um wrapper com stopPropagation para as partes do modal que não devem fechar o modal
-                        onClick={(e) => e.stopPropagation()}
-                        className="relative w-full h-full flex flex-col"
-                    >
+                    <div className="relative w-full h-full flex flex-col">
                         {/* Botão fechar */}
                         <button
                             onClick={onClose}

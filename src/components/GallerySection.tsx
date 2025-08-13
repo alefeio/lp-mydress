@@ -70,9 +70,9 @@ export function GallerySection({
 
                         const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
                         
-                        // CORRIGIDO: Adicionando o timestamp para evitar cache
+                        // CORRIGIDO: Adicionando o timestamp para evitar cache e usando a URL correta
                         const timestamp = Date.now();
-                        const shareUrl = `https://www.mydressbelem.com.br/share/${collectionKey}/${actualIndex}?v=${timestamp}`;
+                        const shareUrl = `${window.location.origin}/${collectionKey}/${actualIndex}?v=${timestamp}`;
 
                         return (
                             <nav key={actualIndex}>
