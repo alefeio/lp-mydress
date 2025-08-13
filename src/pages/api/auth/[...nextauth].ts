@@ -27,20 +27,24 @@ export const authOptions: NextAuthOptions = {
         signIn: '/auth/signin',
         verifyRequest: '/auth/verify-request',
     },
-    // Removendo a estratégia "session: { strategy: 'jwt' }" porque ela é o padrão.
+    // <--- ADICIONE ESTA LINHA DE VOLTA
+    session: {
+        strategy: "jwt",
+    },
+    // <--- FIM DA ALTERAÇÃO
+
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
-                token.role = (user as any).role; // Adiciona o role ao token
+                token.role = (user as any).role;
             }
             return token;
         },
         async session({ session, token }) {
-            // Verifica se o user e o token existem antes de atribuir
             if (session.user && token) {
                 session.user.id = token.id as string;
-                session.user.role = token.role as "ADMIN" | "CLIENT"; // Adiciona o role à sessão
+                session.user.role = token.role as "ADMIN" | "CLIENT";
             }
             return session;
         }
