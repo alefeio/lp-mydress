@@ -69,7 +69,7 @@ export default function DressesGallery() {
                     </h2>
                     <p className="border-t-2 border-textcolor-200 text-background-700 px-4 pt-6 w-fit m-auto">
                         <strong>
-                            Vestidos modernos, elegantes e sempre atualizados com as últimas tendências.
+                            Vestidos modernos, elegantes, acessíveis e sempre atualizados com as últimas tendências.
                         </strong>
                     </p>
                 </div>
