@@ -1,60 +1,59 @@
-import { Product } from "types";
+import React from "react";
+import { BaseProduct, CollectionKey, Collection } from "./types";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
 import { useRouter } from "next/router";
 
 type GallerySectionProps = {
-    title: string;
-    subtitle: string;
-    description: React.ReactNode;
-    collectionKey: keyof typeof collections;
-    buttonText: string;
-    bgcolor: string;
+    collectionKey: CollectionKey;
     buttonHref: string;
-    onOpenModal: (index: number, collectionKey: keyof typeof collections) => void;
-    gallery: ReturnType<typeof useGalleryNavigation<Product>>;
+    onOpenModal: (index: number, collectionKey: CollectionKey) => void;
+    gallery: ReturnType<typeof useGalleryNavigation<BaseProduct>>;
 };
 
 export function GallerySection({
-    title,
-    subtitle,
-    description,
     collectionKey,
-    buttonText,
-    bgcolor,
     buttonHref,
     onOpenModal,
     gallery,
 }: GallerySectionProps) {
-    const collection = collections[collectionKey] as Product[];
-
     const router = useRouter();
 
-    const handleClick = (pg: string) => {
-        router.push(pg);
-    };
+    const collection = collections[collectionKey] as Collection;
+
+    // A validação agora checa se a coleção existe diretamente no objeto `collections`
+    if (!collection) {
+        return <p className="text-center py-8">Coleção não encontrada.</p>;
+    }
 
     return (
-        <article className={`my-16`}>
+        <article className="my-16">
             <div className="max-w-xs mx-auto text-center md:max-w-7xl">
-                <h2 className={`mb-6 font-bold rounded-xl ${bgcolor} text-background-50 px-4 py-2 w-fit m-auto`}>
-                    {title}
+                <h2
+                    className={`mb-6 font-bold rounded-xl ${collection.bgcolor} text-background-50 px-4 py-2 w-fit m-auto`}
+                >
+                    {collection.title}
                 </h2>
-                <p className="px-2 text-bold text-black-200 font-semibold">{subtitle}</p>
+                <p className="px-2 font-semibold text-black">{collection.subtitle}</p>
             </div>
 
             <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
                 <div className="flex gap-2 md:gap-4">
-                    {gallery.getVisibleItems(collection).map((dress, idx) => {
-                        if (!dress) return null;
-                        
-                        const actualIndex = (gallery.index + idx - 1 + collection.length) % collection.length;
+                    {gallery.getVisibleItems(collection.items).map((item, idx) => {
+                        if (!item) return null;
+
+                        const actualIndex =
+                            (gallery.index + idx - 1 + collection.items.length) %
+                            collection.items.length;
+
                         return (
                             <nav key={actualIndex}>
-                                <div className={`${bgcolor} relative h-100 w-80 rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-105 flex-shrink-0`}>
+                                <div
+                                    className={`${collection.bgcolor} relative h-100 w-80 rounded-xl overflow-hidden shadow-lg transition-transform hover:scale-105 flex-shrink-0`}
+                                >
                                     <img
-                                        src={dress.img}
-                                        alt={`${dress.productMark} - ${dress.productModel}`}
+                                        src={item.img}
+                                        alt={`${item.productMark ?? ""} - ${item.productModel ?? ""}`}
                                         className="w-full h-full object-cover"
                                     />
                                     <button
@@ -79,16 +78,16 @@ export function GallerySection({
 
                                     <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full bg-gradient-to-t from-graytone-950/60 to-transparent p-4">
                                         <div className="font-semibold text-sm flex-1 text-left">
-                                            <h3 className="text-textcolor-50">{dress.productMark}</h3>
-                                            <h3 className="text-textcolor-50">Modelo: {dress.productModel}</h3>
+                                            <h3 className="text-textcolor-50">{item.productMark}</h3>
+                                            <h3 className="text-textcolor-50">Modelo: {item.productModel}</h3>
                                         </div>
 
                                         <a
-                                            href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${dress.productModel} - ${dress.productMark} - ${dress.cor}`}
+                                            href={`https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${item.productModel ?? ""
+                                                } - ${item.productMark ?? ""} - ${item.cor}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="self-end inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-textcolor-50 hover:text-textcolor-100 rounded-full shadow-lg py-2 px-4 font-bold text-xs transition-colors duration-300"
-                                            onClick={() => handleClick('/reservar-vestido')}
                                         >
                                             Reservar
                                         </a>
@@ -134,18 +133,17 @@ export function GallerySection({
                 </button>
             </div>
 
-            <div className="py-4">
-                {description}
+            <div className="py-4 w-fit mx-auto text-center">
+                {collection.description}
+                <a
+                    href={buttonHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
+                >
+                    {collection.buttonText}
+                </a>
             </div>
-            <a
-                href={buttonHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
-                onClick={() => handleClick('solicitar-catalogo')}
-            >
-                {buttonText}
-            </a>
         </article>
     );
 }

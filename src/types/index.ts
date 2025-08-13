@@ -1,31 +1,37 @@
-export type Dress = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-};
+// types/index.ts
+import React from "react";
 
-export type Clutch = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-};
-
-export type MidiWhiteDress = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-};
-
-export interface Product {
+export type BaseProduct = {
   id: number;
   img: string;
-  productModel?: string;
   productMark?: string;
+  productModel?: string;
   cor: string;
-}
+};
+
+export type Collection = {
+  title: string;
+  subtitle: string;
+  description: React.ReactNode;
+  bgcolor: string;
+  buttonText: string;
+  items: BaseProduct[];
+};
+
+export type CollectionKey =
+  | "blueDresses"
+  | "blackDresses"
+  | "pinkDresses"
+  | "greenDresses"
+  | "redDresses"
+  | "orangeDresses"
+  | "midisBrancos"
+  | "clutches";
+
+export type CategoryKey = "dresses" | "accessories";
+
+export type Collections = {
+  dresses: Array<Record<CollectionKey, Collection>>;
+  accessories: Array<Record<CollectionKey, Collection>>;
+  articles: never[];
+};
