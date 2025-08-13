@@ -28,21 +28,20 @@ export const authOptions: NextAuthOptions = {
         verifyRequest: '/auth/verify-request',
     },
     // Removendo a estratégia "session: { strategy: 'jwt' }" porque ela é o padrão.
-    // O NextAuth.js detecta que você está usando callbacks JWT e a usa.
     callbacks: {
         async jwt({ token, user }) {
-            // O `user` só está disponível na primeira vez que o JWT é criado
             if (user) {
                 token.id = user.id;
-                // Se você tiver outras propriedades no seu modelo User, como "role", adicione-as aqui.
-                // token.role = user.role;
+                token.role = (user as any).role; // Adiciona o role ao token
             }
             return token;
         },
         async session({ session, token }) {
-            // Adiciona as propriedades do token à sessão
-            session.user.id = token.id as string;
-            // session.user.role = token.role;
+            // Verifica se o user e o token existem antes de atribuir
+            if (session.user && token) {
+                session.user.id = token.id as string;
+                session.user.role = token.role as "ADMIN" | "CLIENT"; // Adiciona o role à sessão
+            }
             return session;
         }
     },
