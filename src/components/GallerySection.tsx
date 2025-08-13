@@ -34,7 +34,6 @@ export function GallerySection({
         return <p className="text-center py-8">Coleção não encontrada.</p>;
     }
 
-    // Corrigido: Adicionado os tipos 'item: BaseProduct' e 'shareUrl: string'
     const handleShare = async (item: BaseProduct, shareUrl: string) => {
         if (isSharing) return;
 
@@ -70,7 +69,10 @@ export function GallerySection({
                         if (!item) return null;
 
                         const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
-                        const shareUrl = `https://www.mydressbelem.com.br/share/${collectionKey}/${actualIndex}`;
+                        
+                        // CORRIGIDO: Adicionando o timestamp para evitar cache
+                        const timestamp = Date.now();
+                        const shareUrl = `https://www.mydressbelem.com.br/share/${collectionKey}/${actualIndex}?v=${timestamp}`;
 
                         return (
                             <nav key={actualIndex}>

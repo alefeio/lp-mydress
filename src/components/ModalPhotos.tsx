@@ -36,8 +36,12 @@ export default function ModalPhotos({
 
     useEffect(() => {
         if (modalType !== null) {
+            // CORRIGIDO: Adicionando o timestamp à URL de compartilhamento
+            const timestamp = Date.now();
+            setShareUrl(`${window.location.origin}/share/${modalType}/${modalIdx}?v=${timestamp}`);
+            
+            // O router.replace deve usar a URL sem o timestamp, pois é a URL real da página
             router.replace(`/${modalType}/${modalIdx}`, undefined, { shallow: true });
-            setShareUrl(`${window.location.origin}/${modalType}/${modalIdx}`);
         }
     }, [modalIdx, modalType, router]);
 
