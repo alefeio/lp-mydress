@@ -39,3 +39,5 @@ public/uploads/
 *.swp
 *.swo
 *.tgz
+
+/src/generated/prisma
