@@ -35,3 +35,12 @@ export type Collections = {
   accessories: Array<Record<CollectionKey, Collection>>;
   articles: never[];
 };
+
+export interface ModalHeaderFooterProps {
+    productMark: string | undefined;
+    productModel: string | undefined;
+    shareUrl: string;
+    modalIdx: number;
+    modalType: string | null;
+    onReserveClick?: () => void;
+}

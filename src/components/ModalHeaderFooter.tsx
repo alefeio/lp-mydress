@@ -1,13 +1,5 @@
 import { FaWhatsapp, FaShareAlt } from 'react-icons/fa';
-
-interface ModalHeaderFooterProps {
-    productMark: string | undefined;
-    productModel: string | undefined;
-    shareUrl: string;
-    modalIdx: number;
-    modalType: string | null;
-    onReserveClick?: () => void;
-}
+import { ModalHeaderFooterProps } from 'types';
 
 export function ModalHeaderFooter({
     productMark,

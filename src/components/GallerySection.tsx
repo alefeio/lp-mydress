@@ -20,7 +20,7 @@ export function GallerySection({
 }: GallerySectionProps) {
     const router = useRouter();
     const [canShare, setCanShare] = useState(false);
-    const [isSharing, setIsSharing] = useState(false); // Novo estado para controlar o compartilhamento
+    const [isSharing, setIsSharing] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && 'share' in navigator) {
@@ -34,11 +34,11 @@ export function GallerySection({
         return <p className="text-center py-8">Coleção não encontrada.</p>;
     }
 
-    const handleShare = async (item, shareUrl) => {
-        // Se já estiver compartilhando, não faz nada
+    // Corrigido: Adicionado os tipos 'item: BaseProduct' e 'shareUrl: string'
+    const handleShare = async (item: BaseProduct, shareUrl: string) => {
         if (isSharing) return;
 
-        setIsSharing(true); // Inicia o compartilhamento
+        setIsSharing(true);
 
         try {
             await navigator.share({
@@ -47,10 +47,9 @@ export function GallerySection({
                 url: shareUrl,
             });
         } catch (error) {
-            // Opcional: Tratar erros, como o usuário cancelando o compartilhamento
             console.error('Falha ao compartilhar:', error);
         } finally {
-            setIsSharing(false); // Finaliza o compartilhamento, independente do resultado
+            setIsSharing(false);
         }
     };
 
@@ -123,7 +122,7 @@ export function GallerySection({
                                                     onClick={() => handleShare(item, shareUrl)}
                                                     className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg p-2 font-semibold text-sm transition-colors duration-300"
                                                     aria-label="Compartilhar"
-                                                    disabled={isSharing} // O botão é desabilitado se já estiver compartilhando
+                                                    disabled={isSharing}
                                                 >
                                                     <FaShareAlt className="w-5 h-5 text-background-50" />
                                                 </button>
