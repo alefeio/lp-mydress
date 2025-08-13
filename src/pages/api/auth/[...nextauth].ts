@@ -27,19 +27,26 @@ export const authOptions: NextAuthOptions = {
         signIn: '/auth/signin',
         verifyRequest: '/auth/verify-request',
     },
-    session: {
-        strategy: "jwt",
-    },
+    // Removendo a estratégia "session: { strategy: 'jwt' }" porque ela é o padrão.
+    // O NextAuth.js detecta que você está usando callbacks JWT e a usa.
     callbacks: {
-        async session({ session, token, user }) {
-            if (session.user) {
-                session.user.role = (user as any).role;
+        async jwt({ token, user }) {
+            // O `user` só está disponível na primeira vez que o JWT é criado
+            if (user) {
+                token.id = user.id;
+                // Se você tiver outras propriedades no seu modelo User, como "role", adicione-as aqui.
+                // token.role = user.role;
             }
+            return token;
+        },
+        async session({ session, token }) {
+            // Adiciona as propriedades do token à sessão
+            session.user.id = token.id as string;
+            // session.user.role = token.role;
             return session;
         }
     },
     secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Esta é a forma correta de exportar a rota no Pages Router
 export default NextAuth(authOptions);
