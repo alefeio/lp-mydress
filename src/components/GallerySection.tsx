@@ -21,21 +21,12 @@ export function GallerySection({
     const router = useRouter();
     const [canShare, setCanShare] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
-    const [shareUrls, setShareUrls] = useState<string[]>([]);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            setCanShare('share' in navigator);
-
-            const newShareUrls = gallery.getVisibleItems(collections[collectionKey].items)
-                .map((item, idx) => {
-                    const actualIndex = (gallery.index + idx - 1 + collections[collectionKey].items.length) % collections[collectionKey].items.length;
-                    const timestamp = Date.now();
-                    return `${window.location.origin}/${collectionKey}/${actualIndex}?v=${timestamp}`;
-                });
-            setShareUrls(newShareUrls);
+        if (typeof window !== 'undefined' && 'share' in navigator) {
+            setCanShare(true);
         }
-    }, [collectionKey, gallery.index]);
+    }, []);
 
     const collection = collections[collectionKey] as Collection;
 
@@ -78,7 +69,10 @@ export function GallerySection({
                         if (!item) return null;
 
                         const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
-                        const shareUrl = shareUrls[idx] || '';
+                        
+                        // CORRIGIDO: Adicionando o timestamp para evitar cache
+                        const timestamp = Date.now();
+                        const shareUrl = `https://www.mydressbelem.com.br/share/${collectionKey}/${actualIndex}?v=${timestamp}`;
 
                         return (
                             <nav key={actualIndex}>

@@ -34,17 +34,16 @@ export default function ModalPhotos({
     
     const currentCollection = getCollectionByKey(modalType);
 
-    // Pegar o timestamp da URL, se existir, para ser consistente
-    const urlTimestamp = router.query.v ? String(router.query.v) : Date.now().toString();
-
     useEffect(() => {
         if (modalType !== null) {
-            // A URL de compartilhamento agora usa o timestamp da URL atual
-            setShareUrl(`${window.location.origin}/${modalType}/${modalIdx}?v=${urlTimestamp}`);
+            // CORRIGIDO: Adicionando o timestamp à URL de compartilhamento
+            const timestamp = Date.now();
+            setShareUrl(`${window.location.origin}/share/${modalType}/${modalIdx}?v=${timestamp}`);
             
-            // REMOVIDO: A chamada a router.replace foi removida para não alterar a URL na barra de endereço.
+            // O router.replace deve usar a URL sem o timestamp, pois é a URL real da página
+            router.replace(`/${modalType}/${modalIdx}`, undefined, { shallow: true });
         }
-    }, [modalIdx, modalType, router, urlTimestamp]);
+    }, [modalIdx, modalType, router]);
 
     if (!currentCollection || currentCollection.items.length === 0) return null;
 
@@ -75,8 +74,7 @@ export default function ModalPhotos({
                     property="og:description"
                     content={`Confira este modelo da coleção ${currentCollection.title}.`}
                 />
-                {/* Adicionando o timestamp na URL da imagem */}
-                <meta property="og:image" content={`${product.img}?v=${urlTimestamp}`} />
+                <meta property="og:image" content={product.img} />
                 <meta property="og:url" content={shareUrl} />
                 <meta property="og:type" content="website" />
                 <meta name="twitter:card" content="summary_large_image" />
@@ -85,20 +83,25 @@ export default function ModalPhotos({
                     name="twitter:description"
                     content={`Confira este modelo da coleção ${currentCollection.title}.`}
                 />
-                <meta name="twitter:image" content={`${product.img}?v=${urlTimestamp}`} />
+                <meta name="twitter:image" content={product.img} />
             </Head>
 
-            {/* O restante do seu código permanece inalterado */}
             <div
                 className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
                 onClick={onClose}
             >
                 <div
                     className="relative bg-background-100 md:rounded-xl shadow-2xl max-w-[100vw] max-h-[90vh] flex flex-col"
-                    onClick={(e) => e.stopPropagation()} 
+                    // Remova o onClick daqui
+                    // onClick={(e) => e.stopPropagation()} 
                     style={{ width: "min(900px, 100%)" }}
                 >
-                    <div className="relative w-full h-full flex flex-col">
+                    <div
+                        // Adicione um wrapper com stopPropagation para as partes do modal que não devem fechar o modal
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full h-full flex flex-col"
+                    >
+                        {/* Botão fechar */}
                         <button
                             onClick={onClose}
                             className="absolute top-4 right-4 text-white bg-black/60 hover:bg-black/80 rounded-full p-2 transition z-50"
@@ -114,14 +117,18 @@ export default function ModalPhotos({
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
+
+                        {/* Cabeçalho fixo */}
                         <div className="sticky top-0 bg-background-200 text-white px-6 py-2 rounded-t-xl text-center select-none z-30">
                             <h3 className="text-2xl font-semibold">{product.productMark || 'Sem Marca'}</h3>
                             <p className="text-sm mt-1">Modelo: {product.productModel || 'Sem Modelo'}</p>
                         </div>
+
                         <ZoomableImage
                             src={product.img}
                             alt={`${product.productMark || ''} - ${product.productModel || ''}`}
                         />
+
                         <ModalHeaderFooter
                             productMark={product.productMark}
                             productModel={product.productModel}
@@ -129,6 +136,8 @@ export default function ModalPhotos({
                             modalIdx={modalIdx}
                             modalType={modalType}
                         />
+
+                        {/* Botões de navegação */}
                         <button
                             onClick={modalPrev}
                             className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition z-50"
@@ -144,6 +153,7 @@ export default function ModalPhotos({
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
+
                         <button
                             onClick={modalNext}
                             className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition z-50"

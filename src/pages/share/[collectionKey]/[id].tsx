@@ -8,13 +8,14 @@ interface SharePageProps {
     title: string;
     description: string;
     imageUrl: string;
+    // CORRIGIDO: Adicionando 'collectionKey' e 'id' à interface de props
     collectionKey: string;
     id: string;
   };
 }
 
 export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-  const { collectionKey, id, v } = context.params as { collectionKey: CollectionKey; id: string; v?: string };
+  const { collectionKey, id } = context.params as { collectionKey: CollectionKey; id: string };
 
   const collection = collections[collectionKey];
   const product = collection?.items[parseInt(id)];
@@ -25,13 +26,11 @@ export const getServerSideProps: GetServerSideProps = async (context: GetServerS
     };
   }
 
-  // LÓGICA CORRIGIDA: Adicionando o timestamp à URL da imagem
-  const imageUrlWithTimestamp = v ? `${product.img}?v=${v}` : product.img;
-
   const shareData = {
     title: `Vestido ${product.productModel} - ${product.productMark}`,
     description: `Confira este modelo incrível: ${product.productModel} da marca ${product.productMark}!`,
-    imageUrl: imageUrlWithTimestamp,
+    imageUrl: product.img,
+    // CORRIGIDO: Adicionando 'collectionKey' e 'id' ao objeto 'shareData'
     collectionKey: collectionKey,
     id: id,
   };
@@ -51,6 +50,7 @@ export default function SharePage({ shareData }: SharePageProps) {
         <meta property="og:title" content={shareData.title} />
         <meta property="og:description" content={shareData.description} />
         <meta property="og:image" content={shareData.imageUrl} />
+        {/* CORRIGIDO: Agora a URL usa as props passadas para o componente */}
         <meta property="og:url" content={`https://www.mydressbelem.com.br/share/${shareData.collectionKey}/${shareData.id}`} />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
