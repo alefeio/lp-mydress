@@ -1,8 +1,8 @@
 import React from "react";
-import { BaseProduct, CollectionKey, Collection } from "./types";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
 import { useRouter } from "next/router";
+import { BaseProduct, Collection, CollectionKey } from "types";
 
 type GallerySectionProps = {
     collectionKey: CollectionKey;

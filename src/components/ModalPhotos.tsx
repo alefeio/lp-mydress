@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { BaseProduct, Collection } from "./types";
 import { collections } from "./Collections";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { ZoomableImage } from "./ZoomableImage";
 import { ModalHeaderFooter } from "./ModalHeaderFooter";
+import { Collection } from "types";
 
 type CollectionKey = keyof typeof collections;
 
