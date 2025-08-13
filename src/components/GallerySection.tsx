@@ -1,3 +1,4 @@
+// GallerySection.tsx
 import React, { useEffect, useState } from "react";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
@@ -79,7 +80,7 @@ export function GallerySection({
                         if (!item) return null;
 
                         const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
-                        const shareUrl = shareUrls[idx] || ''; // Use a URL gerada no useEffect
+                        const shareUrl = shareUrls[idx] || '';
 
                         return (
                             <nav key={actualIndex}>

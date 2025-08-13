@@ -1,3 +1,4 @@
+// ModalPhotos.tsx
 import { useEffect, useState } from "react";
 import { collections } from "./Collections";
 import Head from "next/head";
@@ -34,7 +35,7 @@ export default function ModalPhotos({
     
     const currentCollection = getCollectionByKey(modalType);
 
-    // LÓGICA CORRIGIDA: Pegar o timestamp diretamente da URL, se existir
+    // LÓGICA CORRIGIDA: Pegar o timestamp da URL, se existir, para ser consistente
     const urlTimestamp = router.query.v ? String(router.query.v) : Date.now().toString();
 
     useEffect(() => {
