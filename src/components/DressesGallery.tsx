@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { GallerySection } from "./GallerySection";
 import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
-import { BaseProduct, CollectionKey } from "./types"; // Ajuste o caminho conforme seu projeto
 import { useRouter } from "next/router";
 import ModalPhotos from "./ModalPhotos";
+import { BaseProduct, Collection, CollectionKey } from "types";
 
 export default function DressesGallery() {
     const [modalType, setModalType] = useState<CollectionKey | null>(null);
@@ -13,6 +13,10 @@ export default function DressesGallery() {
 
     const router = useRouter();
     const { collection, id } = router.query;
+
+    function getCollectionByKey(key: CollectionKey | null): Collection | null {
+        return key ? collections[key] || null : null;
+    }
 
     const openModal = (index: number, type: CollectionKey) => {
         router.push(`/${type}/${index}`, undefined, { shallow: true, scroll: false });
@@ -30,8 +34,7 @@ export default function DressesGallery() {
             const colKey = collection as CollectionKey;
             const idx = Number(id);
 
-            // Acesso direto à coleção, sem a necessidade de getCollectionByKey
-            const col = collections[colKey];
+            const col = getCollectionByKey(colKey);
 
             if (col && idx >= 0 && idx < col.items.length && !isNaN(idx)) {
                 setModalType(colKey);
@@ -43,8 +46,11 @@ export default function DressesGallery() {
         }
     }, [collection, id]);
 
-    // O objeto de galerias agora pode ser criado a partir de todas as chaves de `collections`
-    const galleryMap: Record<CollectionKey, ReturnType<typeof useGalleryNavigation<BaseProduct>>> = {};
+    const galleryMap = {} as Record<
+        CollectionKey,
+        ReturnType<typeof useGalleryNavigation<BaseProduct>>
+    >;
+
     (Object.keys(collections) as CollectionKey[]).forEach((key) => {
         const collectionItems = collections[key]?.items;
         const length = collectionItems ? collectionItems.length : 0;
@@ -68,23 +74,16 @@ export default function DressesGallery() {
                     </p>
                 </div>
 
-                {/* Renderiza todas as coleções diretamente, sem precisar de `dresses` e `accessories` */}
                 {Object.keys(collections).map((key) => {
                     const colKey = key as CollectionKey;
                     const col = collections[colKey];
 
-                    if (!col) return null;
+                    if (!col || !galleryMap[colKey]) return null;
 
                     return (
                         <GallerySection
                             key={colKey}
-                            // As props `title`, `subtitle`, etc., já estão disponíveis diretamente na coleção
-                            title={col.title}
-                            subtitle={col.subtitle}
-                            description={col.description}
                             collectionKey={colKey}
-                            bgcolor={col.bgcolor}
-                            buttonText={col.buttonText}
                             buttonHref={`https://wa.me//5591985810208?text=Olá! Gostaria do Catálogo de ${col.title}.`}
                             gallery={galleryMap[colKey]}
                             onOpenModal={(index) => openModal(index, colKey)}
