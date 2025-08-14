@@ -34,8 +34,9 @@ export default async function upload(req: NextApiRequest, res: NextApiResponse) 
     });
 
     console.log('Formulário processado. Arquivos encontrados:', files);
-
-    const file = files.file as any;
+    
+    // Acessa o arquivo da forma correta para a nova versão do formidable
+    const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
     if (!file || !file.filepath) {
       console.error('Erro: Nenhum arquivo encontrado no formulário.');
@@ -56,7 +57,6 @@ export default async function upload(req: NextApiRequest, res: NextApiResponse) 
 
   } catch (uploadErr: any) {
     console.error('Erro geral no processo de upload:', uploadErr.message);
-    // Para depuração, também enviamos o erro na resposta
     return res.status(500).json({ message: 'Erro interno do servidor', error: uploadErr.message || 'Erro desconhecido' });
   }
 }
