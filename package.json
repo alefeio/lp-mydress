@@ -23,6 +23,7 @@
     "@vercel/analytics": "^1.5.0",
     "busboy": "^1.6.0",
     "cloudinary": "^2.7.0",
+    "formidable": "^3.5.4",
     "next": "latest",
     "next-auth": "^4.24.11",
     "nodemailer": "^6.10.1",

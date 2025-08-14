@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { v2 as cloudinary } from 'cloudinary';
-import Busboy from 'busboy';
-import { Readable } from 'stream';
+import { IncomingForm } from 'formidable';
+import fs from 'fs';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,47 +15,38 @@ export const config = {
   },
 };
 
-export default function upload(req: NextApiRequest, res: NextApiResponse) {
+export default async function upload(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Método não permitido' });
   }
 
+  const form = new IncomingForm();
+
   return new Promise((resolve, reject) => {
-    const busboy = Busboy({ headers: req.headers });
+    form.parse(req, async (err, fields, files) => {
+      if (err) {
+        console.error('Erro ao processar formulário:', err);
+        return reject(res.status(500).json({ message: 'Erro ao processar o arquivo', error: err }));
+      }
 
-    busboy.on('file', (_fieldname, file: Readable, _filename) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'dresses' },
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve(result);
-        }
-      );
-      file.pipe(stream);
+      const file = files.file as any;
+
+      if (!file || !file.filepath) {
+        return reject(res.status(400).json({ message: 'Nenhum arquivo enviado.' }));
+      }
+
+      try {
+        const uploadResult = await cloudinary.uploader.upload(file.filepath, {
+          folder: 'dresses',
+        });
+        
+        fs.unlinkSync(file.filepath); // Exclui o arquivo temporário após o upload
+
+        resolve(res.status(200).json({ url: uploadResult.secure_url }));
+      } catch (uploadErr) {
+        console.error('Erro no upload para o Cloudinary:', uploadErr);
+        reject(res.status(500).json({ message: 'Erro no upload para o Cloudinary', error: uploadErr }));
+      }
     });
-
-    req.on('close', () => {
-      reject(new Error('Conexão interrompida antes do upload ser concluído'));
-    });
-
-    busboy.on('error', (err) => {
-      reject(err);
-    });
-
-    busboy.on('finish', () => {
-      // Esta função é chamada quando o Busboy termina de processar o formulário.
-      // A promise já foi resolvida ou rejeitada na função 'file'.
-    });
-
-    req.pipe(busboy);
-  })
-  .then((result: any) => {
-    res.status(200).json({ url: result?.secure_url });
-  })
-  .catch((error: any) => {
-    console.error('Erro na API de upload:', error);
-    res.status(500).json({ message: error.message || 'Erro interno do servidor', error });
   });
 }
