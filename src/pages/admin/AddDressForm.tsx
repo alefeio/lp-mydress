@@ -24,45 +24,49 @@ export default function AddDressForm() {
     setLoading(true);
     setMessage('Enviando...');
 
-    // Passo 1: Upload da imagem para o Cloudinary
-    const formData = new FormData();
-    formData.append('file', file);
+    try {
+      // Passo 1: Upload da imagem para o Cloudinary
+      const formData = new FormData();
+      formData.append('file', file);
 
-    const uploadResponse = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-    const uploadData = await uploadResponse.json();
+      if (!uploadResponse.ok) {
+        const uploadErrorData = await uploadResponse.json();
+        throw new Error(uploadErrorData.message || 'Erro desconhecido no upload.');
+      }
 
-    if (!uploadResponse.ok) {
-      setLoading(false);
-      setMessage(`Erro no upload: ${uploadData.message}`);
-      return;
-    }
+      const uploadData = await uploadResponse.json();
+      const imgUrl = uploadData.url;
 
-    const imgUrl = uploadData.url;
+      // Passo 2: Enviar os dados do vestido para o endpoint de criação
+      const dressResponse = await fetch('/api/dresses/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ img: imgUrl, productMark, productModel, cor }),
+      });
 
-    // Passo 2: Enviar os dados do vestido para o endpoint de criação
-    const dressResponse = await fetch('/api/dresses/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ img: imgUrl, productMark, productModel, cor }),
-    });
+      if (!dressResponse.ok) {
+        const dressErrorData = await dressResponse.json();
+        throw new Error(dressErrorData.message || 'Erro desconhecido ao adicionar vestido.');
+      }
 
-    const dressData = await dressResponse.json();
-
-    setLoading(false);
-    if (dressResponse.ok) {
       setMessage('Vestido adicionado com sucesso!');
       setFile(null);
       setProductMark('');
       setProductModel('');
       setCor('');
-    } else {
-      setMessage(`Erro ao adicionar vestido: ${dressData.message}`);
+
+    } catch (error: any) {
+      console.error(error);
+      setMessage(`Ocorreu um erro: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
