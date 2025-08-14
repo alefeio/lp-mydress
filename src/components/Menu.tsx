@@ -20,7 +20,7 @@ export function Menu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { data: session } = useSession(); // Use o hook useSession para obter a sessão
-    
+
   const router = useRouter();
 
   const handleSignIn = () => {
@@ -38,8 +38,8 @@ export function Menu() {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${isScrolled
-          ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
-          : "bg-background-100 pt-4 pb-2"
+        ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
+        : "bg-background-100 pt-4 pb-2"
         }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
@@ -67,15 +67,16 @@ export function Menu() {
             </a>
           ))}
           {session ? (
-            <div className="text-center p-4 bg-green-100">
-              <p>Logado como: {session.user?.email}</p>
-              <button
-                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-                className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md"
+            <>
+              <a href="#" className="hover:text-textcolor-400 transition-colors">Logado como: {session.user?.email}</a>
+              <a
+                href="#"
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="hover:text-textcolor-400 transition-colors"
               >
                 Sair
-              </button>
-            </div>
+              </a>
+            </>
           ) : (
             <a
               href="#"
