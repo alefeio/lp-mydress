@@ -27,21 +27,22 @@ export const authOptions: NextAuthOptions = {
         signIn: '/auth/signin',
         verifyRequest: '/auth/verify-request',
     },
-    // <--- ADICIONE ESTA LINHA DE VOLTA
     session: {
         strategy: "jwt",
     },
-    // <--- FIM DA ALTERAÇÃO
 
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, account, profile }) {
+            // No primeiro login, o user object é definido
             if (user) {
                 token.id = user.id;
                 token.role = (user as any).role;
             }
+            // Em todas as outras chamadas, apenas o token existe. Retorne-o.
             return token;
         },
         async session({ session, token }) {
+            // Adicione os campos do token (id e role) ao objeto da sessão
             if (session.user && token) {
                 session.user.id = token.id as string;
                 session.user.role = token.role as "ADMIN" | "CLIENT";
