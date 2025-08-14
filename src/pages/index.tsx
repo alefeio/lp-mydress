@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Script from 'next/script'
-import { useSession, signOut } from "next-auth/react"; // Importe useSession e signOut
 import HeroSlider from '../components/HeroSlider'
 import WhatsAppButton from '../components/WhatsAppButton'
 import DressesGallery from '../components/DressesGallery'
@@ -13,8 +12,6 @@ import Hero from 'components/Hero'
 import { Analytics } from "@vercel/analytics/next"
 
 export default function Home() {
-  const { data: session } = useSession(); // Use o hook useSession para obter a sessão
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -101,20 +98,6 @@ export default function Home() {
       <div className="min-h-screen font-sans">
         <Analytics />
         <Menu />
-        
-        {/* Mostra o e-mail do usuário e um botão de sair se estiver logado */}
-        {session && (
-          <div className="text-center p-4 bg-green-100">
-            <p>Logado como: {session.user?.email}</p>
-            <button
-              onClick={() => signOut({ callbackUrl: '/auth/signin' })}
-              className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md"
-            >
-              Sair
-            </button>
-          </div>
-        )}
-
         <HeroSlider />
         <main className="max-w-7xl mx-auto">
           <Hero />

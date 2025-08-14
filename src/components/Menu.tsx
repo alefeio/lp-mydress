@@ -1,3 +1,5 @@
+import { useSession, signOut } from "next-auth/react"; // Importe useSession e signOut
+import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 
 const menuLinks = [
@@ -17,6 +19,13 @@ const menuLinks = [
 export function Menu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { data: session } = useSession(); // Use o hook useSession para obter a sessão
+    
+  const router = useRouter();
+
+  const handleSignIn = () => {
+    router.push('/auth/signin');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,11 +37,10 @@ export function Menu() {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${
-        isScrolled
+      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${isScrolled
           ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
           : "bg-background-100 pt-4 pb-2"
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
         {/* Logo */}
@@ -40,9 +48,8 @@ export function Menu() {
           <img
             src="/images/logo.png"
             alt="Logomarca My Dress"
-            className={`transition-all duration-300 ${
-              isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
-            }`}
+            className={`transition-all duration-300 ${isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
+              }`}
           />
         </a>
 
@@ -59,6 +66,25 @@ export function Menu() {
               {label}
             </a>
           ))}
+          {session ? (
+            <div className="text-center p-4 bg-green-100">
+              <p>Logado como: {session.user?.email}</p>
+              <button
+                onClick={() => signOut({ callbackUrl: '/auth/signin' })}
+                className="mt-2 px-4 py-2 bg-red-500 text-white rounded-md"
+              >
+                Sair
+              </button>
+            </div>
+          ) : (
+            <a
+              href="#"
+              className="hover:text-textcolor-400 transition-colors"
+              onClick={handleSignIn}
+            >
+              Entrar
+            </a>
+          )}
         </nav>
 
         {/* Botão hamburger mobile */}
@@ -70,19 +96,16 @@ export function Menu() {
           aria-controls="mobile-menu"
         >
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${
-              menuOpen ? "rotate-45 translate-y-2" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${menuOpen ? "rotate-45 translate-y-2" : ""
+              }`}
           />
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-opacity ${
-              menuOpen ? "opacity-0" : "opacity-100"
-            }`}
+            className={`block h-0.5 w-6 bg-textcolor-700 transition-opacity ${menuOpen ? "opacity-0" : "opacity-100"
+              }`}
           />
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${
-              menuOpen ? "-rotate-45 -translate-y-2" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${menuOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
           />
         </button>
       </div>
