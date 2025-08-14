@@ -34,12 +34,12 @@ export default function AddDressForm() {
         body: formData,
       });
 
+      const uploadData = await uploadResponse.json();
+
       if (!uploadResponse.ok) {
-        const uploadErrorData = await uploadResponse.json();
-        throw new Error(uploadErrorData.message || 'Erro desconhecido no upload.');
+        throw new Error(uploadData.message || 'Erro desconhecido no upload.');
       }
 
-      const uploadData = await uploadResponse.json();
       const imgUrl = uploadData.url;
 
       // Passo 2: Enviar os dados do vestido para o endpoint de criação
@@ -68,7 +68,7 @@ export default function AddDressForm() {
     } finally {
       setLoading(false);
     }
-  };
+};
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
