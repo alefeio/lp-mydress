@@ -20,29 +20,42 @@ export default function upload(req: NextApiRequest, res: NextApiResponse) {
     return res.status(405).json({ message: 'Método não permitido' });
   }
 
-  const busboy = Busboy({ headers: req.headers });
-  let uploadFinished = false;
+  return new Promise((resolve, reject) => {
+    const busboy = Busboy({ headers: req.headers });
 
-  busboy.on('file', (_fieldname: string, file: Readable, _filename: string) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: 'dresses' },
-      (error, result) => {
-        if (error) {
-          res.status(500).json({ message: 'Erro ao fazer upload para o Cloudinary', error });
-        } else {
-          res.status(200).json({ url: result?.secure_url });
+    busboy.on('file', (_fieldname, file: Readable, _filename) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'dresses' },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
         }
-        uploadFinished = true;
-      }
-    );
-    file.pipe(stream);
-  });
+      );
+      file.pipe(stream);
+    });
 
-  req.pipe(busboy);
+    req.on('close', () => {
+      reject(new Error('Conexão interrompida antes do upload ser concluído'));
+    });
 
-  req.on('close', () => {
-    if (!uploadFinished) {
-      res.status(500).json({ message: 'Conexão interrompida antes do upload ser concluído' });
-    }
+    busboy.on('error', (err) => {
+      reject(err);
+    });
+
+    busboy.on('finish', () => {
+      // Esta função é chamada quando o Busboy termina de processar o formulário.
+      // A promise já foi resolvida ou rejeitada na função 'file'.
+    });
+
+    req.pipe(busboy);
+  })
+  .then((result: any) => {
+    res.status(200).json({ url: result?.secure_url });
+  })
+  .catch((error: any) => {
+    console.error('Erro na API de upload:', error);
+    res.status(500).json({ message: error.message || 'Erro interno do servidor', error });
   });
 }
