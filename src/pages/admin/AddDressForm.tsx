@@ -1,34 +1,68 @@
 import { useState, FormEvent } from 'react';
 
 export default function AddDressForm() {
-  const [img, setImg] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   const [productMark, setProductMark] = useState('');
   const [productModel, setProductModel] = useState('');
   const [cor, setCor] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!file) {
+      setMessage('Por favor, selecione uma imagem.');
+      return;
+    }
+
+    setLoading(true);
     setMessage('Enviando...');
 
-    const response = await fetch('/api/dresses/add', {
+    // Passo 1: Upload da imagem para o Cloudinary
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const uploadResponse = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const uploadData = await uploadResponse.json();
+
+    if (!uploadResponse.ok) {
+      setLoading(false);
+      setMessage(`Erro no upload: ${uploadData.message}`);
+      return;
+    }
+
+    const imgUrl = uploadData.url;
+
+    // Passo 2: Enviar os dados do vestido para o endpoint de criação
+    const dressResponse = await fetch('/api/dresses/add', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ img, productMark, productModel, cor }),
+      body: JSON.stringify({ img: imgUrl, productMark, productModel, cor }),
     });
 
-    const data = await response.json();
+    const dressData = await dressResponse.json();
 
-    if (response.ok) {
+    setLoading(false);
+    if (dressResponse.ok) {
       setMessage('Vestido adicionado com sucesso!');
-      setImg('');
+      setFile(null);
       setProductMark('');
       setProductModel('');
       setCor('');
     } else {
-      setMessage(`Erro: ${data.message}`);
+      setMessage(`Erro ao adicionar vestido: ${dressData.message}`);
     }
   };
 
@@ -37,14 +71,18 @@ export default function AddDressForm() {
       <h2 className="text-2xl font-bold mb-6 text-center">Adicionar Novo Vestido</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="img" className="block text-sm font-medium text-gray-700">URL da Imagem</label>
+          <label htmlFor="file" className="block text-sm font-medium text-gray-700">Imagem</label>
           <input
-            type="text"
-            id="img"
-            value={img}
-            onChange={(e) => setImg(e.target.value)}
+            type="file"
+            id="file"
+            onChange={handleFileChange}
             required
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            className="mt-1 block w-full text-sm text-gray-500
+                       file:mr-4 file:py-2 file:px-4
+                       file:rounded-full file:border-0
+                       file:text-sm file:font-semibold
+                       file:bg-blue-50 file:text-blue-700
+                       hover:file:bg-blue-100"
           />
         </div>
         <div>
@@ -83,9 +121,10 @@ export default function AddDressForm() {
         <div>
           <button
             type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={loading}
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            Adicionar Vestido
+            {loading ? 'Adicionando...' : 'Adicionar Vestido'}
           </button>
         </div>
       </form>
