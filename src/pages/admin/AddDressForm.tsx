@@ -79,6 +79,7 @@ export default function AddDressForm() {
           <input
             type="file"
             id="file"
+            name="file"
             onChange={handleFileChange}
             required
             className="mt-1 block w-full text-sm text-gray-500
