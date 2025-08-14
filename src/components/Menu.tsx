@@ -68,7 +68,7 @@ export function Menu() {
           ))}
           {session ? (
             <>
-              <a href="#" className="hover:text-textcolor-400 transition-colors">Minha conta<br /><span className="text-xs">{session.user?.email}</span></a>
+              <a href="/admin" className="hover:text-textcolor-400 transition-colors">Minha conta<br /><span className="text-xs">{session.user?.email}</span></a>
               <a
                 href="#"
                 onClick={() => signOut({ callbackUrl: '/' })}
