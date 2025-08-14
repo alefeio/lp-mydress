@@ -14,27 +14,23 @@ export default function AdminPage() {
         );
     }
 
-    console.log("Session data:", session);
+    if (status === "unauthenticated") {
+        router.push("/auth/signin");
+        return null;
+    }
 
-    // if (status === "unauthenticated") {
-    //     router.push("/auth/signin");
-    //     return null;
-    // }
+    if (session?.user?.role !== "ADMIN") {
+        router.push("/403");
+        return null;
+    }
 
-    // if (session?.user?.role !== "ADMIN") {
-    //     router.push("/403");
-    //     return null;
-    // }
-
-    // return (
-    //     <div className="container mx-auto p-4">
-    //         <h1 className="text-3xl font-bold mb-4">Painel de Administração</h1>
-    //         <p className="text-lg">Bem-vindo, {session.user.name}!</p>
-    //         <div className="mt-8">
-    //             <AddDressForm />
-    //         </div>
-    //     </div>
-    // );
-
-    return
+    return (
+        <div className="container mx-auto p-4">
+            <h1 className="text-3xl font-bold mb-4">Painel de Administração</h1>
+            <p className="text-lg">Bem-vindo, {session.user.name}!</p>
+            <div className="mt-8">
+                <AddDressForm />
+            </div>
+        </div>
+    );
 }
