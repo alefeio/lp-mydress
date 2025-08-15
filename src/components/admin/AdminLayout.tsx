@@ -1,34 +1,12 @@
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { signOut } from "next-auth/react";
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Verificando acesso...</p>
-      </div>
-    );
-  }
-
-  if (status === "unauthenticated") {
-    router.push("/api/auth/signin");
-    return null;
-  }
-
-  if (session?.user?.role !== "ADMIN") {
-    router.push("/403"); // Página de acesso negado
-    return null;
-  }
-
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar de Navegação */}
@@ -45,6 +23,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link href="/admin/menu">
                 <p className="block p-2 rounded hover:bg-gray-700">Menu</p>
               </Link>
+            </li>
+            <li className="mb-2">
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="w-full text-left p-2 rounded hover:bg-gray-700"
+              >
+                Sair
+              </button>
             </li>
           </ul>
         </nav>
