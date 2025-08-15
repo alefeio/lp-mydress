@@ -16,9 +16,11 @@ export default function AdminMenuPage() {
   );
 }
 
-// Proteção da rota do lado do servidor
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
+
+  // --- ADICIONE ESTA LINHA PARA DEPURAR ---
+  console.log('Sessão recebida no servidor:', session);
 
   if (!session || session.user?.role !== 'ADMIN') {
     return {
