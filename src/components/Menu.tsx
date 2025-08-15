@@ -1,26 +1,18 @@
-import { useSession, signOut } from "next-auth/react"; // Importe useSession e signOut
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
+import Link from 'next/link';
 
-const menuLinks = [
-  { label: "Início", href: "#inicio" },
-  { label: "Nossa coleção", href: "#colecao" },
-  { label: "Sobre nós", href: "#empresa" },
-  { label: "Depoimentos", href: "#depoimentos" },
-  { label: "Perguntas Frequentes", href: "#faq" },
-  { label: "Onde Estamos", href: "#localizacao" },
-  {
-    label: "Contato",
-    href: "https://wa.me//5591985810208?text=Gostaria de mais informações. Estou entrando em contato através do site.",
-    target: "_blank",
-  },
-];
+interface MenuItem {
+  text: string;
+  url: string;
+}
 
 export function Menu() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { data: session } = useSession(); // Use o hook useSession para obter a sessão
-
+  const [dynamicMenu, setDynamicMenu] = useState<{ logoUrl: string; links: MenuItem[] } | null>(null);
+  const { data: session } = useSession();
   const router = useRouter();
 
   const handleSignIn = () => {
@@ -28,12 +20,34 @@ export function Menu() {
   };
 
   useEffect(() => {
+    // Busca os dados do menu da API
+    const fetchMenu = async () => {
+      try {
+        const response = await fetch("/api/crud/menu");
+        if (response.ok) {
+          const data = await response.json();
+          setDynamicMenu(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados do menu:", error);
+      }
+    };
+    fetchMenu();
+
+    // Lógica para detecção de scroll
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 350);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (!dynamicMenu) {
+    // Você pode retornar um spinner de carregamento ou null aqui
+    return null;
+  }
+
+  const { logoUrl, links } = dynamicMenu;
 
   return (
     <header
@@ -44,47 +58,44 @@ export function Menu() {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
         {/* Logo */}
-        <a href="#inicio" className="flex items-center">
+        <Link href="/">
           <img
-            src="/images/logo.png"
+            src={logoUrl || "/images/logo.png"} // Usa a URL da logomarca do DB ou a padrão
             alt="Logomarca My Dress"
             className={`transition-all duration-300 ${isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
               }`}
           />
-        </a>
+        </Link>
 
         {/* Menu desktop */}
         <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
-          {menuLinks.map(({ label, href, target = "" }) => (
-            <a
-              key={href}
-              href={href}
+          {links.map(({ text, url }) => (
+            <Link
+              key={url}
+              href={url}
               className="hover:text-textcolor-400 transition-colors"
               onClick={() => setMenuOpen(false)}
-              target={target}
             >
-              {label}
-            </a>
+              {text}
+            </Link>
           ))}
           {session ? (
             <>
-              <a href="/admin" className="hover:text-textcolor-400 transition-colors">Minha conta<br /><span className="text-xs">{session.user?.email}</span></a>
-              <a
-                href="#"
+              <Link href="/admin" className="hover:text-textcolor-400 transition-colors">Minha conta</Link>
+              <button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="hover:text-textcolor-400 transition-colors"
               >
                 Sair
-              </a>
+              </button>
             </>
           ) : (
-            <a
-              href="#"
+            <button
               className="hover:text-textcolor-400 transition-colors"
               onClick={handleSignIn}
             >
               Entrar
-            </a>
+            </button>
           )}
         </nav>
 
@@ -117,16 +128,15 @@ export function Menu() {
           id="mobile-menu"
           className="md:hidden py-4 flex flex-col gap-4 font-semibold bg-background-100/95 px-4"
         >
-          {menuLinks.map(({ label, href, target = "" }) => (
-            <a
-              key={href}
-              href={href}
+          {links.map(({ text, url }) => (
+            <Link
+              key={url}
+              href={url}
               className="hover:text-textcolor-400 border-t border-background-200 transition-colors pt-4"
               onClick={() => setMenuOpen(false)}
-              target={target}
             >
-              {label}
-            </a>
+              {text}
+            </Link>
           ))}
         </nav>
       )}
