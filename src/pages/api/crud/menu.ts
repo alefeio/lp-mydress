@@ -7,9 +7,9 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Lógica para lidar com a requisição GET
-  // Ela busca os dados do menu ao carregar a página
   if (req.method === 'GET') {
     try {
+      // @ts-ignore
       const menuData = await prisma.menu.findUnique({
         where: { id: 1 },
       });
@@ -20,14 +20,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Lógica para lidar com a requisição POST
-  // Ela salva os dados do menu no banco de dados
   if (req.method === 'POST') {
     const { logoUrl, links } = req.body;
 
-    // Verifique se os dados estão sendo recebidos corretamente
-    console.log('Dados recebidos para salvar o menu:', { logoUrl, links });
-
     try {
+      // @ts-ignore
       const updatedMenu = await prisma.menu.upsert({
         where: { id: 1 },
         update: { logoUrl, links },
@@ -40,7 +37,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   }
 
-  // Se o método não for GET nem POST, retorna 405
   res.setHeader('Allow', ['GET', 'POST']);
   res.status(405).end(`Method ${req.method} Not Allowed`);
 }

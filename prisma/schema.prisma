@@ -10,18 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// O modelo User já existe, vamos apenas garantir que o campo 'role' esteja lá
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          String?   @default("CLIENT") // Role do usuário: CLIENT ou ADMIN
-  accounts      Account[]
-  sessions      Session[]
-}
-
+// Modelo de Autenticação (Next-Auth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -48,6 +37,17 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          String?   @default("USER")
+  accounts      Account[]
+  sessions      Session[]
+}
+
 model VerificationToken {
   identifier String
   token      String   @unique
@@ -56,36 +56,9 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// =======================================================
-// NOVOS MODELOS para o seu catálogo
-// =======================================================
-
+// Seu novo modelo 'Menu'
 model Menu {
-  id        Int      @id @default(autoincrement())
-  logoUrl   String
-  links     Json
-}
-
-// Modelo para as coleções (Vestidos Azuis, Vestidos Pretos, etc.)
-model Collection {
-  id          String @id @default(cuid())
-  name        String
-  subtitle    String?
-  description String?
-  bgcolor     String?
-  buttonText  String?
-  dresses     Dress[] // Relacionamento com os vestidos
-}
-
-// Modelo para os vestidos individuais
-model Dress {
-  id            String @id @default(cuid())
-  img           String
-  productMark   String
-  productModel  String
-  cor           String
-
-  // Relacionamento com a coleção a qual o vestido pertence
-  collection    Collection @relation(fields: [collectionId], references: [id])
-  collectionId  String
+  id       Int     @id @default(1)
+  logoUrl  String?
+  links    Json
 }
