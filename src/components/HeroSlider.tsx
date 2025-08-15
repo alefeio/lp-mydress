@@ -1,61 +1,83 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 
-const slides = [
-  {
-    img: "/images/banner/banner2.jpg",
-    caption: "Coleção 2025 – Cores e Modelos Atualizados para Você Brilhar"
-  },
-  {
-    img: "/images/banner/banner4.jpg",
-    caption: "Midis Brancos - Perfeitos para solenidades, noivados, batizados ou jantares especiais"
-  },
-  {
-    img: "/images/banner/banner5.jpg",
-    caption: "Clutches - O toque final que vai valorizar ainda mais o seu look"
-  }
-]
+interface BannerItem {
+  id: string;
+  url: string;
+  caption?: string; // Propriedade opcional para o texto do banner
+}
 
 export default function HeroSlider() {
-  const [current, setCurrent] = useState(0)
-  const [playing, setPlaying] = useState(true)
-  const [startX, setStartX] = useState<number | null>(null)
+  const [current, setCurrent] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [startX, setStartX] = useState<number | null>(null);
+  const [slides, setSlides] = useState<BannerItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Busca os dados do banner da API
+  useEffect(() => {
+    const fetchBanners = async () => {
+      try {
+        const response = await fetch("/api/crud/banner");
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.banners) {
+            setSlides(data.banners);
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao buscar dados do banner:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBanners();
+  }, []);
+
+  // Lógica para auto-play do slider
+  useEffect(() => {
+    if (!playing || slides.length === 0) return;
+    const timer = setTimeout(() => setCurrent((c) => (c + 1) % slides.length), 10000);
+    return () => clearTimeout(timer);
+  }, [current, playing, slides.length]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    setStartX(e.clientX)
-  }
+    setPlaying(false);
+    setStartX(e.clientX);
+  };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (startX === null) return
-    const deltaX = e.clientX - startX
+    if (startX === null) return;
+    const deltaX = e.clientX - startX;
 
     if (Math.abs(deltaX) > 50) {
-      setCurrent((prev) => (deltaX > 0 ? (prev - 1 + slides.length) % slides.length : (prev + 1) % slides.length))
+      setCurrent((prev) => (deltaX > 0 ? (prev - 1 + slides.length) % slides.length : (prev + 1) % slides.length));
     }
 
-    setStartX(null)
-  }
+    setStartX(null);
+    setPlaying(true);
+  };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    setStartX(e.touches[0].clientX)
-  }
+    setPlaying(false);
+    setStartX(e.touches[0].clientX);
+  };
 
   const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (startX === null) return
-    const endX = e.changedTouches[0].clientX
-    const deltaX = endX - startX
+    if (startX === null) return;
+    const endX = e.changedTouches[0].clientX;
+    const deltaX = endX - startX;
 
     if (Math.abs(deltaX) > 50) {
-      setCurrent((prev) => (deltaX > 0 ? (prev - 1 + slides.length) % slides.length : (prev + 1) % slides.length))
+      setCurrent((prev) => (deltaX > 0 ? (prev - 1 + slides.length) % slides.length : (prev + 1) % slides.length));
     }
 
-    setStartX(null)
-  }
+    setStartX(null);
+    setPlaying(true);
+  };
 
-  useEffect(() => {
-    if (!playing) return
-    const timer = setTimeout(() => setCurrent((c) => (c + 1) % slides.length), 10000)
-    return () => clearTimeout(timer)
-  }, [current, playing])
+  if (isLoading || slides.length === 0) {
+    return null; // Não renderiza nada enquanto carrega ou se não houver banners
+  }
 
   return (
     <div
@@ -70,10 +92,10 @@ export default function HeroSlider() {
     >
       {slides.map((slide, idx) => (
         <div
-          key={idx}
+          key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-0" : "opacity-0 z-0"}`}
         >
-          <img src={slide.img} alt={slide.caption} className="object-cover w-full h-full" />
+          <img src={slide.url} alt={slide.caption || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-graytone-950/60 to-transparent p-6">
             <h2 className="font-serif text-2xl text-textcolor-50 md:text-3xl font-bold drop-shadow">{slide.caption}</h2>
           </div>
@@ -110,5 +132,5 @@ export default function HeroSlider() {
         )}
       </button>
     </div>
-  )
+  );
 }

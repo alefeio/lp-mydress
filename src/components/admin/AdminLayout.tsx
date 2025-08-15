@@ -25,6 +25,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </Link>
             </li>
             <li className="mb-2">
+              <Link href="/admin/banner">
+                <p className="block p-2 rounded hover:bg-gray-700">Banner</p>
+              </Link>
+            </li>
+            <li className="mb-2">
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="w-full text-left p-2 rounded hover:bg-gray-700"

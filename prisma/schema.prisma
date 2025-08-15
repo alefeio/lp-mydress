@@ -62,3 +62,9 @@ model Menu {
   logoUrl  String?
   links    Json
 }
+
+// Seu novo modelo para o Banner
+model Banner {
+  id        Int    @id @default(1)
+  banners   Json
+}
