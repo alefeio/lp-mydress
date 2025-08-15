@@ -1,20 +1,25 @@
-import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { Prisma } from "@prisma/client";
+// src/components/admin/MenuForm.tsx
 
-interface MenuItem {
-  id: number;
+import { useState, useEffect, FormEvent, ChangeEvent } from "react";
+import { FaTrash } from "react-icons/fa";
+
+interface MenuLink {
+  id: string;
   text: string;
   url: string;
+  target?: string;
 }
 
 export default function MenuForm() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoUrl, setLogoUrl] = useState<string>('');
-  const [links, setLinks] = useState<MenuItem[]>([]);
-  const [message, setMessage] = useState<string>("");
+  const [logoUrl, setLogoUrl] = useState<string>("");
+  const [links, setLinks] = useState<MenuLink[]>([]);
+  const [newLinkText, setNewLinkText] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [newLinkTarget, setNewLinkTarget] = useState(false);
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Carrega os dados do menu existentes
   useEffect(() => {
     const fetchMenu = async () => {
       try {
@@ -22,8 +27,8 @@ export default function MenuForm() {
         if (response.ok) {
           const data = await response.json();
           if (data) {
-            setLinks(data.links);
-            setLogoUrl(data.logoUrl || '');
+            setLogoUrl(data.logoUrl || "");
+            setLinks(data.links || []);
           }
         }
       } catch (error) {
@@ -33,62 +38,63 @@ export default function MenuForm() {
     fetchMenu();
   }, []);
 
-  const handleLinkChange = (index: number, field: keyof MenuItem, value: string) => {
-    const newLinks = [...links];
-    (newLinks[index][field] as string) = value;
-    setLinks(newLinks);
-  };
-
-  const handleAddLink = () => {
-    setLinks([...links, { id: Date.now(), text: "", url: "" }]);
-  };
-
-  const handleRemoveLink = (idToRemove: number) => {
-    setLinks(links.filter((link) => link.id !== idToRemove));
-  };
-
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setLogoFile(e.target.files[0]);
     }
   };
 
-  const handleLogoUpload = async () => {
-    if (!logoFile) return logoUrl;
-
-    const formData = new FormData();
-    formData.append("file", logoFile);
-    formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "");
-
-    try {
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Erro no upload da imagem");
+  const handleLinkAdd = (e: FormEvent) => {
+      e.preventDefault();
+      if (newLinkText && newLinkUrl) {
+          setLinks((prevLinks) => [
+              ...prevLinks,
+              {
+                  id: String(Date.now()),
+                  text: newLinkText,
+                  url: newLinkUrl,
+                  target: newLinkTarget ? "_blank" : "_self",
+              },
+          ]);
+          setNewLinkText("");
+          setNewLinkUrl("");
+          setNewLinkTarget(false);
       }
-
-      const data = await response.json();
-      return data.url;
-    } catch (error) {
-      console.error(error);
-      setMessage("Erro ao fazer upload da logomarca.");
-      setLoading(false);
-      return null;
-    }
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleLinkRemove = (idToRemove: string) => {
+    setLinks((prevLinks) => prevLinks.filter((link) => link.id !== idToRemove));
+  };
+
+  const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    let newLogoUrl = logoUrl;
+    let uploadedLogoUrl = logoUrl;
     if (logoFile) {
-      newLogoUrl = await handleLogoUpload();
-      if (!newLogoUrl) return;
+      const formData = new FormData();
+      formData.append("file", logoFile);
+      formData.append("upload_preset", process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "");
+
+      try {
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Erro no upload da logomarca.");
+        }
+
+        const data = await response.json();
+        uploadedLogoUrl = data.url;
+      } catch (error) {
+        console.error(error);
+        setMessage("Erro ao fazer upload da logomarca.");
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -97,98 +103,136 @@ export default function MenuForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ logoUrl: newLogoUrl, links }),
+        body: JSON.stringify({ logoUrl: uploadedLogoUrl, links }),
       });
 
       if (!response.ok) {
-        throw new Error("Erro ao salvar o menu");
+        throw new Error("Erro ao salvar o menu.");
       }
 
-      const data = await response.json();
       setMessage("Menu salvo com sucesso!");
-      setLoading(false);
-      setLogoFile(null);
     } catch (error) {
       console.error(error);
       setMessage("Erro ao salvar o menu.");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Gerenciar Menu</h2>
       {message && (
         <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-green-600" : "text-red-600"}`}>
           {message}
         </p>
       )}
 
-      {/* Upload da Logomarca */}
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">Logomarca</label>
-        <div className="flex items-center space-x-4">
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-          />
-          {logoUrl && (
-            <div className="w-24 h-auto">
-              <img src={logoUrl} alt="Logomarca Atual" className="w-full h-auto object-contain" />
-            </div>
-          )}
-        </div>
+      {/* Seção da Logomarca */}
+      <div className="mb-6">
+        <h3 className="text-xl font-bold mb-2">Logomarca</h3>
+        <label className="block text-gray-700 font-bold mb-2">
+          Imagem da Logomarca
+        </label>
+        <input
+          type="file"
+          onChange={handleLogoChange}
+          className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+        />
+        {logoUrl && (
+          <div className="mt-4">
+            <p className="text-gray-600">Logomarca atual:</p>
+            <img src={logoUrl} alt="Logomarca atual" className="h-16 w-auto mt-2" />
+          </div>
+        )}
       </div>
 
-      {/* Itens do Menu */}
-      <label className="block text-gray-700 font-bold mb-2">Itens do Menu</label>
-      <div className="space-y-4">
-        {links.map((link, index) => (
-          <div key={link.id} className="flex space-x-2">
-            <input
-              type="text"
-              placeholder="Texto do Link"
-              value={link.text}
-              onChange={(e) => handleLinkChange(index, "text", e.target.value)}
-              className="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="URL"
-              value={link.url}
-              onChange={(e) => handleLinkChange(index, "url", e.target.value)}
-              className="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-              required
-            />
+      {/* Seção de Links do Menu */}
+      <div className="mb-6">
+        <h3 className="text-xl font-bold mb-2">Links do Menu</h3>
+        <div className="space-y-4 mb-4">
+          <form onSubmit={handleLinkAdd} className="p-4 border rounded-md">
+            <div className="mb-2">
+              <label htmlFor="link-text" className="block text-gray-700 font-bold mb-1">
+                Texto do Link
+              </label>
+              <input
+                id="link-text"
+                type="text"
+                value={newLinkText}
+                onChange={(e) => setNewLinkText(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="Ex: Sobre Nós"
+              />
+            </div>
+            <div className="mb-2">
+              <label htmlFor="link-url" className="block text-gray-700 font-bold mb-1">
+                URL do Link
+              </label>
+              <input
+                id="link-url"
+                type="text"
+                value={newLinkUrl}
+                onChange={(e) => setNewLinkUrl(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="Ex: /#sobre"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center text-gray-700 font-bold">
+                <input
+                  type="checkbox"
+                  checked={newLinkTarget}
+                  onChange={(e) => setNewLinkTarget(e.target.checked)}
+                  className="mr-2"
+                />
+                Abrir em nova aba?
+              </label>
+            </div>
             <button
-              type="button"
-              onClick={() => handleRemoveLink(link.id)}
-              className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600 focus:outline-none"
+              type="submit"
+              className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors"
             >
-              -
+              Adicionar Link
             </button>
-          </div>
-        ))}
+          </form>
+        </div>
+
+        {links.length > 0 && (
+          <ul className="space-y-2">
+            {links.map((link) => (
+              <li
+                key={link.id}
+                className="flex items-center justify-between p-3 border rounded-md bg-gray-50"
+              >
+                <div>
+                  <p className="font-semibold">{link.text}</p>
+                  <p className="text-sm text-gray-500">{link.url}</p>
+                  <p className="text-sm text-gray-500">Abre em: {link.target === "_blank" ? "Nova aba" : "Mesma aba"}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleLinkRemove(link.id)}
+                  className="p-2 text-red-500 hover:bg-red-100 rounded-full"
+                  aria-label={`Remover link ${link.text}`}
+                >
+                  <FaTrash />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <button
         type="button"
-        onClick={handleAddLink}
-        className="mt-4 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none"
-      >
-        + Adicionar Link
-      </button>
-
-      <button
-        type="submit"
-        className={`w-full mt-6 p-3 text-white font-bold rounded-md ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-        }`}
+        onClick={handleSave}
+        className={`w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+          }`}
         disabled={loading}
       >
         {loading ? "Salvando..." : "Salvar Menu"}
       </button>
-    </form>
+    </div>
   );
 }

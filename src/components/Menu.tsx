@@ -1,11 +1,14 @@
+// src/components/Menu.tsx
+
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
-import Link from 'next/link';
+import Link from "next/link";
 
 interface MenuItem {
   text: string;
   url: string;
+  target?: string;
 }
 
 export function Menu() {
@@ -20,7 +23,6 @@ export function Menu() {
   };
 
   useEffect(() => {
-    // Busca os dados do menu da API
     const fetchMenu = async () => {
       try {
         const response = await fetch("/api/crud/menu");
@@ -34,7 +36,6 @@ export function Menu() {
     };
     fetchMenu();
 
-    // Lógica para detecção de scroll
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 350);
     };
@@ -43,7 +44,6 @@ export function Menu() {
   }, []);
 
   if (!dynamicMenu) {
-    // Você pode retornar um spinner de carregamento ou null aqui
     return null;
   }
 
@@ -57,24 +57,23 @@ export function Menu() {
         }`}
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
-        {/* Logo */}
         <Link href="/">
           <img
-            src={logoUrl || "/images/logo.png"} // Usa a URL da logomarca do DB ou a padrão
+            src={logoUrl || "/images/logo.png"}
             alt="Logomarca My Dress"
             className={`transition-all duration-300 ${isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
               }`}
           />
         </Link>
 
-        {/* Menu desktop */}
         <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
-          {links.map(({ text, url }) => (
+          {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
               className="hover:text-textcolor-400 transition-colors"
               onClick={() => setMenuOpen(false)}
+              target={target}
             >
               {text}
             </Link>
@@ -99,7 +98,6 @@ export function Menu() {
           )}
         </nav>
 
-        {/* Botão hamburger mobile */}
         <button
           className="md:hidden flex flex-col gap-1.5"
           onClick={() => setMenuOpen((v) => !v)}
@@ -122,18 +120,18 @@ export function Menu() {
         </button>
       </div>
 
-      {/* Menu móvel */}
       {menuOpen && (
         <nav
           id="mobile-menu"
           className="md:hidden py-4 flex flex-col gap-4 font-semibold bg-background-100/95 px-4"
         >
-          {links.map(({ text, url }) => (
+          {links.map(({ text, url, target }) => (
             <Link
               key={url}
               href={url}
               className="hover:text-textcolor-400 border-t border-background-200 transition-colors pt-4"
               onClick={() => setMenuOpen(false)}
+              target={target}
             >
               {text}
             </Link>

@@ -1,9 +1,14 @@
+// src/components/HeroSlider.tsx
+
 import { useState, useEffect } from "react";
+import Link from 'next/link';
 
 interface BannerItem {
   id: string;
   url: string;
-  caption?: string; // Propriedade opcional para o texto do banner
+  title?: string;
+  link?: string;
+  target?: string;
 }
 
 export default function HeroSlider() {
@@ -13,7 +18,6 @@ export default function HeroSlider() {
   const [slides, setSlides] = useState<BannerItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Busca os dados do banner da API
   useEffect(() => {
     const fetchBanners = async () => {
       try {
@@ -33,7 +37,6 @@ export default function HeroSlider() {
     fetchBanners();
   }, []);
 
-  // Lógica para auto-play do slider
   useEffect(() => {
     if (!playing || slides.length === 0) return;
     const timer = setTimeout(() => setCurrent((c) => (c + 1) % slides.length), 10000);
@@ -76,7 +79,7 @@ export default function HeroSlider() {
   };
 
   if (isLoading || slides.length === 0) {
-    return null; // Não renderiza nada enquanto carrega ou se não houver banners
+    return null;
   }
 
   return (
@@ -95,14 +98,23 @@ export default function HeroSlider() {
           key={slide.id}
           className={`absolute inset-0 transition-opacity duration-700 ${idx === current ? "opacity-100 z-0" : "opacity-0 z-0"}`}
         >
-          <img src={slide.url} alt={slide.caption || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-graytone-950/60 to-transparent p-6">
-            <h2 className="font-serif text-2xl text-textcolor-50 md:text-3xl font-bold drop-shadow">{slide.caption}</h2>
-          </div>
+          {slide.link ? (
+            <Link href={slide.link} passHref legacyBehavior>
+              <a target={slide.target}>
+                <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
+              </a>
+            </Link>
+          ) : (
+            <img src={slide.url} alt={slide.title || `Banner ${idx + 1}`} className="object-cover w-full h-full" />
+          )}
+          {slide.title && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-graytone-950/60 to-transparent p-6">
+              <h2 className="font-serif text-2xl text-textcolor-50 md:text-3xl font-bold drop-shadow">{slide.title}</h2>
+            </div>
+          )}
         </div>
       ))}
 
-      {/* Controles */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
         {slides.map((_, idx) => (
           <button
@@ -114,7 +126,6 @@ export default function HeroSlider() {
         ))}
       </div>
 
-      {/* Botão Play/Pause */}
       <button
         className="absolute top-4 right-4 bg-textcolor-50/80 opacity-70 rounded-full p-2 shadow-lg hover:bg-textcolor-50 z-10"
         onClick={() => setPlaying((p) => !p)}

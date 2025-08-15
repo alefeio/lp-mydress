@@ -1,19 +1,24 @@
 // src/components/admin/BannerForm.tsx
+
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { Prisma } from "@prisma/client";
 
 interface BannerItem {
   id: string;
   url: string;
+  title?: string;
+  link?: string;
+  target?: string;
 }
 
 export default function BannerForm() {
   const [banners, setBanners] = useState<BannerItem[]>([]);
   const [newFile, setNewFile] = useState<File | null>(null);
+  const [newTitle, setNewTitle] = useState("");
+  const [newLink, setNewLink] = useState("");
+  const [newTarget, setNewTarget] = useState(false);
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
-  // Carrega os dados do banner existentes
   useEffect(() => {
     const fetchBanners = async () => {
       try {
@@ -37,8 +42,8 @@ export default function BannerForm() {
     }
   };
 
-  const handleRemoveBanner = (urlToRemove: string) => {
-    setBanners(banners.filter((banner) => banner.url !== urlToRemove));
+  const handleRemoveBanner = (idToRemove: string) => {
+    setBanners(banners.filter((banner) => banner.id !== idToRemove));
   };
 
   const handleUploadAndSave = async (e: FormEvent) => {
@@ -72,7 +77,15 @@ export default function BannerForm() {
       }
     }
 
-    const updatedBanners = uploadedUrl ? [...banners, { id: String(Date.now()), url: uploadedUrl }] : banners;
+    const newBannerItem = uploadedUrl ? {
+      id: String(Date.now()),
+      url: uploadedUrl,
+      title: newTitle,
+      link: newLink,
+      target: newTarget ? '_blank' : '_self',
+    } : null;
+
+    const updatedBanners = newBannerItem ? [...banners, newBannerItem] : banners;
 
     try {
       const response = await fetch("/api/crud/banner", {
@@ -90,6 +103,9 @@ export default function BannerForm() {
       const data = await response.json();
       setBanners(data.banners);
       setNewFile(null);
+      setNewTitle("");
+      setNewLink("");
+      setNewTarget(false);
       setMessage("Banners salvos com sucesso!");
     } catch (error) {
       console.error(error);
@@ -107,26 +123,58 @@ export default function BannerForm() {
         </p>
       )}
 
-      {/* Upload de Novo Banner */}
-      <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">Adicionar Novo Banner</label>
-        <input
-          type="file"
-          onChange={handleFileChange}
-          className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
-        />
+      {/* Seção para Adicionar Novo Banner */}
+      <div className="mb-4 space-y-4 border p-4 rounded-md">
+        <h3 className="text-xl font-bold">Adicionar Novo Banner</h3>
+        <div>
+          <label className="block text-gray-700 font-bold mb-2">Imagem</label>
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold mb-2">Título (Opcional)</label>
+          <input
+            type="text"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="Título do Banner"
+          />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-bold mb-2">Link (Opcional)</label>
+          <input
+            type="text"
+            value={newLink}
+            onChange={(e) => setNewLink(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            placeholder="https://..."
+          />
+        </div>
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            checked={newTarget}
+            onChange={(e) => setNewTarget(e.target.checked)}
+            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label className="text-gray-700">Abrir em nova aba?</label>
+        </div>
       </div>
 
-      {/* Banners Atuais */}
+      {/* Seção de Banners Atuais */}
       <div className="mb-4">
         <label className="block text-gray-700 font-bold mb-2">Banners Atuais</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {banners.map((banner) => (
             <div key={banner.id} className="relative group">
-              <img src={banner.url} alt="Banner" className="w-full h-auto rounded-md shadow-md" />
+              <img src={banner.url} alt={banner.title || "Banner"} className="w-full h-auto rounded-md shadow-md" />
               <button
                 type="button"
-                onClick={() => handleRemoveBanner(banner.url)}
+                onClick={() => handleRemoveBanner(banner.id)}
                 className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

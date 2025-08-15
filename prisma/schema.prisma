@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo de Autenticação (Next-Auth)
+// Modelos de Autenticação (Next-Auth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -56,7 +56,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Seu novo modelo 'Menu'
+// Modelo do Menu
 model Menu {
   id       Int     @id @default(1)
   logoUrl  String?
