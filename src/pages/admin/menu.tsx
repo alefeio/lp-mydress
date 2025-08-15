@@ -17,9 +17,10 @@ export default function AdminMenuPage() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const session = await getSession(context);
+  // --- ADICIONE ESTA LINHA PARA DEPURAR OS HEADERS ---
+  console.log('Headers da requisição:', context.req.headers);
 
-  // --- ADICIONE ESTA LINHA PARA DEPURAR ---
+  const session = await getSession(context);
   console.log('Sessão recebida no servidor:', session);
 
   if (!session || session.user?.role !== 'ADMIN') {
