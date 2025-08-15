@@ -23,19 +23,19 @@ model User {
 }
 
 model Account {
-  id                 String    @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -60,6 +60,12 @@ model VerificationToken {
 // NOVOS MODELOS para o seu catálogo
 // =======================================================
 
+model Menu {
+  id        Int      @id @default(autoincrement())
+  logoUrl   String
+  links     Json
+}
+
 // Modelo para as coleções (Vestidos Azuis, Vestidos Pretos, etc.)
 model Collection {
   id          String @id @default(cuid())
@@ -73,13 +79,13 @@ model Collection {
 
 // Modelo para os vestidos individuais
 model Dress {
-  id           String @id @default(cuid())
-  img          String
-  productMark  String
-  productModel String
-  cor          String
+  id            String @id @default(cuid())
+  img           String
+  productMark   String
+  productModel  String
+  cor           String
 
   // Relacionamento com a coleção a qual o vestido pertence
-  collection   Collection @relation(fields: [collectionId], references: [id])
-  collectionId String
+  collection    Collection @relation(fields: [collectionId], references: [id])
+  collectionId  String
 }
