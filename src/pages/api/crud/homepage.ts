@@ -25,7 +25,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
   // Lógica para lidar com a requisição POST (salvar/atualizar)
   else if (req.method === "POST") {
     const session = await getSession({ req });
-    if (!session || session.user.role !== "ADMIN") {
+    // CORREÇÃO: Adicionamos a verificação para 'session.user'
+    if (!session || !session.user || session.user.role !== "ADMIN") {
       res.status(401).json({ message: "Não autorizado." });
       return;
     }
@@ -38,14 +39,13 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
         return;
       }
 
-      const upsertPromises = sections.map((section, index) => {
+      const upsertPromises = sections.map((section: any, index: number) => {
         // Usa `upsert` para criar ou atualizar o registro.
-        // Se a sessão já tiver um ID, ela é atualizada. Se não, é criada.
         return prisma.homepageSection.upsert({
-          where: { id: section.id || "new" }, // O 'new' é um placeholder que faz o create ser chamado
+          where: { id: section.id || "new" },
           update: {
             type: section.type,
-            order: index, // O 'order' é definido pela posição no array
+            order: index,
             content: section.content,
           },
           create: {
@@ -69,7 +69,8 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
   // Lógica para lidar com a requisição DELETE
   else if (req.method === "DELETE") {
     const session = await getSession({ req });
-    if (!session || session.user.role !== "ADMIN") {
+    // CORREÇÃO: Adicionamos a verificação para 'session.user'
+    if (!session || !session.user || session.user.role !== "ADMIN") {
       res.status(401).json({ message: "Não autorizado." });
       return;
     }
@@ -85,7 +86,7 @@ export default async function handle(req: NextApiRequest, res: NextApiResponse) 
       res.status(500).json({ message: "Erro ao remover a sessão." });
     }
   }
-  
+
   else {
     res.setHeader("Allow", ["GET", "POST", "DELETE"]);
     res.status(405).end(`Método ${req.method} não permitido`);
