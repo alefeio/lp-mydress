@@ -33,23 +33,31 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
+            // user é o objeto do usuário que você recebe na primeira vez que ele faz login
             if (user) {
                 const userFromDb = await prisma.user.findUnique({
                     where: { id: user.id },
                     select: { role: true },
                 });
                 token.id = user.id;
-                // Força o tipo para 'any' para evitar o erro de tipagem.
-                // Esta é a solução mais robusta para o seu problema.
                 (token as any).role = userFromDb?.role;
             }
+
+            // Se o usuário fez login com um provedor (como Email), 'account' estará presente
+            if (account) {
+                // Adicione o token de acesso ao objeto 'token'
+                (token as any).accessToken = account.access_token;
+            }
+
             return token;
         },
         async session({ session, token }) {
-            if (session.user && token) {
+            if (session.user) {
                 (session.user as any).id = (token as any).id as string;
                 (session.user as any).role = (token as any).role as "ADMIN" | "USER" | undefined;
+                // Adicione o token de acesso ao objeto 'session'
+                (session as any).accessToken = (token as any).accessToken;
             }
             return session;
         }

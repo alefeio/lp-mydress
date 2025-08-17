@@ -1,7 +1,7 @@
 // src/pages/admin/homepage.tsx
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FaTrash, FaPlus, FaArrowUp, FaArrowDown, FaEdit } from "react-icons/fa";
 import { DynamicSection } from "../../components/sections/DynamicSection";
@@ -135,11 +135,27 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
+      // Adiciona a sessão para obter o token
+      const session = await getSession();
+
+      if (!session || session.user?.role !== "ADMIN") {
+        // Caso não tenha sessão ou o usuário não seja ADMIN,
+        // não envia a requisição e exibe um erro.
+        setMessage("Acesso não autorizado.");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch("/api/crud/homepage", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          // Adiciona o cabeçalho de Autorização com o token da sessão
+          Authorization: `Bearer ${session.accessToken}`,
+        },
         body: JSON.stringify({ sections }),
       });
+
       if (response.ok) {
         setMessage("Sessões salvas com sucesso!");
         fetchSections(); // Atualiza a lista
