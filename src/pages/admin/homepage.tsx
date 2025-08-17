@@ -1,8 +1,7 @@
 // src/pages/admin/homepage.tsx
 
 import { useState, useEffect } from "react";
-import { useSession, getSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { FaTrash, FaPlus, FaArrowUp, FaArrowDown, FaEdit } from "react-icons/fa";
 import { DynamicSection } from "../../components/sections/DynamicSection";
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -88,14 +87,13 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
 };
 
 export default function HomepageAdmin() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { data: session } = useSession();
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const fetchSections = async (accessToken: string) => {
+  const fetchSections = async () => {
     setLoading(true);
     setMessage("");
     try {
@@ -103,7 +101,7 @@ export default function HomepageAdmin() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${session?.accessToken}`,
         },
       });
 
@@ -122,24 +120,18 @@ export default function HomepageAdmin() {
   };
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
-      router.push("/auth/signin");
-    } else if (status === "authenticated" && session?.user?.role === "ADMIN") {
-      if (session.accessToken) {
-        fetchSections(session.accessToken);
-      } else {
-        setMessage("Erro: Token de acesso não encontrado.");
-      }
+    // O useEffect agora só executa quando a sessão está disponível
+    // O AdminLayout já garante que o usuário é ADMIN e está autenticado
+    if (session?.accessToken) {
+        fetchSections();
     }
-  }, [session, status, router]);
+  }, [session]);
 
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
     try {
-      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
+      if (!session || !session.accessToken) {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -156,9 +148,7 @@ export default function HomepageAdmin() {
 
       if (response.ok) {
         setMessage("Sessões salvas com sucesso!");
-        if (session.accessToken) {
-          fetchSections(session.accessToken);
-        }
+        fetchSections();
       } else {
         throw new Error("Erro ao salvar as sessões.");
       }
@@ -174,7 +164,7 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
+      if (!session || !session.accessToken) {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -189,9 +179,7 @@ export default function HomepageAdmin() {
       });
       if (response.ok) {
         setMessage("Sessão removida com sucesso!");
-        if (session.accessToken) {
-          fetchSections(session.accessToken);
-        }
+        fetchSections();
       } else {
         throw new Error("Erro ao remover a sessão.");
       }
