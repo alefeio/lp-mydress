@@ -95,21 +95,15 @@ export default function HomepageAdmin() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const fetchSections = async () => {
+  const fetchSections = async (accessToken: string) => {
     setLoading(true);
+    setMessage("");
     try {
-      const session = await getSession();
-      if (!session || !session.accessToken) {
-        setMessage("Acesso não autorizado.");
-        setLoading(false);
-        return;
-      }
-
       const response = await fetch("/api/crud/homepage", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -133,7 +127,11 @@ export default function HomepageAdmin() {
     } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
       router.push("/auth/signin");
     } else if (status === "authenticated" && session?.user?.role === "ADMIN") {
-      fetchSections();
+      if (session.accessToken) {
+        fetchSections(session.accessToken);
+      } else {
+        setMessage("Erro: Token de acesso não encontrado.");
+      }
     }
   }, [session, status, router]);
 
@@ -141,8 +139,6 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      const session = await getSession();
-
       if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
@@ -160,7 +156,9 @@ export default function HomepageAdmin() {
 
       if (response.ok) {
         setMessage("Sessões salvas com sucesso!");
-        fetchSections();
+        if (session.accessToken) {
+          fetchSections(session.accessToken);
+        }
       } else {
         throw new Error("Erro ao salvar as sessões.");
       }
@@ -176,7 +174,6 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      const session = await getSession();
       if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
@@ -192,7 +189,9 @@ export default function HomepageAdmin() {
       });
       if (response.ok) {
         setMessage("Sessão removida com sucesso!");
-        fetchSections();
+        if (session.accessToken) {
+          fetchSections(session.accessToken);
+        }
       } else {
         throw new Error("Erro ao remover a sessão.");
       }
@@ -244,7 +243,7 @@ export default function HomepageAdmin() {
     <AdminLayout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Gerenciar Homepage</h1>
-        {message && <p className={`mb-4 text-center ${message.startsWith('Erro') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>}
+        {message && <p className={`mb-4 text-center ${message.startsWith('Erro') || message.startsWith('Acesso') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-xl font-bold mb-4">Adicionar Nova Sessão</h2>
           <div className="flex flex-wrap gap-4">
