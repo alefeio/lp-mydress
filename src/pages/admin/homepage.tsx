@@ -13,16 +13,29 @@ interface HomepageSection {
   content: { [key: string]: any }; // O conteúdo JSON
 }
 
-// Este componente é o formulário de edição para a Sessão Personalizada
-const GenericSectionForm = ({ content, onUpdate, onCancel }) => {
-  const [data, setData] = useState(content);
+// Interfaces de tipos para os formulários de edição
+interface GenericSectionContent {
+  title?: string;
+  text?: string;
+  style?: { [key: string]: string };
+}
 
-  const handleChange = (e) => {
+interface GenericSectionFormProps {
+  content: GenericSectionContent;
+  onUpdate: (content: GenericSectionContent) => void;
+  onCancel: () => void;
+}
+
+// Este componente é o formulário de edição para a Sessão Personalizada
+const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpdate, onCancel }) => {
+  const [data, setData] = useState<GenericSectionContent>(content);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setData(prev => ({ ...prev, [name]: value }));
   };
-  
-  const handleStyleChange = (e) => {
+
+  const handleStyleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setData(prev => ({
       ...prev,
@@ -36,7 +49,7 @@ const GenericSectionForm = ({ content, onUpdate, onCancel }) => {
   return (
     <div className="bg-white p-4 rounded-md mt-2 shadow-inner">
       <h4 className="text-lg font-semibold mb-2">Editar Sessão Personalizada</h4>
-      
+
       {/* Pré-visualização do Conteúdo */}
       <div className="bg-gray-200 p-4 rounded-md mb-4">
         <h5 className="text-sm font-bold mb-2">Pré-visualização</h5>
@@ -209,7 +222,6 @@ export default function HomepageAdmin() {
           >
             <FaPlus /> Sessão Personalizada
           </button>
-          {/* Adicione outros botões para tipos de sessão específicos aqui */}
         </div>
       </div>
 
