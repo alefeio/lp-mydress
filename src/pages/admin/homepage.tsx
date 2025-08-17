@@ -120,8 +120,6 @@ export default function HomepageAdmin() {
   };
 
   useEffect(() => {
-    // O useEffect agora só executa quando a sessão está disponível
-    // O AdminLayout já garante que o usuário é ADMIN e está autenticado
     if (session?.accessToken) {
         fetchSections();
     }
@@ -131,7 +129,8 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      if (!session || !session.accessToken) {
+      // Esta verificação agora é mais robusta
+      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -148,7 +147,9 @@ export default function HomepageAdmin() {
 
       if (response.ok) {
         setMessage("Sessões salvas com sucesso!");
-        fetchSections();
+        if (session.accessToken) {
+          fetchSections();
+        }
       } else {
         throw new Error("Erro ao salvar as sessões.");
       }
@@ -164,7 +165,7 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      if (!session || !session.accessToken) {
+      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -227,6 +228,8 @@ export default function HomepageAdmin() {
     }
   };
 
+  const isButtonDisabled = !session || !session.accessToken || loading;
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -281,8 +284,8 @@ export default function HomepageAdmin() {
           </ul>
           <button
             onClick={handleSave}
-            disabled={loading}
-            className={`mt-6 w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
+            disabled={isButtonDisabled}
+            className={`mt-6 w-full p-3 text-white font-bold rounded-md ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
           >
             {loading ? "Salvando..." : "Salvar Ordem e Conteúdo"}
           </button>
