@@ -87,7 +87,7 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
 };
 
 export default function HomepageAdmin() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -120,16 +120,20 @@ export default function HomepageAdmin() {
   };
 
   useEffect(() => {
+    // --- PASSO DE DIAGNÓSTICO ---
+    console.log("Status da sessão:", status);
+    console.log("Objeto de sessão:", session);
+    // ----------------------------
+
     if (session?.accessToken) {
         fetchSections();
     }
-  }, [session]);
+  }, [session, status]);
 
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
     try {
-      // Esta verificação agora é mais robusta
       if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
@@ -228,7 +232,7 @@ export default function HomepageAdmin() {
     }
   };
 
-  const isButtonDisabled = !session || !session.accessToken || loading;
+  const isButtonDisabled = !session?.accessToken || loading;
 
   return (
     <AdminLayout>
