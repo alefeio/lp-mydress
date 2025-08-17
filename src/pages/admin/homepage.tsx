@@ -1,18 +1,18 @@
 // src/pages/admin/homepage.tsx
 
 import { useState, useEffect } from "react";
-import { getSession, useSession } from "next-auth/react";
+import { useSession, getSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FaTrash, FaPlus, FaArrowUp, FaArrowDown, FaEdit } from "react-icons/fa";
 import { DynamicSection } from "../../components/sections/DynamicSection";
-import AdminLayout from '../../components/admin/AdminLayout'; // Importação adicionada
+import AdminLayout from '../../components/admin/AdminLayout';
 
-// Tipos de dados para as sessões, baseados no nosso novo modelo
+// Tipos de dados para as sessões
 interface HomepageSection {
   id: string;
   type: string;
   order: number;
-  content: { [key: string]: any }; // O conteúdo JSON
+  content: { [key: string]: any };
 }
 
 // Interfaces de tipos para os formulários de edição
@@ -28,7 +28,6 @@ interface GenericSectionFormProps {
   onCancel: () => void;
 }
 
-// Este componente é o formulário de edição para a Sessão Personalizada
 const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpdate, onCancel }) => {
   const [data, setData] = useState<GenericSectionContent>(content);
 
@@ -51,16 +50,12 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
   return (
     <div className="bg-white p-4 rounded-md mt-2 shadow-inner">
       <h4 className="text-lg font-semibold mb-2">Editar Sessão Personalizada</h4>
-
-      {/* Pré-visualização do Conteúdo */}
       <div className="bg-gray-200 p-4 rounded-md mb-4">
         <h5 className="text-sm font-bold mb-2">Pré-visualização</h5>
         <div className="bg-white p-4 rounded-md border-2 border-dashed border-gray-400">
           <DynamicSection content={{ ...data, type: 'custom' }} />
         </div>
       </div>
-
-      {/* Inputs de Conteúdo */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700">Título</label>
         <input type="text" name="title" value={data.title || ''} onChange={handleChange} className="w-full p-2 border rounded-md" />
@@ -69,8 +64,6 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
         <label className="block text-sm font-medium text-gray-700">Texto</label>
         <textarea name="text" value={data.text || ''} onChange={handleChange} className="w-full p-2 border rounded-md h-24"></textarea>
       </div>
-
-      {/* Inputs de Estilo */}
       <h5 className="text-sm font-bold mt-6 mb-2">Estilos do Contêiner</h5>
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -86,7 +79,6 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
           <input type="text" name="padding" value={data.style?.padding || ''} onChange={handleStyleChange} className="w-full p-2 border rounded-md" />
         </div>
       </div>
-
       <div className="flex justify-end gap-2 mt-4">
         <button onClick={() => onUpdate(data)} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Salvar</button>
         <button onClick={onCancel} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Cancelar</button>
@@ -95,7 +87,6 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
   );
 };
 
-// Componente principal da página de administração da Home
 export default function HomepageAdmin() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -104,23 +95,23 @@ export default function HomepageAdmin() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Redireciona APENAS se o status for 'unauthenticated' e não 'loading'
-    if (status === "unauthenticated") {
-      router.push("/auth/signin");
-    } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
-      // Se estiver autenticado mas não for um ADMIN, também redireciona
-      router.push("/auth/signin");
-    } else if (status === "authenticated" && session?.user?.role === "ADMIN") {
-      // Se estiver autenticado e for um ADMIN, carrega os dados
-      fetchSections();
-    }
-  }, [session, status, router]);
-
+  // A função fetchSections agora usa o token de autenticação
   const fetchSections = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/crud/homepage");
+      const session = await getSession();
+      if (!session || !session.accessToken) {
+        throw new Error("Sessão não autenticada.");
+      }
+
+      const response = await fetch("/api/crud/homepage", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
+
       if (response.ok) {
         const data = await response.json();
         setSections(data);
@@ -134,16 +125,24 @@ export default function HomepageAdmin() {
     }
   };
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/signin");
+    } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
+      router.push("/auth/signin");
+    } else if (status === "authenticated" && session?.user?.role === "ADMIN") {
+      // Agora, a chamada só acontece quando o status é 'authenticated' e o usuário é ADMIN
+      fetchSections();
+    }
+  }, [session, status, router]);
+
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
     try {
-      // Adiciona a sessão para obter o token
       const session = await getSession();
 
-      if (!session || session.user?.role !== "ADMIN") {
-        // Caso não tenha sessão ou o usuário não seja ADMIN,
-        // não envia a requisição e exibe um erro.
+      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -153,7 +152,6 @@ export default function HomepageAdmin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Adiciona o cabeçalho de Autorização com o token da sessão
           Authorization: `Bearer ${session.accessToken}`,
         },
         body: JSON.stringify({ sections }),
@@ -161,7 +159,7 @@ export default function HomepageAdmin() {
 
       if (response.ok) {
         setMessage("Sessões salvas com sucesso!");
-        fetchSections(); // Atualiza a lista
+        fetchSections();
       } else {
         throw new Error("Erro ao salvar as sessões.");
       }
@@ -177,7 +175,20 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      const response = await fetch(`/api/crud/homepage?id=${id}`, { method: "DELETE" });
+      const session = await getSession();
+      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
+        setMessage("Acesso não autorizado.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`/api/crud/homepage?id=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
       if (response.ok) {
         setMessage("Sessão removida com sucesso!");
         fetchSections();
@@ -202,7 +213,6 @@ export default function HomepageAdmin() {
       [newSections[index + 1], newSections[index]] = [newSections[index], newSections[index + 1]];
     }
 
-    // Reorganiza a ordem
     setSections(newSections.map((s, i) => ({ ...s, order: i })));
   };
 
@@ -234,7 +244,6 @@ export default function HomepageAdmin() {
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Gerenciar Homepage</h1>
         {message && <p className="mb-4 text-center text-green-600">{message}</p>}
-
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-xl font-bold mb-4">Adicionar Nova Sessão</h2>
           <div className="flex flex-wrap gap-4">
@@ -246,7 +255,6 @@ export default function HomepageAdmin() {
             </button>
           </div>
         </div>
-
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-bold mb-4">Sessões Atuais</h2>
           {sections.length === 0 && !loading && <p>Nenhuma sessão adicionada ainda.</p>}
