@@ -42,7 +42,7 @@ export default function Testimonials() {
         <>
             <div id="depoimentos">&nbsp;</div>
             <section
-                className="my-16 max-w-xs md:max-w-5xl mx-auto px-4"
+                className="my-16 md:max-w-5xl mx-auto px-4"
             >
                 <h3 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
                     Depoimentos

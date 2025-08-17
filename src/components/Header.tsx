@@ -33,9 +33,9 @@ export default function Header() {
   return (
     <>
       <div id="empresa">&nbsp;</div>
-      <aside className="my-16 max-w-xs md:max-w-5xl mx-auto">
+      <aside className="my-16 md:max-w-5xl mx-auto">
         <div className="w-full mx-auto">
-          <div className="mb-6 text-center max-w-xs md:max-w-4xl mx-auto px-4">
+          <div className="mb-6 text-center md:max-w-4xl mx-auto px-4">
             <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
               Seja única com a My Dress
             </h2>
@@ -45,7 +45,7 @@ export default function Header() {
           </div>
 
           <div className="md:flex gap-8 px-4">
-            <div className="max-w-xs rounded-xl mx-auto md:mx-0">
+            <div className="rounded-xl mx-auto md:mx-0">
               <video
                 src="/videos/institucional.mp4"
                 muted

@@ -68,3 +68,11 @@ model Banner {
   id        Int    @id @default(1)
   banners   Json
 }
+
+// Novo Modelo para gerenciar as sessões da Home
+model HomepageSection {
+  id          String   @id @default(cuid())
+  type        String
+  order       Int
+  content     Json
+}

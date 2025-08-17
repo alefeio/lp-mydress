@@ -10,7 +10,7 @@ export default function LocationMap() {
     return (
         <>
             <div id="localizacao">&nbsp;</div>
-            <section className="my-16 max-w-xs md:max-w-5xl mx-auto px-4">
+            <section className="my-16 md:max-w-5xl mx-auto px-4">
                 <h2 className="font-serif text-2xl md:text-3xl font-bold mb-6 text-center">
                     Onde Estamos
                 </h2>
