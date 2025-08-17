@@ -33,8 +33,8 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user, account }) {
-            // Adiciona o role e o ID do usuário ao token na primeira vez
+        async jwt({ token, user }) {
+            // Adiciona o role e o id do usuário ao token
             if (user) {
                 const userFromDb = await prisma.user.findUnique({
                     where: { id: user.id },
@@ -43,21 +43,13 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id;
                 (token as any).role = userFromDb?.role;
             }
-
-            // Adiciona o accessToken ao token APENAS se ele não estiver lá
-            // (Isso evita que ele seja sobrescrito em cada requisição)
-            if (account && account.access_token) {
-                (token as any).accessToken = account.access_token;
-            }
-
             return token;
         },
         async session({ session, token }) {
-            // Adiciona as propriedades do token à sessão do usuário
+            // Adiciona o id e o role do token à sessão do usuário
             if (session.user) {
-                (session.user as any).id = (token as any).id as string;
-                (session.user as any).role = (token as any).role as "ADMIN" | "USER" | undefined;
-                (session as any).accessToken = (token as any).accessToken;
+                (session.user as any).id = (token as any).id;
+                (session.user as any).role = (token as any).role;
             }
             return session;
         }

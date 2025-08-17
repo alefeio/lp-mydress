@@ -87,7 +87,7 @@ const GenericSectionForm: React.FC<GenericSectionFormProps> = ({ content, onUpda
 };
 
 export default function HomepageAdmin() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [sections, setSections] = useState<HomepageSection[]>([]);
   const [message, setMessage] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -101,7 +101,7 @@ export default function HomepageAdmin() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.accessToken}`,
+          // O header de autorização não precisa mais do accessToken
         },
       });
 
@@ -120,21 +120,17 @@ export default function HomepageAdmin() {
   };
 
   useEffect(() => {
-    // --- PASSO DE DIAGNÓSTICO ---
-    console.log("Status da sessão:", status);
-    console.log("Objeto de sessão:", session);
-    // ----------------------------
-
-    if (session?.accessToken) {
+    // Agora o useEffect só verifica se o usuário é um ADMIN
+    if (session?.user?.role === "ADMIN") {
         fetchSections();
     }
-  }, [session, status]);
+  }, [session]);
 
   const handleSave = async () => {
     setLoading(true);
     setMessage("");
     try {
-      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
+      if (!session || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -144,16 +140,14 @@ export default function HomepageAdmin() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
+          // O header de autorização não precisa mais do accessToken
         },
         body: JSON.stringify({ sections }),
       });
 
       if (response.ok) {
         setMessage("Sessões salvas com sucesso!");
-        if (session.accessToken) {
-          fetchSections();
-        }
+        fetchSections();
       } else {
         throw new Error("Erro ao salvar as sessões.");
       }
@@ -169,7 +163,7 @@ export default function HomepageAdmin() {
     setLoading(true);
     setMessage("");
     try {
-      if (!session || !session.accessToken || session.user?.role !== "ADMIN") {
+      if (!session || session.user?.role !== "ADMIN") {
         setMessage("Acesso não autorizado.");
         setLoading(false);
         return;
@@ -179,7 +173,7 @@ export default function HomepageAdmin() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
+          // O header de autorização não precisa mais do accessToken
         },
       });
       if (response.ok) {
@@ -232,7 +226,7 @@ export default function HomepageAdmin() {
     }
   };
 
-  const isButtonDisabled = !session?.accessToken || loading;
+  const isButtonDisabled = !session || session.user?.role !== "ADMIN" || loading;
 
   return (
     <AdminLayout>
