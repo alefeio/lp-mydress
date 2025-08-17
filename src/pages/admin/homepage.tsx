@@ -105,11 +105,14 @@ export default function HomepageAdmin() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Redireciona APENAS se o status for 'unauthenticated' e não 'loading'
     if (status === "unauthenticated") {
       router.push("/auth/signin");
-    } else if (session?.user?.role !== "ADMIN") {
+    } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
+      // Se estiver autenticado mas não for um ADMIN, também redireciona
       router.push("/auth/signin");
-    } else {
+    } else if (status === "authenticated" && session?.user?.role === "ADMIN") {
+      // Se estiver autenticado e for um ADMIN, carrega os dados
       fetchSections();
     }
   }, [session, status, router]);
