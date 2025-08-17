@@ -1,3 +1,5 @@
+// src/pages/api/crud/homepage.ts
+
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
 import { PrismaClient } from '@prisma/client';
@@ -40,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'GET') {
     try {
-      // Lógica para obter as sessões (se necessária)
+      // Lógica para obter as sessões
       const sections = await prisma.homepageSection.findMany({
         orderBy: { order: 'asc' },
       });
@@ -48,9 +50,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } catch (error) {
       return res.status(500).json({ message: 'Erro ao buscar as sessões' });
     }
+  } else if (req.method === 'DELETE') {
+    try {
+      const { id } = req.query;
+      await prisma.homepageSection.delete({
+        where: { id: id as string },
+      });
+      return res.status(200).json({ message: 'Sessão removida com sucesso' });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Erro ao remover a sessão' });
+    }
   } else {
     // Método não permitido
-    res.setHeader('Allow', ['POST', 'GET']);
+    res.setHeader('Allow', ['POST', 'GET', 'DELETE']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

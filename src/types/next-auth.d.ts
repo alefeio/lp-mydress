@@ -8,10 +8,10 @@ declare module "next-auth" {
    * Extends the built-in session type to include accessToken and custom user fields.
    */
   interface Session {
-    accessToken?: string; // Adicionado
+    accessToken?: string;
     user?: {
       id?: string;
-      role?: "ADMIN" | "USER" | null;
+      role?: "ADMIN" | "USER" | null; 
     } & DefaultSession["user"];
   }
 
@@ -19,7 +19,7 @@ declare module "next-auth" {
    * Extends the built-in user type to include custom fields.
    */
   interface User extends DefaultUser {
-    role?: "ADMIN" | "USER" | null;
+    role?: "ADMIN" | "USER" | null; 
   }
 }
 
@@ -29,7 +29,7 @@ declare module "next-auth/jwt" {
    */
   interface JWT extends DefaultJWT {
     id?: string;
-    role?: "ADMIN" | "USER" | null;
-    accessToken?: string; // Adicionado
+    role?: "ADMIN" | "USER" | null; 
+    accessToken?: string; 
   }
 }

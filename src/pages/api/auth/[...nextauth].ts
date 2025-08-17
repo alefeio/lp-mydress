@@ -34,7 +34,6 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user, account }) {
-            // user é o objeto do usuário que você recebe na primeira vez que ele faz login
             if (user) {
                 const userFromDb = await prisma.user.findUnique({
                     where: { id: user.id },
@@ -44,9 +43,7 @@ export const authOptions: NextAuthOptions = {
                 (token as any).role = userFromDb?.role;
             }
 
-            // Se o usuário fez login com um provedor (como Email), 'account' estará presente
             if (account) {
-                // Adicione o token de acesso ao objeto 'token'
                 (token as any).accessToken = account.access_token;
             }
 
@@ -56,7 +53,6 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 (session.user as any).id = (token as any).id as string;
                 (session.user as any).role = (token as any).role as "ADMIN" | "USER" | undefined;
-                // Adicione o token de acesso ao objeto 'session'
                 (session as any).accessToken = (token as any).accessToken;
             }
             return session;

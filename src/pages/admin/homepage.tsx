@@ -95,13 +95,14 @@ export default function HomepageAdmin() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // A função fetchSections agora usa o token de autenticação
   const fetchSections = async () => {
     setLoading(true);
     try {
       const session = await getSession();
       if (!session || !session.accessToken) {
-        throw new Error("Sessão não autenticada.");
+        setMessage("Acesso não autorizado.");
+        setLoading(false);
+        return;
       }
 
       const response = await fetch("/api/crud/homepage", {
@@ -115,6 +116,7 @@ export default function HomepageAdmin() {
       if (response.ok) {
         const data = await response.json();
         setSections(data);
+        setMessage("");
       } else {
         throw new Error("Erro ao buscar as sessões.");
       }
@@ -131,7 +133,6 @@ export default function HomepageAdmin() {
     } else if (status === "authenticated" && session?.user?.role !== "ADMIN") {
       router.push("/auth/signin");
     } else if (status === "authenticated" && session?.user?.role === "ADMIN") {
-      // Agora, a chamada só acontece quando o status é 'authenticated' e o usuário é ADMIN
       fetchSections();
     }
   }, [session, status, router]);
@@ -243,7 +244,7 @@ export default function HomepageAdmin() {
     <AdminLayout>
       <div className="p-6">
         <h1 className="text-3xl font-bold mb-6">Gerenciar Homepage</h1>
-        {message && <p className="mb-4 text-center text-green-600">{message}</p>}
+        {message && <p className={`mb-4 text-center ${message.startsWith('Erro') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-xl font-bold mb-4">Adicionar Nova Sessão</h2>
           <div className="flex flex-wrap gap-4">
