@@ -1,9 +1,11 @@
 // src/pages/admin/homepage.tsx
+
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { FaTrash, FaPlus, FaArrowUp, FaArrowDown, FaEdit } from "react-icons/fa";
 import { DynamicSection } from "../../components/sections/DynamicSection";
+import AdminLayout from '../../components/admin/AdminLayout'; // Importação adicionada
 
 // Tipos de dados para as sessões, baseados no nosso novo modelo
 interface HomepageSection {
@@ -209,66 +211,68 @@ export default function HomepageAdmin() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Gerenciar Homepage</h1>
-      {message && <p className="mb-4 text-center text-green-600">{message}</p>}
+    <AdminLayout>
+      <div className="p-6">
+        <h1 className="text-3xl font-bold mb-6">Gerenciar Homepage</h1>
+        {message && <p className="mb-4 text-center text-green-600">{message}</p>}
 
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-bold mb-4">Adicionar Nova Sessão</h2>
-        <div className="flex flex-wrap gap-4">
+        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+          <h2 className="text-xl font-bold mb-4">Adicionar Nova Sessão</h2>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => setSections([...sections, { id: `new-${Date.now()}`, type: 'custom', order: sections.length, content: { title: "Nova Sessão Personalizada", text: "Este é o conteúdo.", style: {} } }])}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-600"
+            >
+              <FaPlus /> Sessão Personalizada
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-bold mb-4">Sessões Atuais</h2>
+          {sections.length === 0 && !loading && <p>Nenhuma sessão adicionada ainda.</p>}
+          {loading && <p>Carregando sessões...</p>}
+          <ul className="space-y-4">
+            {sections.map((section, index) => (
+              <li key={section.id} className="border p-4 rounded-md shadow-sm">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="font-semibold">{index + 1}. {section.type.charAt(0).toUpperCase() + section.type.slice(1)}</span>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleMove(section.id, "up")} className="text-gray-500 hover:text-blue-500 disabled:opacity-50" disabled={index === 0}>
+                      <FaArrowUp />
+                    </button>
+                    <button onClick={() => handleMove(section.id, "down")} className="text-gray-500 hover:text-blue-500 disabled:opacity-50" disabled={index === sections.length - 1}>
+                      <FaArrowDown />
+                    </button>
+                    <button onClick={() => setEditingId(section.id)} className="text-gray-500 hover:text-green-500">
+                      <FaEdit />
+                    </button>
+                    <button onClick={() => handleDelete(section.id)} className="text-red-500 hover:text-red-700">
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
+                {editingId === section.id ? (
+                  getFormForType(section)
+                ) : (
+                  <div className="text-sm text-gray-500 mt-2">
+                    <p>ID: {section.id}</p>
+                    <p>Tipo: {section.type}</p>
+                    <p>Conteúdo: {JSON.stringify(section.content)}</p>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
           <button
-            onClick={() => setSections([...sections, { id: `new-${Date.now()}`, type: 'custom', order: sections.length, content: { title: "Nova Sessão Personalizada", text: "Este é o conteúdo.", style: {} } }])}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-600"
+            onClick={handleSave}
+            disabled={loading}
+            className={`mt-6 w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
           >
-            <FaPlus /> Sessão Personalizada
+            {loading ? "Salvando..." : "Salvar Ordem e Conteúdo"}
           </button>
         </div>
       </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold mb-4">Sessões Atuais</h2>
-        {sections.length === 0 && !loading && <p>Nenhuma sessão adicionada ainda.</p>}
-        {loading && <p>Carregando sessões...</p>}
-        <ul className="space-y-4">
-          {sections.map((section, index) => (
-            <li key={section.id} className="border p-4 rounded-md shadow-sm">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold">{index + 1}. {section.type.charAt(0).toUpperCase() + section.type.slice(1)}</span>
-                <div className="flex gap-2">
-                  <button onClick={() => handleMove(section.id, "up")} className="text-gray-500 hover:text-blue-500 disabled:opacity-50" disabled={index === 0}>
-                    <FaArrowUp />
-                  </button>
-                  <button onClick={() => handleMove(section.id, "down")} className="text-gray-500 hover:text-blue-500 disabled:opacity-50" disabled={index === sections.length - 1}>
-                    <FaArrowDown />
-                  </button>
-                  <button onClick={() => setEditingId(section.id)} className="text-gray-500 hover:text-green-500">
-                    <FaEdit />
-                  </button>
-                  <button onClick={() => handleDelete(section.id)} className="text-red-500 hover:text-red-700">
-                    <FaTrash />
-                  </button>
-                </div>
-              </div>
-              {editingId === section.id ? (
-                getFormForType(section)
-              ) : (
-                <div className="text-sm text-gray-500 mt-2">
-                  <p>ID: {section.id}</p>
-                  <p>Tipo: {section.type}</p>
-                  <p>Conteúdo: {JSON.stringify(section.content)}</p>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          className={`mt-6 w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"}`}
-        >
-          {loading ? "Salvando..." : "Salvar Ordem e Conteúdo"}
-        </button>
-      </div>
-    </div>
+    </AdminLayout>
   );
 }

@@ -1,11 +1,12 @@
+// src/pages/api/auth/[...nextauth].ts
+
 import NextAuth, { NextAuthOptions } from "next-auth"
 import EmailProvider from "next-auth/providers/email"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
 import { Resend } from 'resend';
 
-const prisma = new PrismaClient()
-
+const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const authOptions: NextAuthOptions = {
@@ -32,20 +33,23 @@ export const authOptions: NextAuthOptions = {
     },
 
     callbacks: {
-        async jwt({ token, user, account, profile }) {
-            // No primeiro login, o user object é definido
+        async jwt({ token, user }) {
             if (user) {
+                const userFromDb = await prisma.user.findUnique({
+                    where: { id: user.id },
+                    select: { role: true },
+                });
                 token.id = user.id;
-                token.role = (user as any).role;
+                // Força o tipo para 'any' para evitar o erro de tipagem.
+                // Esta é a solução mais robusta para o seu problema.
+                (token as any).role = userFromDb?.role;
             }
-            // Em todas as outras chamadas, apenas o token existe. Retorne-o.
             return token;
         },
         async session({ session, token }) {
-            // Adicione os campos do token (id e role) ao objeto da sessão
             if (session.user && token) {
-                session.user.id = token.id as string;
-                session.user.role = token.role as "ADMIN" | "CLIENT";
+                (session.user as any).id = (token as any).id as string;
+                (session.user as any).role = (token as any).role as "ADMIN" | "USER" | undefined;
             }
             return session;
         }
