@@ -1,6 +1,5 @@
 // src/pages/admin/testimonials.tsx
-
-import AdminLayout from '@/components/admin/AdminLayout';
+import AdminLayout from 'components/admin/AdminLayout';
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 
