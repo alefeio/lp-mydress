@@ -1,6 +1,9 @@
 // src/pages/api/crud/menu.ts
+
+import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-import prisma from "../../../../lib/prisma";
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Lógica para lidar com a requisição GET
