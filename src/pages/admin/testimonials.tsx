@@ -1,211 +1,190 @@
 // src/pages/admin/testimonials.tsx
 
-import { useState, useEffect, FormEvent } from 'react';
-import { useSession } from 'next-auth/react';
-import AdminLayout from '../../components/admin/AdminLayout';
-import { FaTrash, FaEdit, FaPlus, FaCamera, FaVideo, FaAlignLeft } from 'react-icons/fa';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 
 interface Testimonial {
   id: string;
   name: string;
-  type: 'TEXT' | 'PHOTO' | 'VIDEO';
+  type: 'texto' | 'foto' | 'video';
   content: string;
   createdAt: string;
+  updatedAt: string;
 }
 
-export default function TestimonialsAdmin() {
-  const { data: session, status } = useSession();
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [name, setName] = useState('');
-  const [type, setType] = useState<'TEXT' | 'PHOTO' | 'VIDEO'>('TEXT');
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [editingId, setEditingId] = useState<string | null>(null);
+const fetcher = async (url: string) => {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error('Erro ao buscar dados.');
+  }
+  return res.json();
+};
 
-  const fetchTestimonials = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('/api/crud/testimonials');
-      if (res.ok) {
-        const data = await res.json();
-        setTestimonials(data);
-      } else {
-        setMessage('Erro ao carregar depoimentos.');
-      }
-    } catch (error) {
-      setMessage('Erro ao carregar depoimentos.');
-    } finally {
-      setLoading(false);
-    }
-  };
+export default function Testimonials() {
+  const [editing, setEditing] = useState<Testimonial | null>(null);
+  const [form, setForm] = useState({ name: '', type: 'texto', content: '' });
+  const [file, setFile] = useState<File | null>(null);
+
+  const { data: testimonials, error, mutate } = useSWR('/api/crud/testimonials', fetcher);
 
   useEffect(() => {
-    if (session?.user?.role === 'ADMIN') {
-      fetchTestimonials();
-    }
-  }, [session]);
-
-  const handleSave = async (e: FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
-
-    if (!session || session.user?.role !== 'ADMIN') {
-      setMessage('Acesso não autorizado.');
-      setLoading(false);
-      return;
-    }
-
-    // Lógica para upload de imagem ou vídeo (se necessário)
-    // Para simplificar, assumimos que o conteúdo é uma URL ou texto
-    let contentToSave = content;
-
-    const method = editingId ? 'POST' : 'POST'; // A API usa POST para criação e edição
-    const url = '/api/crud/testimonials';
-    const body = JSON.stringify({
-      id: editingId,
-      name,
-      type,
-      content: contentToSave,
-    });
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body,
+    if (editing) {
+      setForm({
+        name: editing.name,
+        type: editing.type as 'texto' | 'foto' | 'video',
+        content: editing.content,
       });
+    } else {
+      setForm({ name: '', type: 'texto', content: '' });
+    }
+  }, [editing]);
 
-      if (res.ok) {
-        setMessage(`Depoimento ${editingId ? 'editado' : 'criado'} com sucesso!`);
-        setName('');
-        setType('TEXT');
-        setContent('');
-        setEditingId(null);
-        fetchTestimonials(); // Recarrega a lista
-      } else {
-        setMessage(`Erro ao ${editingId ? 'editar' : 'criar'} o depoimento.`);
-      }
-    } catch (error) {
-      setMessage(`Erro ao ${editingId ? 'editar' : 'criar'} o depoimento.`);
-    } finally {
-      setLoading(false);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
     }
   };
 
-  const handleEdit = (testimonial: Testimonial) => {
-    setName(testimonial.name);
-    setType(testimonial.type);
-    setContent(testimonial.content);
-    setEditingId(testimonial.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const uploadFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'secreto'); // Substitua 'secreto' pelo seu 'upload_preset' do Cloudinary
+
+    // Substitua 'seu_cloud_name' pelo seu nome de conta do Cloudinary
+    const res = await fetch('https://api.cloudinary.com/v1_1/seu_cloud_name/image/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) {
+      throw new Error('Falha ao fazer upload do arquivo para o Cloudinary.');
+    }
+
+    const data = await res.json();
+    return data.secure_url;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let finalContent = form.content;
+    if (file && (form.type === 'foto' || form.type === 'video')) {
+      try {
+        finalContent = await uploadFile(file);
+      } catch (uploadError) {
+        alert('Erro ao fazer upload do arquivo.');
+        console.error(uploadError);
+        return;
+      }
+    }
+
+    const url = '/api/crud/testimonials';
+    const method = 'POST';
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, content: finalContent, id: editing?.id }),
+    });
+
+    if (res.ok) {
+      mutate();
+      setEditing(null);
+      setForm({ name: '', type: 'texto', content: '' });
+      setFile(null);
+    } else {
+      alert('Erro ao salvar depoimento.');
+    }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Tem certeza que deseja excluir este depoimento?')) return;
-    setLoading(true);
-    setMessage('');
-    try {
-      const res = await fetch(`/api/crud/testimonials?id=${id}`, {
-        method: 'DELETE',
-      });
+    if (confirm('Tem certeza que deseja excluir este depoimento?')) {
+      const res = await fetch(`/api/crud/testimonials?id=${id}`, { method: 'DELETE' });
+
       if (res.ok) {
-        setMessage('Depoimento excluído com sucesso!');
-        fetchTestimonials();
+        mutate();
       } else {
-        setMessage('Erro ao excluir o depoimento.');
+        alert('Erro ao excluir depoimento.');
       }
-    } catch (error) {
-      setMessage('Erro ao excluir o depoimento.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (status === 'loading') return <p>Carregando...</p>;
-  if (session?.user?.role !== 'ADMIN') return <p>Acesso não autorizado.</p>;
+  if (error) return <AdminLayout>Falha ao carregar depoimentos.</AdminLayout>;
+  if (!testimonials) return <AdminLayout>Carregando...</AdminLayout>;
 
   return (
     <AdminLayout>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Gerenciar Depoimentos</h1>
-        {message && <p className={`mb-4 text-center ${message.startsWith('Erro') ? 'text-red-600' : 'text-green-600'}`}>{message}</p>}
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Gerenciar Depoimentos</h1>
 
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-bold mb-4">{editingId ? 'Editar Depoimento' : 'Adicionar Novo Depoimento'}</h2>
-          <form onSubmit={handleSave}>
+          <h2 className="text-xl font-semibold mb-4">
+            {editing ? 'Editar Depoimento' : 'Adicionar Novo Depoimento'}
+          </h2>
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Nome do Depoente</label>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome do Cliente</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                id="name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Tipo de Conteúdo</label>
-              <div className="mt-1 flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => setType('TEXT')}
-                  className={`px-4 py-2 rounded-md transition-colors ${type === 'TEXT' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                >
-                  <FaAlignLeft className="inline-block mr-2" /> Texto
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setType('PHOTO')}
-                  className={`px-4 py-2 rounded-md transition-colors ${type === 'PHOTO' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                >
-                  <FaCamera className="inline-block mr-2" /> Foto
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setType('VIDEO')}
-                  className={`px-4 py-2 rounded-md transition-colors ${type === 'VIDEO' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
-                >
-                  <FaVideo className="inline-block mr-2" /> Vídeo
-                </button>
-              </div>
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo de Depoimento</label>
+              <select
+                id="type"
+                value={form.type}
+                onChange={(e) => setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video' })}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              >
+                <option value="texto">Texto</option>
+                <option value="foto">Foto</option>
+                <option value="video">Vídeo</option>
+              </select>
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">
-                {type === 'TEXT' ? 'Conteúdo do Depoimento' : type === 'PHOTO' ? 'URL da Foto' : 'URL do Vídeo'}
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+                {form.type === 'texto' ? 'Conteúdo do Depoimento' : 'Arquivo'}
               </label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                rows={4}
-                required
-              />
+              {form.type === 'texto' ? (
+                <textarea
+                  id="content"
+                  value={form.content}
+                  onChange={(e) => setForm({ ...form, content: e.target.value })}
+                  rows={4}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                  required
+                ></textarea>
+              ) : (
+                <input
+                  type="file"
+                  id="file"
+                  onChange={handleFileChange}
+                  className="mt-1 block w-full"
+                  required={!editing} // Arquivo é obrigatório na criação
+                />
+              )}
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end space-x-2">
               <button
                 type="submit"
-                disabled={loading}
-                className={`px-6 py-2 rounded-md font-bold text-white ${loading ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'}`}
+                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
               >
-                {loading ? 'Salvando...' : editingId ? 'Salvar Edição' : 'Adicionar Depoimento'}
+                {editing ? 'Salvar Alterações' : 'Adicionar Depoimento'}
               </button>
-              {editingId && (
+              {editing && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setEditingId(null);
-                    setName('');
-                    setType('TEXT');
-                    setContent('');
-                  }}
-                  className="px-6 py-2 rounded-md font-bold text-gray-700 bg-gray-200 hover:bg-gray-300"
+                  onClick={() => setEditing(null)}
+                  className="bg-gray-400 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-500 transition"
                 >
                   Cancelar
                 </button>
@@ -215,30 +194,36 @@ export default function TestimonialsAdmin() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Lista de Depoimentos</h2>
-          {loading && <p>Carregando...</p>}
-          {!loading && testimonials.length === 0 && <p>Nenhum depoimento encontrado.</p>}
+          <h2 className="text-xl font-semibold mb-4">Depoimentos Existentes</h2>
           <ul className="space-y-4">
-            {testimonials.map((testimonial) => (
-              <li key={testimonial.id} className="border p-4 rounded-md shadow-sm flex justify-between items-start">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-1 text-xs rounded-full font-bold text-white ${testimonial.type === 'TEXT' ? 'bg-gray-500' : testimonial.type === 'PHOTO' ? 'bg-blue-500' : 'bg-red-500'}`}>
-                      {testimonial.type}
-                    </span>
+            {testimonials.map((testimonial: Testimonial) => (
+              <li key={testimonial.id} className="border-b pb-4 last:border-b-0">
+                <div className="flex justify-between items-center">
+                  <div>
                     <h3 className="text-lg font-bold">{testimonial.name}</h3>
+                    <p className="text-gray-600 text-sm italic">{testimonial.type}</p>
+                    {testimonial.type === 'texto' ? (
+                      <p className="mt-2">{testimonial.content}</p>
+                    ) : (
+                      <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                        Visualizar {testimonial.type}
+                      </a>
+                    )}
                   </div>
-                  {testimonial.type === 'TEXT' && <p className="text-gray-700">{testimonial.content}</p>}
-                  {testimonial.type === 'PHOTO' && <img src={testimonial.content} alt={`Depoimento de ${testimonial.name}`} className="mt-2 max-w-xs rounded-md" />}
-                  {testimonial.type === 'VIDEO' && <p className="text-sm text-gray-500 mt-2">Vídeo: <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">{testimonial.content}</a></p>}
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleEdit(testimonial)} className="text-blue-500 hover:text-blue-700" aria-label="Editar">
-                    <FaEdit />
-                  </button>
-                  <button onClick={() => handleDelete(testimonial.id)} className="text-red-500 hover:text-red-700" aria-label="Excluir">
-                    <FaTrash />
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => setEditing(testimonial)}
+                      className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(testimonial.id)}
+                      className="bg-red-600 text-white py-1 px-3 rounded-md hover:bg-red-700 transition"
+                    >
+                      Excluir
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}

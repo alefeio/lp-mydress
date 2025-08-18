@@ -12,6 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(401).json({ message: 'Acesso não autorizado.' });
     }
 
+    // Lógica para obter todos os depoimentos
     if (req.method === 'GET') {
         try {
             const testimonials = await prisma.testimonial.findMany({
@@ -25,6 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
+    // Lógica para criar ou atualizar um depoimento
     if (req.method === 'POST') {
         const { id, name, type, content } = req.body;
         if (!name || !type || !content) {
@@ -51,6 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
+    // Lógica para deletar um depoimento
     if (req.method === 'DELETE') {
         const { id } = req.query;
         if (!id) {
