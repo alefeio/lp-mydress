@@ -1,5 +1,5 @@
-import AdminLayout from '@/components/admin/AdminLayout';
 import { PrismaClient } from '@prisma/client';
+import AdminLayout from 'components/admin/AdminLayout';
 import { GetServerSideProps } from 'next';
 import { useState } from 'react';
 
