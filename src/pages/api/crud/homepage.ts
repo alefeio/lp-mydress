@@ -1,69 +1,74 @@
-// src/pages/api/crud/homepage.ts
-
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { getServerSession } from 'next-auth';
+import { authOptions } from './auth/[...nextauth]';
+import prisma from '../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // 1. Obter a sessão do usuário
-  const session = await getSession({ req });
+    const session = await getServerSession(req, res, authOptions);
 
-  // 2. Verificar se o usuário está autenticado e se é um ADMIN
-  if (!session || session.user?.role !== 'ADMIN') {
-    return res.status(401).json({ message: 'Acesso não autorizado' });
-  }
-
-  // A partir daqui, a requisição está autorizada
-  if (req.method === 'POST') {
-    try {
-      const { sections } = req.body;
-
-      // 3. Deletar todas as sessões existentes
-      await prisma.homepageSection.deleteMany({});
-
-      // 4. Salvar as novas sessões com a ordem correta
-      const sectionsToSave = sections.map((section: any) => ({
-        type: section.type,
-        order: section.order,
-        content: section.content,
-      }));
-
-      await prisma.homepageSection.createMany({
-        data: sectionsToSave,
-      });
-
-      return res.status(200).json({ message: 'Sessões salvas com sucesso' });
-
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Erro ao salvar as sessões' });
+    // Verifica se a sessão existe e se o usuário é um ADMIN
+    if (!session || session.user?.role !== 'ADMIN') {
+        return res.status(401).json({ error: 'Acesso não autorizado.' });
     }
-  } else if (req.method === 'GET') {
-    try {
-      // Lógica para obter as sessões
-      const sections = await prisma.homepageSection.findMany({
-        orderBy: { order: 'asc' },
-      });
-      return res.status(200).json(sections);
-    } catch (error) {
-      return res.status(500).json({ message: 'Erro ao buscar as sessões' });
+
+    if (req.method === 'GET') {
+        try {
+            const sections = await prisma.homepageSection.findMany({
+                orderBy: {
+                    order: 'asc',
+                },
+            });
+            return res.status(200).json(sections);
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao buscar as sessões.' });
+        }
     }
-  } else if (req.method === 'DELETE') {
-    try {
-      const { id } = req.query;
-      await prisma.homepageSection.delete({
-        where: { id: id as string },
-      });
-      return res.status(200).json({ message: 'Sessão removida com sucesso' });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Erro ao remover a sessão' });
+
+    if (req.method === 'POST') {
+        const { sections } = req.body;
+        if (!sections || !Array.isArray(sections)) {
+            return res.status(400).json({ error: 'Dados inválidos.' });
+        }
+        try {
+            await prisma.$transaction(
+                sections.map((section: any) =>
+                    prisma.homepageSection.upsert({
+                        where: { id: section.id },
+                        update: {
+                            order: section.order,
+                            content: section.content,
+                        },
+                        create: {
+                            id: section.id,
+                            type: section.type,
+                            order: section.order,
+                            content: section.content,
+                        },
+                    })
+                )
+            );
+            return res.status(200).json({ message: 'Sessões salvas com sucesso.' });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao salvar as sessões.' });
+        }
     }
-  } else {
-    // Método não permitido
-    res.setHeader('Allow', ['POST', 'GET', 'DELETE']);
+
+    if (req.method === 'DELETE') {
+        const { id } = req.query;
+        if (!id) {
+            return res.status(400).json({ error: 'ID da sessão não fornecido.' });
+        }
+        try {
+            await prisma.homepageSection.delete({
+                where: { id: String(id) },
+            });
+            return res.status(200).json({ message: 'Sessão removida com sucesso.' });
+        } catch (error) {
+            return res.status(500).json({ error: 'Erro ao remover a sessão.' });
+        }
+    }
+
+    // Se o método da requisição não for suportado
+    res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
 }
