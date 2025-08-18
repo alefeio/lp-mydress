@@ -113,7 +113,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
 
   return (
     <AdminLayout>
-      <h1 className="text-textcolor-900 text-3xl font-bold mb-6">Gerenciar Perguntas Frequentes</h1>
+      <h1 className="text-textcolor-900 text-3xl font-bold mb-6 text-textcolor-50">Gerenciar Perguntas Frequentes</h1>
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-lg font-semibold mb-4">{editId ? 'Editar FAQ' : 'Adicionar Nova FAQ'}</h2>
         {error && <div className="bg-red-200 text-red-800 p-2 rounded mb-4">{error}</div>}

@@ -210,7 +210,7 @@ export default function AdminColecoes() {
       </Head>
       <AdminLayout>
         <main className="container mx-auto p-4 mt-20">
-          <h1 className="text-3xl font-bold mb-6">Gerenciar Coleções</h1>
+          <h1 className="text-3xl font-bold mb-6 text-textcolor-50">Gerenciar Coleções</h1>
           
           {/* Formulário de Criação/Edição */}
           <section className="bg-gray-100 p-6 rounded-lg shadow-md mb-8">

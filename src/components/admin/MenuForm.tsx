@@ -137,7 +137,7 @@ export default function MenuForm() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Gerenciar Menu</h2>
+      <h2 className="text-2xl font-bold mb-4 text-textcolor-50">Gerenciar Menu</h2>
       {message && (
         <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-green-600" : "text-red-600"}`}>
           {message}

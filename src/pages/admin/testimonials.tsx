@@ -24,6 +24,7 @@ export default function Testimonials() {
   const [editing, setEditing] = useState<Testimonial | null>(null);
   const [form, setForm] = useState({ name: '', type: 'texto', content: '' });
   const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const { data: testimonials, error, mutate } = useSWR('/api/crud/testimonials', fetcher);
 
@@ -48,63 +49,78 @@ export default function Testimonials() {
   const uploadFile = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('upload_preset', 'secreto'); // Substitua 'secreto' pelo seu 'upload_preset' do Cloudinary
 
-    // Substitua 'seu_cloud_name' pelo seu nome de conta do Cloudinary
-    const res = await fetch('https://api.cloudinary.com/v1_1/seu_cloud_name/image/upload', {
+    const res = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
     });
 
-    if (!res.ok) {
-      throw new Error('Falha ao fazer upload do arquivo para o Cloudinary.');
-    }
-
     const data = await res.json();
-    return data.secure_url;
+    if (!res.ok) {
+      throw new Error(data.message || 'Falha ao fazer upload do arquivo.');
+    }
+    return data.url;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     let finalContent = form.content;
-    if (file && (form.type === 'foto' || form.type === 'video')) {
-      try {
+    try {
+      if (file && (form.type === 'foto' || form.type === 'video')) {
         finalContent = await uploadFile(file);
-      } catch (uploadError) {
-        alert('Erro ao fazer upload do arquivo.');
-        console.error(uploadError);
-        return;
+      } else if (editing && (editing.type === 'foto' || editing.type === 'video') && !file) {
+        // Mantém o conteúdo existente se não houver novo arquivo e for uma edição
+        finalContent = editing.content;
       }
+    } catch (uploadError: any) {
+      alert('Erro ao fazer upload do arquivo: ' + uploadError.message);
+      setLoading(false);
+      return;
     }
 
     const url = '/api/crud/testimonials';
-    const method = 'POST';
+    const method = editing ? 'PUT' : 'POST';
 
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, content: finalContent, id: editing?.id }),
-    });
-
-    if (res.ok) {
-      mutate();
-      setEditing(null);
-      setForm({ name: '', type: 'texto', content: '' });
-      setFile(null);
-    } else {
-      alert('Erro ao salvar depoimento.');
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, content: finalContent, id: editing?.id }),
+      });
+  
+      if (res.ok) {
+        mutate();
+        setEditing(null);
+        setForm({ name: '', type: 'texto', content: '' });
+        setFile(null);
+        alert(`Depoimento ${editing ? 'atualizado' : 'adicionado'} com sucesso!`);
+      } else {
+        const data = await res.json();
+        alert('Erro ao salvar depoimento: ' + data.message);
+      }
+    } catch (apiError) {
+      alert('Erro ao conectar com a API de depoimentos.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir este depoimento?')) {
-      const res = await fetch(`/api/crud/testimonials?id=${id}`, { method: 'DELETE' });
-
-      if (res.ok) {
-        mutate();
-      } else {
-        alert('Erro ao excluir depoimento.');
+      try {
+        const res = await fetch(`/api/crud/testimonials?id=${id}`, { method: 'DELETE' });
+  
+        if (res.ok) {
+          mutate();
+          alert('Depoimento excluído com sucesso.');
+        } else {
+          const data = await res.json();
+          alert('Erro ao excluir depoimento: ' + data.message);
+        }
+      } catch (e) {
+        alert('Erro ao conectar com a API.');
       }
     }
   };
@@ -115,7 +131,7 @@ export default function Testimonials() {
   return (
     <AdminLayout>
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Gerenciar Depoimentos</h1>
+        <h1 className="text-2xl font-bold mb-4 text-textcolor-50">Gerenciar Depoimentos</h1>
 
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h2 className="text-xl font-semibold mb-4">
@@ -139,7 +155,10 @@ export default function Testimonials() {
               <select
                 id="type"
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video' })}
+                onChange={(e) => {
+                  setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
+                  setFile(null);
+                }}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
               >
                 <option value="texto">Texto</option>
@@ -167,22 +186,23 @@ export default function Testimonials() {
                   id="file"
                   onChange={handleFileChange}
                   className="mt-1 block w-full"
-                  required={!editing} // Arquivo é obrigatório na criação
+                  required={!editing || (editing && !file && !editing.content)}
                 />
               )}
             </div>
-
+            
             <div className="flex justify-end space-x-2">
               <button
                 type="submit"
-                className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+                disabled={loading}
+                className={`py-2 px-4 rounded-md transition ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
               >
-                {editing ? 'Salvar Alterações' : 'Adicionar Depoimento'}
+                {loading ? 'Salvando...' : (editing ? 'Salvar Alterações' : 'Adicionar Depoimento')}
               </button>
               {editing && (
                 <button
                   type="button"
-                  onClick={() => setEditing(null)}
+                  onClick={() => { setEditing(null); setFile(null); }}
                   className="bg-gray-400 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-500 transition"
                 >
                   Cancelar
