@@ -8,11 +8,11 @@ const prisma = new PrismaClient();
 function slugify(text) {
   return text.toString().toLowerCase()
     .trim()
-    .replace(/\s+/g, '-')           // Substitui espaços por hífens
-    .replace(/[^\w-]+/g, '')       // Remove todos os caracteres não-palavra
-    .replace(/--+/g, '-')          // Substitui múltiplos hífens por um único
-    .replace(/^-+/, '')            // Remove hífens do início
-    .replace(/-+$/, '');           // Remove hífens do final
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
 }
 
 export default async function handler(req, res) {
@@ -20,7 +20,6 @@ export default async function handler(req, res) {
 
   switch (method) {
     case 'GET':
-      // ... (código existente) ...
       try {
         const colecoes = await prisma.colecao.findMany({
           include: {
@@ -38,83 +37,94 @@ export default async function handler(req, res) {
 
     case 'POST':
       try {
-        const { title, subtitle, description, bgcolor, buttonText, buttonUrl, items, colecaoId } = req.body;
+        const { title, subtitle, description, bgcolor, buttonText, buttonUrl, items } = req.body;
+        
+        const itemsWithSlugs = (items || []).map(item => ({
+          ...item,
+          slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+        }));
 
-        if (colecaoId) {
-          if (!items || !Array.isArray(items)) {
-            return res.status(400).json({ success: false, message: 'Dados de itens inválidos.' });
-          }
-          // Geração do slug para cada item
-          const itemsWithSlugs = items.map(item => ({
-            ...item,
-            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-          }));
-          const createdItems = await prisma.colecaoItem.createMany({
-            data: itemsWithSlugs.map(item => ({ ...item, colecaoId })),
-          });
-          return res.status(201).json({ success: true, data: createdItems });
-        } else {
-          // Geração do slug para cada item da nova coleção
-          const itemsWithSlugs = (items || []).map(item => ({
-            ...item,
-            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-          }));
-
-          const createdColecao = await prisma.colecao.create({
-            data: {
-              title,
-              subtitle,
-              description,
-              bgcolor,
-              buttonText,
-              buttonUrl, // Adicionado campo buttonUrl
-              items: {
-                create: itemsWithSlugs, // Usando os itens com slugs gerados
-              },
+        const createdColecao = await prisma.colecao.create({
+          data: {
+            title,
+            subtitle,
+            description,
+            bgcolor,
+            buttonText,
+            buttonUrl,
+            items: {
+              create: itemsWithSlugs,
             },
-            include: {
-              items: true,
-            },
-          });
-          return res.status(201).json({ success: true, data: createdColecao });
-        }
+          },
+          include: {
+            items: true,
+          },
+        });
+        return res.status(201).json({ success: true, data: createdColecao });
       } catch (error) {
-        console.error('Erro ao criar coleção ou item:', error);
+        console.error('Erro ao criar coleção:', error);
         return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
       }
 
     case 'PUT':
-      // O slug também pode ser atualizado se necessário, mas geralmente é imutável
       try {
-        const { id, ...data } = req.body;
+        const { id, items, ...rest } = req.body;
 
-        if (data.productMark || data.productModel || data.cor || data.img) {
-          // Se o item for atualizado, o slug também é atualizado com base nos novos dados
-          if (data.productMark || data.productModel || data.cor) {
-             data.slug = slugify(`${data.productMark}-${data.productModel}-${data.cor}`);
-          }
-          const updatedItem = await prisma.colecaoItem.update({
-            where: { id },
-            data,
-          });
-          return res.status(200).json({ success: true, data: updatedItem });
-        } else {
-          const updatedColecao = await prisma.colecao.update({
-            where: { id },
-            data,
-          });
-          return res.status(200).json({ success: true, data: updatedColecao });
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
         }
+
+        const updatedColecao = await prisma.colecao.update({
+            where: { id },
+            data: {
+                ...rest,
+            },
+        });
+
+        if (items && Array.isArray(items)) {
+          // Lógica para sincronizar os itens (atualizar existentes, criar novos)
+          const transaction = items.map(item => {
+              if (item.id) {
+                  // Se o item tem ID, ele já existe e pode ser atualizado
+                  return prisma.colecaoItem.update({
+                      where: { id: item.id },
+                      data: {
+                          productMark: item.productMark,
+                          productModel: item.productModel,
+                          cor: item.cor,
+                          img: item.img,
+                          slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+                      },
+                  });
+              } else {
+                  // Se não tem ID, é um novo item para esta coleção
+                  return prisma.colecaoItem.create({
+                      data: {
+                          ...item,
+                          colecaoId: id,
+                          slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+                      },
+                  });
+              }
+          });
+          await prisma.$transaction(transaction);
+        }
+
+        const colecaoComItensAtualizados = await prisma.colecao.findUnique({
+            where: { id },
+            include: { items: true },
+        });
+
+        return res.status(200).json({ success: true, data: colecaoComItensAtualizados });
       } catch (error) {
-        console.error('Erro ao atualizar:', error);
-        return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+        console.error('Erro ao atualizar coleção:', error);
+        return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
       }
 
     case 'DELETE':
-      // ... (código existente) ...
       try {
         const { id, isItem } = req.body;
-
+        
         if (isItem) {
           await prisma.colecaoItem.delete({
             where: { id },

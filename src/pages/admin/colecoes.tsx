@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Head from "next/head";
-import { MdAddPhotoAlternate, MdDelete } from 'react-icons/md';
-import AdminLayout from "components/admin/AdminLayout";
+import AdminLayout from '@/components/AdminLayout';
+import { MdAddPhotoAlternate, MdDelete, MdEdit } from 'react-icons/md';
 
 // Definições de tipo
 interface ColecaoItem {
@@ -12,7 +12,7 @@ interface ColecaoItem {
   productModel: string;
   cor: string;
   img: string | File;
-  slug?: string; // Adicionado, mas será gerado no backend
+  slug?: string;
 }
 
 interface Colecao {
@@ -22,11 +22,12 @@ interface Colecao {
   description: string | null;
   bgcolor: string | null;
   buttonText: string | null;
-  buttonUrl: string | null; // Adicionado
+  buttonUrl: string | null;
   items: ColecaoItem[];
 }
 
 interface FormState {
+  id?: string; // Adicionado para a edição
   title: string;
   subtitle: string;
   description: string;
@@ -72,6 +73,18 @@ export default function AdminColecoes() {
     }
   };
 
+  const resetForm = () => {
+    setForm({
+      title: "",
+      subtitle: "",
+      description: "",
+      bgcolor: "",
+      buttonText: "",
+      buttonUrl: "",
+      items: [{ productMark: "", productModel: "", cor: "", img: "" }],
+    });
+  };
+
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
@@ -90,7 +103,6 @@ export default function AdminColecoes() {
     setForm({ ...form, items: newItems });
   };
   
-
   const handleAddItem = () => {
     setForm({
       ...form,
@@ -103,56 +115,64 @@ export default function AdminColecoes() {
     setForm({ ...form, items: newItems });
   };
 
+  const handleEdit = (colecao: Colecao) => {
+    setForm({
+      id: colecao.id,
+      title: colecao.title,
+      subtitle: colecao.subtitle || "",
+      description: colecao.description || "",
+      bgcolor: colecao.bgcolor || "",
+      buttonText: colecao.buttonText || "",
+      buttonUrl: colecao.buttonUrl || "",
+      items: colecao.items.map(item => ({...item, img: item.img as string}))
+    });
+    // Rola para o topo do formulário
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
   
     try {
-      // Faz o upload de cada imagem para o seu próprio endpoint /api/upload
+      // Faz o upload de novas imagens para o seu próprio endpoint /api/upload
       const itemsWithUrls = await Promise.all(
         form.items.map(async (item) => {
           if (item.img instanceof File) {
             const formData = new FormData();
-            formData.append("file", item.img); // O nome do campo deve ser 'file' para o /api/upload
-  
-            const uploadRes = await fetch("/api/upload", { // Chamando o endpoint interno /api/upload
+            formData.append("file", item.img);
+            const uploadRes = await fetch("/api/upload", {
               method: "POST",
               body: formData,
             });
-  
             const uploadData = await uploadRes.json();
             if (!uploadRes.ok) {
               throw new Error(uploadData.message || "Erro no upload da imagem via API.");
             }
-            return { ...item, img: uploadData.url }; // A URL vem da sua própria API
+            return { ...item, img: uploadData.url };
           }
           return item;
         })
       );
   
-      // Enviar a coleção com as URLs das imagens para a sua API de CRUD
+      // Determina o método da requisição (POST para novo, PUT para edição)
+      const method = form.id ? "PUT" : "POST";
+      const body = { ...form, items: itemsWithUrls };
+      
       const res = await fetch("/api/crud/colecoes", {
-        method: "POST",
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, items: itemsWithUrls }),
+        body: JSON.stringify(body),
       });
   
       const data = await res.json();
       if (res.ok && data.success) {
-        alert("Coleção criada com sucesso!");
-        setForm({
-          title: "",
-          subtitle: "",
-          description: "",
-          bgcolor: "",
-          buttonText: "",
-          buttonUrl: "",
-          items: [{ productMark: "", productModel: "", cor: "", img: "" }],
-        });
+        alert(`Coleção ${form.id ? 'atualizada' : 'criada'} com sucesso!`);
+        resetForm();
         fetchColecoes();
       } else {
-        setError(data.message || "Erro ao criar coleção.");
+        setError(data.message || `Erro ao ${form.id ? 'atualizar' : 'criar'} coleção.`);
       }
     } catch (e: any) {
       setError(e.message || "Erro ao conectar com a API ou no upload da imagem.");
@@ -194,7 +214,7 @@ export default function AdminColecoes() {
           
           {/* Formulário de Criação/Edição */}
           <section className="bg-gray-100 p-6 rounded-lg shadow-md mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Adicionar Nova Coleção</h2>
+            <h2 className="text-2xl font-semibold mb-4">{form.id ? "Editar Coleção" : "Adicionar Nova Coleção"}</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <input type="text" name="title" value={form.title} onChange={handleFormChange} placeholder="Título" required className="p-2 border rounded" />
               <input type="text" name="subtitle" value={form.subtitle} onChange={handleFormChange} placeholder="Subtítulo" className="p-2 border rounded" />
@@ -226,9 +246,16 @@ export default function AdminColecoes() {
                 <MdAddPhotoAlternate /> Adicionar Novo Item
               </button>
               
-              <button type="submit" disabled={loading} className="bg-green-500 text-white p-3 rounded mt-4">
-                {loading ? "Salvando..." : "Salvar Coleção"}
-              </button>
+              <div className="flex gap-2">
+                <button type="submit" disabled={loading} className="bg-green-500 text-white p-3 rounded mt-4 flex-1">
+                  {loading ? (form.id ? "Atualizando..." : "Salvando...") : (form.id ? "Atualizar Coleção" : "Salvar Coleção")}
+                </button>
+                {form.id && (
+                  <button type="button" onClick={resetForm} className="bg-gray-500 text-white p-3 rounded mt-4 flex-1">
+                    Cancelar Edição
+                  </button>
+                )}
+              </div>
             </form>
             {error && <p className="text-red-500 mt-2">{error}</p>}
           </section>
@@ -246,7 +273,12 @@ export default function AdminColecoes() {
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold">{colecao.title}</h3>
                     <div>
-                      <button onClick={() => handleDelete(colecao.id)} className="bg-red-500 text-white p-2 rounded ml-2">Excluir Coleção</button>
+                      <button onClick={() => handleEdit(colecao)} className="bg-blue-500 text-white p-2 rounded ml-2">
+                        <MdEdit />
+                      </button>
+                      <button onClick={() => handleDelete(colecao.id)} className="bg-red-500 text-white p-2 rounded ml-2">
+                        <MdDelete />
+                      </button>
                     </div>
                   </div>
                   <div className="mt-2 text-sm text-gray-600">
