@@ -234,7 +234,14 @@ export default function AdminColecoes() {
                     <label htmlFor={`img-${index}`} className="flex-1 text-gray-500 cursor-pointer">
                       {item.img instanceof File ? item.img.name : (item.img ? "Arquivo Selecionado" : "Escolher arquivo...")}
                     </label>
-                    <input type="file" name="img" id={`img-${index}`} onChange={(e) => handleItemChange(e, index)} required className="hidden" />
+                    <input 
+                      type="file" 
+                      name="img" 
+                      id={`img-${index}`} 
+                      onChange={(e) => handleItemChange(e, index)} 
+                      required={!item.img || item.img instanceof File} // AQUI ESTÁ A MUDANÇA
+                      className="hidden" 
+                    />
                   </div>
 
                   <button type="button" onClick={() => handleRemoveItem(index)} className="bg-red-500 text-white p-2 rounded">
