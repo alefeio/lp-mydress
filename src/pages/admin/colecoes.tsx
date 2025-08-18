@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Head from "next/head";
-import AdminLayout from '@/components/AdminLayout';
 import { MdAddPhotoAlternate, MdDelete, MdEdit } from 'react-icons/md';
+import AdminLayout from "components/admin/AdminLayout";
 
 // Definições de tipo
 interface ColecaoItem {
