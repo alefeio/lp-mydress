@@ -11,7 +11,7 @@ interface ColecaoItem {
   productMark: string;
   productModel: string;
   cor: string;
-  img: string | File; // Alterado para aceitar tanto string (URL) quanto File
+  img: string | File;
 }
 
 interface Colecao {
@@ -24,9 +24,19 @@ interface Colecao {
   items: ColecaoItem[];
 }
 
+// Nova interface para o estado do formulário, garantindo a tipagem correta
+interface FormState {
+  title: string;
+  subtitle: string;
+  description: string;
+  bgcolor: string;
+  buttonText: string;
+  items: ColecaoItem[];
+}
+
 export default function AdminColecoes() {
   const [colecoes, setColecoes] = useState<Colecao[]>([]);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({ // Ajuste: Tipando o estado do formulário
     title: "",
     subtitle: "",
     description: "",
@@ -95,15 +105,14 @@ export default function AdminColecoes() {
     setError("");
   
     try {
-      // Processar cada item para fazer o upload da imagem
       const itemsWithUrls = await Promise.all(
         form.items.map(async (item) => {
           if (item.img instanceof File) {
             const formData = new FormData();
             formData.append("file", item.img);
-            formData.append("upload_preset", "your_cloudinary_preset"); // Altere para seu upload preset do Cloudinary
+            formData.append("upload_preset", "your_cloudinary_preset");
   
-            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/your_cloud_name/image/upload`, { // Altere para o seu cloud name do Cloudinary
+            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/your_cloud_name/image/upload`, {
               method: "POST",
               body: formData,
             });
@@ -114,11 +123,10 @@ export default function AdminColecoes() {
             }
             return { ...item, img: uploadData.secure_url };
           }
-          return item; // Se não for um arquivo, mantém o valor atual (URL)
+          return item;
         })
       );
   
-      // Enviar a coleção com as URLs das imagens para a sua API
       const res = await fetch("/api/crud/colecoes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -242,7 +250,7 @@ export default function AdminColecoes() {
                     <h4 className="font-semibold">Itens:</h4>
                     {colecao.items.map((item) => (
                       <div key={item.id} className="flex flex-col md:flex-row gap-2 items-center bg-gray-50 p-2 rounded mt-1">
-                        <img src={item.img} alt={item.productModel} className="w-16 h-16 object-cover rounded" />
+                        <img src={item.img as string} alt={item.productModel} className="w-16 h-16 object-cover rounded" />
                         <div className="flex-1">
                           <span>{item.productMark} - {item.productModel} ({item.cor})</span>
                         </div>
