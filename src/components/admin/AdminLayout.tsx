@@ -8,11 +8,11 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-background-50">
+    <div className="flex min-h-screen bg-graytone-300">
       {/* Sidebar de Navegação */}
-      <aside className="w-64 z-30 shadow-lg p-4 bg-background-100">
+      <aside className="w-64 z-30 shadow-lg p-4 bg-graytone-800">
         <h2 className="text-xl font-bold mb-6">Painel Admin</h2>
-        <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
+        <nav className="hidden md:flex text-textcolor-50">
           <ul className="list-none">
             <li className="mb-2">
               <Link href="/admin" className="block p-2 rounded hover:bg-graytone-700">
