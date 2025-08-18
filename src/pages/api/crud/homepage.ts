@@ -1,12 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getServerSession } from 'next-auth';
-import { authOptions } from './auth/[...nextauth]';
-import prisma from '../../../lib/prisma';
+import { authOptions } from '../auth/[...nextauth]';
+import prisma from '../../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const session = await getServerSession(req, res, authOptions);
 
-    // Verifica se a sessão existe e se o usuário é um ADMIN
     if (!session || session.user?.role !== 'ADMIN') {
         return res.status(401).json({ error: 'Acesso não autorizado.' });
     }
@@ -68,7 +67,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     }
 
-    // Se o método da requisição não for suportado
     res.setHeader('Allow', ['GET', 'POST', 'DELETE']);
     return res.status(405).end(`Method ${req.method} Not Allowed`);
 }
