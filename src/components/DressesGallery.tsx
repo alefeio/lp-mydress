@@ -24,7 +24,7 @@ export default function DressesGallery() {
     const router = useRouter();
     const { collectionId, id } = router.query;
 
-    const { data: collections, error } = useSWR<Collection[]>('/api/crud/collections', fetcher);
+    const { data: collections, error } = useSWR<Collection[]>('/api/crud/colecoes', fetcher);
 
     // Mapeia o array de coleções para um objeto para busca rápida
     const collectionsMap: Record<string, Collection> = collections ? collections.reduce((map, collection) => {

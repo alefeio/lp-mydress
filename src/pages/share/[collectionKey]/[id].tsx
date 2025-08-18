@@ -20,8 +20,8 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
   };
 
   const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/collections`
-    : 'http://localhost:3000/api/crud/collections';
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/colecoes`
+    : 'http://localhost:3000/api/crud/colecoes';
 
   try {
     const res = await fetch(API_URL);
