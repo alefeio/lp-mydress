@@ -88,14 +88,19 @@ model FAQ {
   updatedAt DateTime @updatedAt
 }
 
+// prisma/schema.prisma
+
+// ... (outros modelos) ...
+
 model Colecao {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  subtitle    String? // O '?' indica que o campo é opcional
+  subtitle    String?
   description String?
   bgcolor     String?
   buttonText  String?
-  items       ColecaoItem[] // Relação de um para muitos: uma Coleção tem muitos ColecaoItems
+  buttonUrl   String? // Campo adicionado para a URL do botão
+  items       ColecaoItem[]
 }
 
 model ColecaoItem {
@@ -103,8 +108,10 @@ model ColecaoItem {
   productMark   String
   productModel  String
   cor           String
-  img           String // Campo adicionado para a URL da imagem
+  img           String
+  slug          String   @unique // Campo adicionado para a URL amigável (slug)
+
   // Chave estrangeira que conecta o item à sua coleção
-  colecao       Colecao  @relation(fields: [colecaoId], references: [id])
+  colecao       Colecao  @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
   colecaoId     String
 }

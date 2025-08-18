@@ -4,12 +4,23 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Função para gerar o slug a partir de uma string
+function slugify(text) {
+  return text.toString().toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')           // Substitui espaços por hífens
+    .replace(/[^\w-]+/g, '')       // Remove todos os caracteres não-palavra
+    .replace(/--+/g, '-')          // Substitui múltiplos hífens por um único
+    .replace(/^-+/, '')            // Remove hífens do início
+    .replace(/-+$/, '');           // Remove hífens do final
+}
+
 export default async function handler(req, res) {
   const { method } = req;
 
   switch (method) {
     case 'GET':
-      // Adicionando o método GET para ler os dados
+      // ... (código existente) ...
       try {
         const colecoes = await prisma.colecao.findMany({
           include: {
@@ -27,17 +38,28 @@ export default async function handler(req, res) {
 
     case 'POST':
       try {
-        const { title, subtitle, description, bgcolor, buttonText, items, colecaoId } = req.body;
+        const { title, subtitle, description, bgcolor, buttonText, buttonUrl, items, colecaoId } = req.body;
 
         if (colecaoId) {
           if (!items || !Array.isArray(items)) {
             return res.status(400).json({ success: false, message: 'Dados de itens inválidos.' });
           }
+          // Geração do slug para cada item
+          const itemsWithSlugs = items.map(item => ({
+            ...item,
+            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+          }));
           const createdItems = await prisma.colecaoItem.createMany({
-            data: items.map(item => ({ ...item, colecaoId })),
+            data: itemsWithSlugs.map(item => ({ ...item, colecaoId })),
           });
           return res.status(201).json({ success: true, data: createdItems });
         } else {
+          // Geração do slug para cada item da nova coleção
+          const itemsWithSlugs = (items || []).map(item => ({
+            ...item,
+            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+          }));
+
           const createdColecao = await prisma.colecao.create({
             data: {
               title,
@@ -45,8 +67,9 @@ export default async function handler(req, res) {
               description,
               bgcolor,
               buttonText,
+              buttonUrl, // Adicionado campo buttonUrl
               items: {
-                create: items || [],
+                create: itemsWithSlugs, // Usando os itens com slugs gerados
               },
             },
             include: {
@@ -61,10 +84,15 @@ export default async function handler(req, res) {
       }
 
     case 'PUT':
+      // O slug também pode ser atualizado se necessário, mas geralmente é imutável
       try {
         const { id, ...data } = req.body;
 
         if (data.productMark || data.productModel || data.cor || data.img) {
+          // Se o item for atualizado, o slug também é atualizado com base nos novos dados
+          if (data.productMark || data.productModel || data.cor) {
+             data.slug = slugify(`${data.productMark}-${data.productModel}-${data.cor}`);
+          }
           const updatedItem = await prisma.colecaoItem.update({
             where: { id },
             data,
@@ -83,6 +111,7 @@ export default async function handler(req, res) {
       }
 
     case 'DELETE':
+      // ... (código existente) ...
       try {
         const { id, isItem } = req.body;
 

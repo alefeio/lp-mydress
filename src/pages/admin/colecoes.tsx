@@ -12,6 +12,7 @@ interface ColecaoItem {
   productModel: string;
   cor: string;
   img: string | File;
+  slug?: string; // Adicionado, mas será gerado no backend
 }
 
 interface Colecao {
@@ -21,21 +22,21 @@ interface Colecao {
   description: string | null;
   bgcolor: string | null;
   buttonText: string | null;
+  buttonUrl: string | null; // Adicionado
   items: ColecaoItem[];
 }
 
-// Nova interface para o estado do formulário, garantindo a tipagem correta
 interface FormState {
   title: string;
   subtitle: string;
   description: string;
   bgcolor: string;
   buttonText: string;
+  buttonUrl: string; // Adicionado
   items: ColecaoItem[];
 }
 
 export default function AdminColecoes() {
-  // AJUSTE: Duas variáveis de estado separadas para a lista e o formulário
   const [colecoes, setColecoes] = useState<Colecao[]>([]);
   const [form, setForm] = useState<FormState>({
     title: "",
@@ -43,6 +44,7 @@ export default function AdminColecoes() {
     description: "",
     bgcolor: "",
     buttonText: "",
+    buttonUrl: "", // Adicionado
     items: [{ productMark: "", productModel: "", cor: "", img: "" }],
   });
   
@@ -146,6 +148,7 @@ export default function AdminColecoes() {
           description: "",
           bgcolor: "",
           buttonText: "",
+          buttonUrl: "",
           items: [{ productMark: "", productModel: "", cor: "", img: "" }],
         });
         fetchColecoes();
@@ -199,6 +202,7 @@ export default function AdminColecoes() {
               <textarea name="description" value={form.description} onChange={handleFormChange} placeholder="Descrição" className="p-2 border rounded" />
               <input type="text" name="bgcolor" value={form.bgcolor} onChange={handleFormChange} placeholder="Cor de Fundo (Ex: #F4F1DE)" className="p-2 border rounded" />
               <input type="text" name="buttonText" value={form.buttonText} onChange={handleFormChange} placeholder="Texto do Botão" className="p-2 border rounded" />
+              <input type="url" name="buttonUrl" value={form.buttonUrl} onChange={handleFormChange} placeholder="URL do Botão" className="p-2 border rounded" /> {/* Adicionado */}
               
               <h3 className="text-xl font-semibold mt-4">Itens da Coleção</h3>
               {form.items.map((item, index) => (
@@ -249,6 +253,7 @@ export default function AdminColecoes() {
                   <div className="mt-2 text-sm text-gray-600">
                     <p><strong>Subtítulo:</strong> {colecao.subtitle}</p>
                     <p><strong>Descrição:</strong> {colecao.description}</p>
+                    <p><strong>URL do Botão:</strong> {colecao.buttonUrl || 'N/A'}</p>
                   </div>
                   <div className="mt-4">
                     <h4 className="font-semibold">Itens:</h4>
@@ -257,6 +262,7 @@ export default function AdminColecoes() {
                         <img src={item.img as string} alt={item.productModel} className="w-16 h-16 object-cover rounded" />
                         <div className="flex-1">
                           <span>{item.productMark} - {item.productModel} ({item.cor})</span>
+                          <p className="text-xs text-gray-500">Slug: {item.slug}</p>
                         </div>
                         <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-400 text-white p-1 rounded text-xs">Excluir Item</button>
                       </div>

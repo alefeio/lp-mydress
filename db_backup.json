@@ -224,5 +224,14 @@
       "updatedAt": "2025-08-18T14:26:54.586Z"
     }
   ],
-  "users": []
+  "users": [
+    {
+      "id": "cmeh9agbb0000jm04j5982ub2",
+      "name": null,
+      "email": "ads.mydress@gmail.com",
+      "emailVerified": "2025-08-18T15:14:52.054Z",
+      "image": null,
+      "role": "USER"
+    }
+  ]
 }

@@ -106,6 +106,7 @@ CREATE TABLE "public"."Colecao" (
     "description" TEXT,
     "bgcolor" TEXT,
     "buttonText" TEXT,
+    "buttonUrl" TEXT,
 
     CONSTRAINT "Colecao_pkey" PRIMARY KEY ("id")
 );
@@ -117,6 +118,7 @@ CREATE TABLE "public"."ColecaoItem" (
     "productModel" TEXT NOT NULL,
     "cor" TEXT NOT NULL,
     "img" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
     "colecaoId" TEXT NOT NULL,
 
     CONSTRAINT "ColecaoItem_pkey" PRIMARY KEY ("id")
@@ -137,6 +139,9 @@ CREATE UNIQUE INDEX "VerificationToken_token_key" ON "public"."VerificationToken
 -- CreateIndex
 CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "public"."VerificationToken"("identifier", "token");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "ColecaoItem_slug_key" ON "public"."ColecaoItem"("slug");
+
 -- AddForeignKey
 ALTER TABLE "public"."Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -144,4 +149,4 @@ ALTER TABLE "public"."Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY 
 ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."ColecaoItem" ADD CONSTRAINT "ColecaoItem_colecaoId_fkey" FOREIGN KEY ("colecaoId") REFERENCES "public"."Colecao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."ColecaoItem" ADD CONSTRAINT "ColecaoItem_colecaoId_fkey" FOREIGN KEY ("colecaoId") REFERENCES "public"."Colecao"("id") ON DELETE CASCADE ON UPDATE CASCADE;
