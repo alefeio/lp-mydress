@@ -13,7 +13,9 @@ const fetcher = async (url: string) => {
     if (!res.ok) {
         throw new Error('Erro ao buscar dados.');
     }
-    return res.json();
+    const data = await res.json();
+    // AQUI ESTÁ A CORREÇÃO: RETORNA O ARRAY DENTRO DO OBJETO
+    return data.colecoes; 
 };
 
 export default function DressesGallery() {

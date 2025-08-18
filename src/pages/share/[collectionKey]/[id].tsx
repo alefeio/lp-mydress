@@ -28,7 +28,8 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
     if (!res.ok) {
       throw new Error('Failed to fetch collections');
     }
-    const collections: Collection[] = await res.json();
+    const data = await res.json();
+    const collections = data.colecoes; // AQUI ESTÁ A CORREÇÃO
 
     const currentCollection = collections.find((c) => c.id === collectionKey);
 
