@@ -1,52 +1,19 @@
+// src/components/FAQ.tsx
+
 import { useState } from "react";
-import { PrismaClient } from "@prisma/client";
-import { GetServerSideProps } from "next";
+import React from 'react'; // Adicione a importação de React
 
 // Define a tipagem dos dados que serão passados para o componente
-interface FAQ {
+interface FAQItem {
   id: string;
   pergunta: string;
   resposta: string;
 }
 
-// Define a tipagem das props da página
+// Define a tipagem das props do componente
 interface FAQPageProps {
-  faqs: FAQ[];
+  faqs: FAQItem[];
 }
-
-const prisma = new PrismaClient();
-
-// Função que busca os dados no servidor antes da página ser renderizada
-export const getServerSideProps: GetServerSideProps<FAQPageProps> = async () => {
-  try {
-    const faqs = await prisma.fAQ.findMany({
-      select: {
-        id: true,
-        pergunta: true,
-        resposta: true,
-      },
-      orderBy: {
-        pergunta: 'asc',
-      },
-    });
-
-    // Retorna os dados como props
-    return {
-      props: {
-        faqs,
-      },
-    };
-  } catch (error) {
-    console.error("Erro ao buscar FAQs:", error);
-    return {
-      props: {
-        faqs: [],
-      },
-    };
-  } finally {
-    await prisma.$disconnect();
-  }
-};
 
 export default function FAQ({ faqs }: FAQPageProps) {
   const [open, setOpen] = useState<number | null>(null);

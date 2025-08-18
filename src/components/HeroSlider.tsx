@@ -11,31 +11,17 @@ interface BannerItem {
   target?: string;
 }
 
-export default function HeroSlider() {
+interface HeroSliderProps {
+  banners: {
+    banners: BannerItem[];
+  }[];
+}
+
+export default function HeroSlider({ banners }: HeroSliderProps) {
   const [current, setCurrent] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [startX, setStartX] = useState<number | null>(null);
-  const [slides, setSlides] = useState<BannerItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        const response = await fetch("/api/crud/banner");
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.banners) {
-            setSlides(data.banners);
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados do banner:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBanners();
-  }, []);
+  const slides = banners[0]?.banners || [];
 
   useEffect(() => {
     if (!playing || slides.length === 0) return;
@@ -78,7 +64,7 @@ export default function HeroSlider() {
     setPlaying(true);
   };
 
-  if (isLoading || slides.length === 0) {
+  if (slides.length === 0) {
     return null;
   }
 

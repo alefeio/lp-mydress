@@ -1,17 +1,99 @@
-import Head from 'next/head'
-import Script from 'next/script'
-import HeroSlider from '../components/HeroSlider'
-import WhatsAppButton from '../components/WhatsAppButton'
-import DressesGallery from '../components/DressesGallery'
-import Testimonials from '../components/Testimonials'
-import FAQ from '../components/FAQ'
-import LocationMap from '../components/LocationMap'
-import Header from 'components/Header'
-import { Menu } from 'components/Menu'
-import Hero from 'components/Hero'
-import { Analytics } from "@vercel/analytics/next"
+import { PrismaClient } from '@prisma/client';
+import { GetServerSideProps } from 'next';
+import Head from 'next/head';
+import Script from 'next/script';
+import HeroSlider from '../components/HeroSlider';
+import WhatsAppButton from '../components/WhatsAppButton';
+import DressesGallery from '../components/DressesGallery';
+import Testimonials from '../components/Testimonials';
+import FAQ from '../components/FAQ';
+import LocationMap from '../components/LocationMap';
+import Header from 'components/Header';
+import { Menu } from 'components/Menu';
+import Hero from 'components/Hero';
+import { Analytics } from "@vercel/analytics/next";
 
-export default function Home() {
+// Tipagens para os dados
+interface Banner {
+  id: number;
+  banners: {
+    id: string;
+    url: string;
+    link: string;
+    title: string;
+    target: string;
+  }[];
+}
+
+interface MenuItem {
+  id: number;
+  logoUrl: string;
+  links: {
+    id: string;
+    url: string;
+    text: string;
+    target: string;
+  }[];
+}
+
+interface TestimonialItem {
+  id: string;
+  name: string;
+  content: string;
+  type: string;
+}
+
+interface FaqItem {
+  id: string;
+  pergunta: string;
+  resposta: string;
+}
+
+interface HomePageProps {
+  banners: Banner[];
+  menu: MenuItem | null;
+  testimonials: TestimonialItem[];
+  faqs: FaqItem[];
+}
+
+const prisma = new PrismaClient();
+
+// Função que busca todos os dados necessários no servidor
+export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
+  try {
+    const [banners, menus, testimonials, faqs] = await Promise.all([
+      prisma.banner.findMany(),
+      prisma.menu.findMany(),
+      prisma.testimonial.findMany({ orderBy: { createdAt: 'desc' } }),
+      prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
+    ]);
+
+    const menu = menus.length > 0 ? menus[0] : null;
+
+    return {
+      props: {
+        banners: JSON.parse(JSON.stringify(banners)),
+        menu: JSON.parse(JSON.stringify(menu)),
+        testimonials: JSON.parse(JSON.stringify(testimonials)),
+        faqs: JSON.parse(JSON.stringify(faqs)),
+      },
+    };
+  } catch (error) {
+    console.error("Erro ao buscar dados do banco de dados:", error);
+    return {
+      props: {
+        banners: [],
+        menu: null,
+        testimonials: [],
+        faqs: [],
+      },
+    };
+  } finally {
+    await prisma.$disconnect();
+  }
+};
+
+export default function Home({ banners, menu, testimonials, faqs }: HomePageProps) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -38,12 +120,10 @@ export default function Home() {
         <meta property="og:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
         <meta property="og:url" content="https://www.mydressbelem.com.br" />
         <meta property="og:type" content="website" />
-
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="My Dress Belém | Aluguel de Vestidos de Festa" />
         <meta name="twitter:description" content="Aluguel de vestidos elegantes em Belém‑PA. Atendimento por agendamento via WhatsApp." />
         <meta name="twitter:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
-
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
       </Head>
@@ -97,18 +177,18 @@ export default function Home() {
 
       <div className="min-h-screen font-sans">
         <Analytics />
-        <Menu />
-        <HeroSlider />
+        <Menu menuData={menu} />
+        <HeroSlider banners={banners} />
         <main className="max-w-7xl mx-auto">
           <Hero />
           <DressesGallery />
           <Header />
-          <Testimonials />
-          <FAQ />
+          <Testimonials testimonials={testimonials} />
+          <FAQ faqs={faqs} />
           <LocationMap />
         </main>
         <WhatsAppButton />
       </div>
     </>
-  )
+  );
 }
