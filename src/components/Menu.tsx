@@ -56,7 +56,7 @@ export function Menu() {
         : "bg-background-100 pt-4 pb-2"
         }`}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-8">
+      <div className="mx-auto flex items-center justify-between px-4 md:px-8">
         <Link href="/">
           <img
             src={logoUrl || "/images/logo.png"}

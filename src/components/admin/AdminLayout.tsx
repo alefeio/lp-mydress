@@ -10,9 +10,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="flex min-h-screen bg-background-50">
       {/* Sidebar de Navegação */}
-      <aside className="w-64 bg-background-900 text-background-50 p-4">
+      <aside className="w-64 z-30 shadow-lg p-4 bg-background-100">
         <h2 className="text-xl font-bold mb-6">Painel Admin</h2>
-        <nav>
+        <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
           <ul className="list-none">
             <li className="mb-2">
               <Link href="/admin" className="block p-2 rounded hover:bg-graytone-700">
@@ -37,6 +37,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <li className="mb-2">
               <Link href="/admin/testimonials" className="block p-2 rounded hover:bg-graytone-700">
                 Depoimentos
+              </Link>
+            </li>
+            <li className="mb-2">
+              <Link href="/admin/faq" className="block p-2 rounded hover:bg-graytone-700">
+                Perguntas Frequentes
               </Link>
             </li>
             <li className="mb-2">

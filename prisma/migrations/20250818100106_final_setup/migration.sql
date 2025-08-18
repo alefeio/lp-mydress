@@ -87,6 +87,17 @@ CREATE TABLE "public"."Testimonial" (
     CONSTRAINT "Testimonial_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."FAQ" (
+    "id" TEXT NOT NULL,
+    "pergunta" TEXT NOT NULL,
+    "resposta" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "FAQ_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "public"."Account"("provider", "providerAccountId");
 
