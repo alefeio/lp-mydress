@@ -35,8 +35,9 @@ interface FormState {
 }
 
 export default function AdminColecoes() {
+  // AJUSTE: Duas variáveis de estado separadas para a lista e o formulário
   const [colecoes, setColecoes] = useState<Colecao[]>([]);
-  const [form, setForm] = useState<FormState>({ // Ajuste: Tipando o estado do formulário
+  const [form, setForm] = useState<FormState>({
     title: "",
     subtitle: "",
     description: "",
@@ -44,6 +45,7 @@ export default function AdminColecoes() {
     buttonText: "",
     items: [{ productMark: "", productModel: "", cor: "", img: "" }],
   });
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -110,9 +112,11 @@ export default function AdminColecoes() {
           if (item.img instanceof File) {
             const formData = new FormData();
             formData.append("file", item.img);
-            formData.append("upload_preset", "your_cloudinary_preset");
+            // Substitua 'mydress_upload' pelo seu upload preset do Cloudinary
+            formData.append("upload_preset", "mydress_upload"); 
   
-            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/your_cloud_name/image/upload`, {
+            // Substitua 'mydress-cloud' pelo seu cloud name do Cloudinary
+            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/mydress-cloud/image/upload`, {
               method: "POST",
               body: formData,
             });
