@@ -98,6 +98,29 @@ CREATE TABLE "public"."FAQ" (
     CONSTRAINT "FAQ_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."Colecao" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "subtitle" TEXT,
+    "description" TEXT,
+    "bgcolor" TEXT,
+    "buttonText" TEXT,
+
+    CONSTRAINT "Colecao_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."ColecaoItem" (
+    "id" TEXT NOT NULL,
+    "productMark" TEXT NOT NULL,
+    "productModel" TEXT NOT NULL,
+    "cor" TEXT NOT NULL,
+    "colecaoId" TEXT NOT NULL,
+
+    CONSTRAINT "ColecaoItem_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "public"."Account"("provider", "providerAccountId");
 
@@ -118,3 +141,6 @@ ALTER TABLE "public"."Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."ColecaoItem" ADD CONSTRAINT "ColecaoItem_colecaoId_fkey" FOREIGN KEY ("colecaoId") REFERENCES "public"."Colecao"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

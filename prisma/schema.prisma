@@ -87,3 +87,24 @@ model FAQ {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Colecao {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String? // O '?' indica que o campo é opcional
+  description String?
+  bgcolor     String?
+  buttonText  String?
+  items       ColecaoItem[] // Relação de um para muitos: uma Coleção tem muitos ColecaoItems
+}
+
+model ColecaoItem {
+  id            String   @id @default(cuid())
+  productMark   String
+  productModel  String
+  cor           String
+
+  // Chave estrangeira que conecta o item à sua coleção
+  colecao       Colecao  @relation(fields: [colecaoId], references: [id])
+  colecaoId     String
+}

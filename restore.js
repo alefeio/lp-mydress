@@ -1,86 +1,68 @@
+// restore.js
+
 const { PrismaClient } = require('@prisma/client');
-const fs = require('fs');
+const fs = require('fs/promises');
+const path = require('path');
 
 const prisma = new PrismaClient();
 
-async function restore() {
+async function main() {
   try {
-    console.log('Iniciando a restauração dos dados...');
+    console.log('Iniciando a restauração...');
+    
+    const backupPath = path.join(__dirname, 'db_backup.json');
+    const backupFile = await fs.readFile(backupPath, 'utf-8');
+    const backupData = JSON.parse(backupFile);
 
-    // 1. Restaura os usuários
-    console.log('Restaurando a tabela User...');
-    const usersData = JSON.parse(fs.readFileSync('users_backup.json', 'utf8'));
-    for (const user of usersData) {
-      await prisma.user.create({
-        data: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          emailVerified: new Date(user.emailVerified),
-          image: user.image,
-          role: user.role
-        }
-      });
+    // Ordem de restauração para respeitar as dependências de chaves estrangeiras
+    // (Por exemplo, User deve ser restaurado antes de Account, que não tem registros)
+    
+    // Apaga os dados existentes para uma restauração limpa
+    await prisma.testimonial.deleteMany({});
+    await prisma.fAQ.deleteMany({});
+    await prisma.homepageSection.deleteMany({});
+    await prisma.menu.deleteMany({});
+    await prisma.banner.deleteMany({});
+    await prisma.user.deleteMany({});
+    
+    // Restaura os dados
+    if (backupData.users && backupData.users.length > 0) {
+      await prisma.user.createMany({ data: backupData.users });
+      console.log('Dados da tabela User restaurados.');
     }
-    console.log('Tabela User restaurada com sucesso!');
 
-    // 2. Restaura o menu
-    console.log('Restaurando a tabela Menu...');
-    const menusData = JSON.parse(fs.readFileSync('menus_backup.json', 'utf8'));
-    for (const menu of menusData) {
-        await prisma.menu.create({
-            data: {
-                id: menu.id,
-                logoUrl: menu.logoUrl,
-                links: menu.links
-            }
-        });
+    if (backupData.testimonials && backupData.testimonials.length > 0) {
+      await prisma.testimonial.createMany({ data: backupData.testimonials });
+      console.log('Dados da tabela Testimonial restaurados.');
     }
-    console.log('Tabela Menu restaurada com sucesso!');
 
-    // 3. Restaura os banners
-    console.log('Restaurando a tabela Banner...');
-    const bannersData = JSON.parse(fs.readFileSync('banners_backup.json', 'utf8'));
-    for (const banner of bannersData) {
-        await prisma.banner.create({
-            data: {
-                id: banner.id,
-                banners: banner.banners
-            }
-        });
+    if (backupData.faqs && backupData.faqs.length > 0) {
+      await prisma.fAQ.createMany({ data: backupData.faqs });
+      console.log('Dados da tabela FAQ restaurados.');
     }
-    console.log('Tabela Banner restaurada com sucesso!');
 
-    // 4. Restaura a homepage
-    console.log('Restaurando a tabela HomepageSection...');
-    const homepageSectionsData = JSON.parse(fs.readFileSync('homepageSection_backup.json', 'utf8'));
-    await prisma.homepageSection.createMany({
-        data: homepageSectionsData
-    });
-    console.log('Tabela HomepageSection restaurada com sucesso!');
+    if (backupData.homepageSections && backupData.homepageSections.length > 0) {
+      await prisma.homepageSection.createMany({ data: backupData.homepageSections });
+      console.log('Dados da tabela HomepageSection restaurados.');
+    }
 
-    // 5. Restaura os depoimentos
-    console.log('Restaurando a tabela Testimonial...');
-    const testimonialsData = JSON.parse(fs.readFileSync('testimonials_backup.json', 'utf8'));
-    await prisma.testimonial.createMany({
-      data: testimonialsData.map(t => ({
-        id: t.id,
-        name: t.name,
-        type: t.type,
-        content: t.content,
-        createdAt: new Date(t.createdAt),
-        updatedAt: new Date(t.updatedAt)
-      }))
-    });
-    console.log('Tabela Testimonial restaurada com sucesso!');
+    if (backupData.menus && backupData.menus.length > 0) {
+      await prisma.menu.createMany({ data: backupData.menus });
+      console.log('Dados da tabela Menu restaurados.');
+    }
 
-    console.log('\nTodos os dados foram restaurados com sucesso!');
+    if (backupData.banners && backupData.banners.length > 0) {
+      await prisma.banner.createMany({ data: backupData.banners });
+      console.log('Dados da tabela Banner restaurados.');
+    }
 
+    console.log('Restauração concluída com sucesso!');
   } catch (error) {
-    console.error("Erro ao restaurar os dados:", error);
+    console.error('Erro ao realizar a restauração:', error);
+    process.exit(1);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-restore();
+main();
