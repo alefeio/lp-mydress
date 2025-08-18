@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelos de Autenticação (Next-Auth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -56,23 +52,29 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Modelo do Menu
 model Menu {
   id       Int     @id @default(1)
   logoUrl  String?
   links    Json
 }
 
-// Seu novo modelo para o Banner
 model Banner {
   id        Int    @id @default(1)
   banners   Json
 }
 
-// Novo Modelo para gerenciar as sessões da Home
 model HomepageSection {
   id          String   @id @default(cuid())
   type        String
   order       Int
   content     Json
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // Pode ser "TEXT", "PHOTO", ou "VIDEO"
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
