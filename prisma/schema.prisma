@@ -103,7 +103,7 @@ model ColecaoItem {
   productMark   String
   productModel  String
   cor           String
-
+  img           String // Campo adicionado para a URL da imagem
   // Chave estrangeira que conecta o item à sua coleção
   colecao       Colecao  @relation(fields: [colecaoId], references: [id])
   colecaoId     String

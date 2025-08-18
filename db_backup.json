@@ -1,8 +1,228 @@
 {
-  "banners": [],
-  "faqs": [],
+  "banners": [
+    {
+      "id": 1,
+      "banners": [
+        {
+          "id": "1755526044885",
+          "url": "https://res.cloudinary.com/dk2mgiu3a/image/upload/v1755526044/dresses/vmhxp8ef86wiwgecyshb.jpg",
+          "link": "#colecao",
+          "title": "Coleção 2025 – Cores e Modelos Atualizados para Você Brilhar",
+          "target": "_self"
+        },
+        {
+          "id": "1755526066088",
+          "url": "https://res.cloudinary.com/dk2mgiu3a/image/upload/v1755526065/dresses/uqops7oypxqbzwfw9wnj.jpg",
+          "link": "#colecao",
+          "title": "Midis Brancos - Perfeitos para solenidades, noivados, batizados ou jantares especiais",
+          "target": "_self"
+        },
+        {
+          "id": "1755526114385",
+          "url": "https://res.cloudinary.com/dk2mgiu3a/image/upload/v1755526113/dresses/jzua6nkqrh2i2sjynqbj.jpg",
+          "link": "#colecao",
+          "title": "Clutches - O toque final que vai valorizar ainda mais o seu look",
+          "target": "_self"
+        }
+      ]
+    }
+  ],
+  "faqs": [
+    {
+      "id": "cmeh7lx7d0008la04wmaxtft2",
+      "pergunta": "Como funciona o aluguel de vestidos na My Dress?",
+      "resposta": "O processo é bem simples: você agenda uma visita em nosso espaço, experimenta os modelos disponíveis e escolhe o seu favorito. O vestido é reservado para a data do seu evento, e você retira próximo ao dia. Após o uso, é só devolver - a lavagem está incluída no serviço.",
+      "createdAt": "2025-08-18T14:27:47.929Z",
+      "updatedAt": "2025-08-18T14:27:47.929Z"
+    },
+    {
+      "id": "cmeh7m4kz0009la040vrip1n4",
+      "pergunta": "Preciso agendar para experimentar os vestidos?",
+      "resposta": "Sim! Atendemos exclusivamente com hora marcada, para garantir um atendimento personalizado e tranquilo. Clique aqui para escolher o melhor horário para você.",
+      "createdAt": "2025-08-18T14:27:57.491Z",
+      "updatedAt": "2025-08-18T14:27:57.491Z"
+    },
+    {
+      "id": "cmeh7mi8b000ala046nsvucps",
+      "pergunta": "Com quantos dias de antecedência posso reservar meu vestido?",
+      "resposta": "As reservas podem ser feitas com até 40 dias de antecedência do seu evento. Optamos por esse período, para maior segurança para você, por se tratar de trajes alugáveis. Mas você pode agendar uma visita antes e conhecer pessoalmente nosso acervo, além do catálogo.",
+      "createdAt": "2025-08-18T14:28:15.091Z",
+      "updatedAt": "2025-08-18T14:28:15.091Z"
+    },
+    {
+      "id": "cmeh7mn4h000bla047bkbcow7",
+      "pergunta": "Quais tipos de vestidos vocês alugam?",
+      "resposta": "Trabalhamos com vestidos para formaturas, casamentos (madrinhas e convidadas), aniversários, festas de gala e eventos especiais.)",
+      "createdAt": "2025-08-18T14:28:21.521Z",
+      "updatedAt": "2025-08-18T14:28:21.521Z"
+    },
+    {
+      "id": "cmeh7ms4z000cla04dm3ztdci",
+      "pergunta": "O que está incluído no valor do aluguel?",
+      "resposta": "O valor do aluguel inclui locação do vestido, higienização completa do traje e ajustes necessários.",
+      "createdAt": "2025-08-18T14:28:28.019Z",
+      "updatedAt": "2025-08-18T14:28:28.019Z"
+    },
+    {
+      "id": "cmeh7mxls000dla042x3c3497",
+      "pergunta": "Vocês fazem ajustes no vestido?",
+      "resposta": "Sim! Fazemos ajustes simples como barra e alça, para que o vestido fique perfeito no seu corpo. Os ajustes são verificados na semana do evento.",
+      "createdAt": "2025-08-18T14:28:35.017Z",
+      "updatedAt": "2025-08-18T14:28:35.017Z"
+    },
+    {
+      "id": "cmeh7n4go000ela04klhtxg18",
+      "pergunta": "E se eu sujar ou danificar o vestido?",
+      "resposta": "Manchas comuns de uso já estão previstas e cobertas pela lavagem. Taxa extra de lavagem: A lavanderia não cobre o excesso de sujeira na barra ou manchas no tecido, necessitando de lavagem especial. Danos graves como rasgos, queimaduras ou perdas serão analisadas caso a caso.",
+      "createdAt": "2025-08-18T14:28:43.993Z",
+      "updatedAt": "2025-08-18T14:28:43.993Z"
+    },
+    {
+      "id": "cmeh7n9ww000fla04zfoe5616",
+      "pergunta": "Quais são as formas de pagamento disponíveis?",
+      "resposta": "Pix, dinhheiro ou cartão. No crédito há um pequeno acréscimo da máquina. Parcelamos em até 3x.",
+      "createdAt": "2025-08-18T14:28:50.970Z",
+      "updatedAt": "2025-08-18T14:28:50.970Z"
+    },
+    {
+      "id": "cmeh7nfge000gla0469trwlx1",
+      "pergunta": "Sempre tem novidades?",
+      "resposta": "Sim! Nosso catálogo está sempre atualizando. Todo mês tem vestidos novos chegando.",
+      "createdAt": "2025-08-18T14:28:58.238Z",
+      "updatedAt": "2025-08-18T14:28:58.238Z"
+    },
+    {
+      "id": "cmeh7nl52000hla04wzivbxp3",
+      "pergunta": "O atendimento é somente por agendamento mesmo?",
+      "resposta": "Sim! Pois dessa forma conseguimos realizar um atendimento tranquilo e personalizado para cada cliente.",
+      "createdAt": "2025-08-18T14:29:05.606Z",
+      "updatedAt": "2025-08-18T14:29:05.606Z"
+    }
+  ],
   "homepageSections": [],
-  "menus": [],
-  "testimonials": [],
+  "menus": [
+    {
+      "id": 1,
+      "logoUrl": "https://res.cloudinary.com/dk2mgiu3a/image/upload/v1755525952/dresses/ytr9ifkwwrzbmp4osn3q.png",
+      "links": [
+        {
+          "id": "1755525789145",
+          "url": "#",
+          "text": "Início",
+          "target": "_self"
+        },
+        {
+          "id": "1755525833324",
+          "url": "#colecao",
+          "text": "Nossa Coleção",
+          "target": "_self"
+        },
+        {
+          "id": "1755525848956",
+          "url": "#empresa",
+          "text": "Sobre Nós",
+          "target": "_self"
+        },
+        {
+          "id": "1755525860396",
+          "url": "#depoimentos",
+          "text": "Depoimentos",
+          "target": "_self"
+        },
+        {
+          "id": "1755525872108",
+          "url": "#faq",
+          "text": "Perguntas Frequentes",
+          "target": "_self"
+        },
+        {
+          "id": "1755525915268",
+          "url": "#localizacao",
+          "text": "Onde Estamos",
+          "target": "_self"
+        },
+        {
+          "id": "1755525949736",
+          "url": "https://wa.me/5591985810208?text=\"Gostaria de mais informações. Estou entrando em contato através do site.\"",
+          "text": "Contato",
+          "target": "_blank"
+        }
+      ]
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "cmeh7iy9m0000la04x3exn81j",
+      "name": "Siqueira Coutinho",
+      "type": "texto",
+      "content": "Ambiente maravilhoso e aconchegante, tudo muito organizado, roupas cheirosas e bem cuidadas, atendimento nota mil, com certeza voltarei futuramente.",
+      "createdAt": "2025-08-18T14:25:29.336Z",
+      "updatedAt": "2025-08-18T14:25:29.336Z"
+    },
+    {
+      "id": "cmeh7jh100001jl04om4oxr5t",
+      "name": "Willianni Santos",
+      "type": "texto",
+      "content": "O espaço, os vestidos, o atendimento, tudo incrível 😍",
+      "createdAt": "2025-08-18T14:25:53.652Z",
+      "updatedAt": "2025-08-18T14:25:53.652Z"
+    },
+    {
+      "id": "cmeh7jpq70001la04ctroj8wl",
+      "name": "Patricia Pantoja Evoluir",
+      "type": "texto",
+      "content": "Local incrível, com atendimento impecável! O look um mais lindo que o outro 🥰",
+      "createdAt": "2025-08-18T14:26:04.928Z",
+      "updatedAt": "2025-08-18T14:26:04.928Z"
+    },
+    {
+      "id": "cmeh7jx620002la0443x148u8",
+      "name": "Lorena Honorato",
+      "type": "texto",
+      "content": "Atendimento maravilhoso desde a primeira visita até a devolução. As meninas são muito atenciosas, os vestidos são lindos, e é perceptível o cuidado com as peças e a busca por trazer novos modelos às clientes. Indico para qualquer amiga.",
+      "createdAt": "2025-08-18T14:26:14.571Z",
+      "updatedAt": "2025-08-18T14:26:14.571Z"
+    },
+    {
+      "id": "cmeh7k4n10003la04gb2ed576",
+      "name": "Fabíola Luz",
+      "type": "texto",
+      "content": "Ótimo atendimento! Loja muito bonita e acolhedora. Vestidos em ótimos estados.",
+      "createdAt": "2025-08-18T14:26:24.254Z",
+      "updatedAt": "2025-08-18T14:26:24.254Z"
+    },
+    {
+      "id": "cmeh7kb150004la04amb73bzf",
+      "name": "Raíza Reis",
+      "type": "texto",
+      "content": "Atendimento maravilhoso",
+      "createdAt": "2025-08-18T14:26:32.538Z",
+      "updatedAt": "2025-08-18T14:26:32.538Z"
+    },
+    {
+      "id": "cmeh7kgj00005la04nfyebdjy",
+      "name": "Izabele Matos",
+      "type": "texto",
+      "content": "Excelente atendimento. Moças muito educadas e solícitas, além de lindas opções de vestidos",
+      "createdAt": "2025-08-18T14:26:39.646Z",
+      "updatedAt": "2025-08-18T14:26:39.646Z"
+    },
+    {
+      "id": "cmeh7km6b0006la04jzlnm46i",
+      "name": "Jorge Silva",
+      "type": "texto",
+      "content": "Loja excelente. Visitei com minha esposa e filha. Vestidos novos, bom preço e excelente atendimento. Obrigado às proprietárias.",
+      "createdAt": "2025-08-18T14:26:46.980Z",
+      "updatedAt": "2025-08-18T14:26:46.980Z"
+    },
+    {
+      "id": "cmeh7ks1m0007la043jngp245",
+      "name": "Giuliana Galdino",
+      "type": "texto",
+      "content": "Que loja incrível! Espaço perfeito, bom atendimento, vestidos em ótimo estado, ótimos preços para aluguel, provadores confortáveis e boa localização. Ainda ganhei uma bolsa de brinde, para usar com o vestido.",
+      "createdAt": "2025-08-18T14:26:54.586Z",
+      "updatedAt": "2025-08-18T14:26:54.586Z"
+    }
+  ],
   "users": []
 }

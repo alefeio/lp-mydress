@@ -116,6 +116,7 @@ CREATE TABLE "public"."ColecaoItem" (
     "productMark" TEXT NOT NULL,
     "productModel" TEXT NOT NULL,
     "cor" TEXT NOT NULL,
+    "img" TEXT NOT NULL,
     "colecaoId" TEXT NOT NULL,
 
     CONSTRAINT "ColecaoItem_pkey" PRIMARY KEY ("id")

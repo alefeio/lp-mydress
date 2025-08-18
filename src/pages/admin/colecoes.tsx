@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Head from "next/head";
-import AdminLayout from "components/admin/AdminLayout";
+import AdminLayout from '@/components/AdminLayout';
+import { MdAddPhotoAlternate, MdDelete } from 'react-icons/md';
 
 // Definições de tipo
 interface ColecaoItem {
-  id: string;
+  id?: string;
   productMark: string;
   productModel: string;
   cor: string;
+  img: string | File; // Alterado para aceitar tanto string (URL) quanto File
 }
 
 interface Colecao {
@@ -30,7 +32,7 @@ export default function AdminColecoes() {
     description: "",
     bgcolor: "",
     buttonText: "",
-    items: [{ productMark: "", productModel: "", cor: "" }],
+    items: [{ productMark: "", productModel: "", cor: "", img: "" }],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,13 +44,9 @@ export default function AdminColecoes() {
   const fetchColecoes = async () => {
     setLoading(true);
     try {
-      // Ajuste: A rota de API para "read" ainda não existe. A forma mais simples
-      // é criar uma nova rota ou usar a rota da página pública.
-      // Vou assumir que o /api/crud/colecoes irá listar todas as coleções com um GET
-      // ou que você irá usar a rota da página pública /colecoes.
-      const res = await fetch("/api/colecoes"); 
+      const res = await fetch("/api/crud/colecoes", { method: "GET" });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.success) {
         setColecoes(data.colecoes);
       } else {
         setError(data.message || "Erro ao carregar coleções.");
@@ -66,16 +64,23 @@ export default function AdminColecoes() {
   };
 
   const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
     const newItems = [...form.items];
-    newItems[index] = { ...newItems[index], [name]: value };
+  
+    if (name === "img" && files) {
+      newItems[index] = { ...newItems[index], [name]: files[0] };
+    } else {
+      newItems[index] = { ...newItems[index], [name]: value };
+    }
+  
     setForm({ ...form, items: newItems });
   };
+  
 
   const handleAddItem = () => {
     setForm({
       ...form,
-      items: [...form.items, { productMark: "", productModel: "", cor: "" }],
+      items: [...form.items, { productMark: "", productModel: "", cor: "", img: "" }],
     });
   };
 
@@ -88,15 +93,40 @@ export default function AdminColecoes() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
+  
     try {
+      // Processar cada item para fazer o upload da imagem
+      const itemsWithUrls = await Promise.all(
+        form.items.map(async (item) => {
+          if (item.img instanceof File) {
+            const formData = new FormData();
+            formData.append("file", item.img);
+            formData.append("upload_preset", "your_cloudinary_preset"); // Altere para seu upload preset do Cloudinary
+  
+            const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/your_cloud_name/image/upload`, { // Altere para o seu cloud name do Cloudinary
+              method: "POST",
+              body: formData,
+            });
+  
+            const uploadData = await uploadRes.json();
+            if (!uploadRes.ok) {
+              throw new Error(uploadData.error.message || "Erro no upload da imagem");
+            }
+            return { ...item, img: uploadData.secure_url };
+          }
+          return item; // Se não for um arquivo, mantém o valor atual (URL)
+        })
+      );
+  
+      // Enviar a coleção com as URLs das imagens para a sua API
       const res = await fetch("/api/crud/colecoes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, items: itemsWithUrls }),
       });
+  
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.success) {
         alert("Coleção criada com sucesso!");
         setForm({
           title: "",
@@ -104,18 +134,19 @@ export default function AdminColecoes() {
           description: "",
           bgcolor: "",
           buttonText: "",
-          items: [{ productMark: "", productModel: "", cor: "" }],
+          items: [{ productMark: "", productModel: "", cor: "", img: "" }],
         });
-        fetchColecoes(); // Recarrega a lista
+        fetchColecoes();
       } else {
         setError(data.message || "Erro ao criar coleção.");
       }
-    } catch (e) {
-      setError("Erro ao conectar com a API.");
+    } catch (e: any) {
+      setError(e.message || "Erro ao conectar com a API.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleDelete = async (id: string, isItem = false) => {
     if (!confirm(`Tem certeza que deseja excluir ${isItem ? "este item" : "esta coleção"}?`)) return;
@@ -128,7 +159,7 @@ export default function AdminColecoes() {
       });
       if (res.ok) {
         alert(`${isItem ? "Item" : "Coleção"} excluído com sucesso!`);
-        fetchColecoes(); // Recarrega a lista
+        fetchColecoes();
       } else {
         const data = await res.json();
         setError(data.message || "Erro ao excluir.");
@@ -143,7 +174,7 @@ export default function AdminColecoes() {
       <Head>
         <title>Admin - Coleções</title>
       </Head>
-      <AdminLayout> {/* Ajuste: Componente de Layout */}
+      <AdminLayout>
         <main className="container mx-auto p-4 mt-20">
           <h1 className="text-3xl font-bold mb-6">Gerenciar Coleções</h1>
           
@@ -159,14 +190,26 @@ export default function AdminColecoes() {
               
               <h3 className="text-xl font-semibold mt-4">Itens da Coleção</h3>
               {form.items.map((item, index) => (
-                <div key={index} className="flex gap-2 items-center">
-                  <input type="text" name="productMark" value={item.productMark} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-2 border rounded" />
-                  <input type="text" name="productModel" value={item.productModel} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-2 border rounded" />
-                  <input type="text" name="cor" value={item.cor} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-2 border rounded" />
-                  <button type="button" onClick={() => handleRemoveItem(index)} className="bg-red-500 text-white p-2 rounded">Remover</button>
+                <div key={index} className="flex flex-col md:flex-row gap-2 items-center">
+                  <input type="text" name="productMark" value={item.productMark as string} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-2 border rounded flex-1" />
+                  <input type="text" name="productModel" value={item.productModel as string} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-2 border rounded flex-1" />
+                  <input type="text" name="cor" value={item.cor as string} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-2 border rounded flex-1" />
+                  
+                  <div className="flex-1 w-full flex items-center gap-2 border rounded p-2">
+                    <label htmlFor={`img-${index}`} className="flex-1 text-gray-500 cursor-pointer">
+                      {item.img instanceof File ? item.img.name : "Escolher arquivo..."}
+                    </label>
+                    <input type="file" name="img" id={`img-${index}`} onChange={(e) => handleItemChange(e, index)} required className="hidden" />
+                  </div>
+
+                  <button type="button" onClick={() => handleRemoveItem(index)} className="bg-red-500 text-white p-2 rounded">
+                    <MdDelete />
+                  </button>
                 </div>
               ))}
-              <button type="button" onClick={handleAddItem} className="bg-blue-500 text-white p-2 rounded mt-2">Adicionar Novo Item</button>
+              <button type="button" onClick={handleAddItem} className="bg-blue-500 text-white p-2 rounded mt-2 flex items-center justify-center gap-2">
+                <MdAddPhotoAlternate /> Adicionar Novo Item
+              </button>
               
               <button type="submit" disabled={loading} className="bg-green-500 text-white p-3 rounded mt-4">
                 {loading ? "Salvando..." : "Salvar Coleção"}
@@ -198,9 +241,12 @@ export default function AdminColecoes() {
                   <div className="mt-4">
                     <h4 className="font-semibold">Itens:</h4>
                     {colecao.items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center bg-gray-50 p-2 rounded mt-1">
-                        <span>{item.productMark} - {item.productModel} ({item.cor})</span>
-                        <button onClick={() => handleDelete(item.id, true)} className="bg-red-400 text-white p-1 rounded text-xs">Excluir Item</button>
+                      <div key={item.id} className="flex flex-col md:flex-row gap-2 items-center bg-gray-50 p-2 rounded mt-1">
+                        <img src={item.img} alt={item.productModel} className="w-16 h-16 object-cover rounded" />
+                        <div className="flex-1">
+                          <span>{item.productMark} - {item.productModel} ({item.cor})</span>
+                        </div>
+                        <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-400 text-white p-1 rounded text-xs">Excluir Item</button>
                       </div>
                     ))}
                   </div>
