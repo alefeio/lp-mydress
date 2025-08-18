@@ -1,91 +1,141 @@
+// src/pages/share/[collectionKey]/[id].tsx
+
 import Head from 'next/head';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { CollectionKey } from '../../../types'; 
-import { collections } from 'components/Collections';
-import { FaWhatsapp, FaHome } from 'react-icons/fa'; // Importando os ícones
+import { Collection, BaseProduct } from 'types';
+import { FaWhatsapp, FaHome } from 'react-icons/fa';
 
-interface SharePageProps {
-  shareData: {
-    title: string;
-    description: string;
-    imageUrl: string;
-    collectionKey: string;
-    id: string;
-    productModel: string; // Adicionando o modelo para o botão do WhatsApp
-    productMark: string; // Adicionando a marca para o botão do WhatsApp
-  };
+interface ShareProps {
+  product: BaseProduct;
+  collectionTitle: string;
+  shareUrl: string;
 }
 
-export const getServerSideProps: GetServerSideProps = async (context: GetServerSidePropsContext) => {
-  const { collectionKey, id } = context.params as { collectionKey: CollectionKey; id: string };
+export const getServerSideProps: GetServerSideProps<ShareProps> = async (
+  context: GetServerSidePropsContext
+) => {
+  const { collectionKey, id } = context.params as {
+    collectionKey: string;
+    id: string;
+  };
 
-  const collection = collections[collectionKey];
-  const product = collection?.items[parseInt(id)];
+  const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/collections`
+    : 'http://localhost:3000/api/crud/collections';
 
-  if (!product || !('productMark' in product)) {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) {
+      throw new Error('Failed to fetch collections');
+    }
+    const collections: Collection[] = await res.json();
+
+    const currentCollection = collections.find((c) => c.id === collectionKey);
+
+    if (!currentCollection) {
+      return {
+        notFound: true,
+      };
+    }
+
+    const productIndex = parseInt(id, 10);
+    const product = currentCollection.items[productIndex];
+
+    if (!product || isNaN(productIndex)) {
+      return {
+        notFound: true,
+      };
+    }
+
+    const host = context.req.headers.host;
+    const protocol = context.req.headers['x-forwarded-proto'] || 'http';
+    const shareUrl = `${protocol}://${host}/share/${collectionKey}/${id}`;
+
+    return {
+      props: {
+        product,
+        collectionTitle: currentCollection.title,
+        shareUrl,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching data for share page:', error);
     return {
       notFound: true,
     };
   }
-
-  const shareData = {
-    title: `Vestido ${product.productModel} - ${product.productMark}`,
-    description: `Confira este modelo incrível: ${product.productModel} da marca ${product.productMark}!`,
-    imageUrl: product.img,
-    collectionKey: collectionKey,
-    id: id,
-    productModel: product.productModel ?? '', // Passando o modelo
-    productMark: product.productMark ?? '', // Passando a marca
-  };
-
-  return {
-    props: {
-      shareData,
-    },
-  };
 };
 
-export default function SharePage({ shareData }: SharePageProps) {
-  const whatsappUrl = `https://wa.me//5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(shareData.productModel)} - ${encodeURIComponent(shareData.productMark)}. Link para a foto: ${encodeURIComponent(`https://www.mydressbelem.com.br/share/${shareData.collectionKey}/${shareData.id}`)}`;
-  const siteUrl = `https://www.mydressbelem.com.br/${shareData.collectionKey}/${shareData.id}`;
+const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
+  if (!product) {
+    return <div>Produto não encontrado.</div>;
+  }
+
+  const handleWhatsappClick = () => {
+    const whatsappMessage = `Olá! Gostaria de reservar o modelo ${product.productModel}. Link para a foto: ${shareUrl}`;
+    const whatsappUrl = `https://wa.me/5591985810208?text=${encodeURIComponent(
+      whatsappMessage
+    )}`;
+    window.open(whatsappUrl, '_blank');
+  };
 
   return (
-    <>
+    <div className="bg-background-50 min-h-screen flex items-center justify-center p-4">
       <Head>
-        <title>{shareData.title}</title>
-        <meta property="og:title" content={shareData.title} />
-        <meta property="og:description" content={shareData.description} />
-        <meta property="og:image" content={shareData.imageUrl} />
-        <meta property="og:url" content={`https://www.mydressbelem.com.br/share/${shareData.collectionKey}/${shareData.id}`} />
+        <title>{`Vestido ${product.productModel || ''} - ${collectionTitle}`}</title>
+        <meta
+          name="description"
+          content={`Confira este lindo vestido da coleção ${collectionTitle}. Modelo ${
+            product.productModel || ''
+          }.`}
+        />
+        <meta property="og:title" content={`Vestido ${product.productModel || ''} - ${collectionTitle}`} />
+        <meta
+          property="og:description"
+          content={`Confira este lindo vestido da coleção ${collectionTitle}.`}
+        />
+        <meta property="og:image" content={product.img} />
+        <meta property="og:url" content={shareUrl} />
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`Vestido ${product.productModel || ''} - ${collectionTitle}`} />
+        <meta name="twitter:image" content={product.img} />
       </Head>
-      
-      <div className="flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-bold">{shareData.title}</h1>
-        <p className="mt-2 text-gray-600">{shareData.description}</p>
-        <img src={shareData.imageUrl} alt={shareData.title} className="mt-4 max-w-full h-auto" />
 
-        <div className="flex gap-4 mt-8">
-            <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
-                aria-label="Reservar via WhatsApp"
-            >
-                <FaWhatsapp className="w-5 h-5 mr-2 text-background-50" /> Falar no WhatsApp
-            </a>
+      <div className="w-full max-w-xl bg-white rounded-lg shadow-lg overflow-hidden md:max-w-xl">
+        <div className="p-4 bg-gray-100 text-center">
+          <h1 className="text-xl font-bold">{product.productMark}</h1>
+          <p className="text-sm text-gray-600">Modelo: {product.productModel}</p>
+        </div>
+        <div className="relative w-full h-auto">
+          <img
+            src={product.img}
+            alt={`${product.productMark} - ${product.productModel}`}
+            className="w-full h-auto object-contain"
+          />
+        </div>
 
-            <a
-                href={siteUrl}
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
-                aria-label="Ir para o site"
+        <div className="p-4 flex flex-col items-center">
+          <p className="text-center text-sm text-gray-700 mb-4">{product.description}</p>
+          <div className="flex space-x-4">
+            <button
+              onClick={handleWhatsappClick}
+              className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-                <FaHome className="w-5 h-5 mr-2 text-background-50" /> Ver no site
+              <FaWhatsapp />
+              <span>Reservar via WhatsApp</span>
+            </button>
+            <a
+              href="/"
+              className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
+            >
+              <FaHome />
+              <span>Voltar para a home</span>
             </a>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
-}
+};
+
+export default SharePage;
