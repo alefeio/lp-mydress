@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { FaTrash } from "react-icons/fa";
+import { useSession } from "next-auth/react";
 
 interface MenuLink {
   id: string;
@@ -11,6 +12,7 @@ interface MenuLink {
 }
 
 export default function MenuForm() {
+  const { data: session, status } = useSession();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoUrl, setLogoUrl] = useState<string>("");
   const [links, setLinks] = useState<MenuLink[]>([]);
@@ -22,6 +24,9 @@ export default function MenuForm() {
 
   useEffect(() => {
     const fetchMenu = async () => {
+      // Verifica se a sessão existe e o usuário é ADMIN
+      if (session?.user?.role !== "ADMIN") return;
+
       try {
         const response = await fetch("/api/crud/menu");
         if (response.ok) {
@@ -36,7 +41,7 @@ export default function MenuForm() {
       }
     };
     fetchMenu();
-  }, []);
+  }, [session, status]);
 
   const handleLogoChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -45,21 +50,21 @@ export default function MenuForm() {
   };
 
   const handleLinkAdd = (e: FormEvent) => {
-      e.preventDefault();
-      if (newLinkText && newLinkUrl) {
-          setLinks((prevLinks) => [
-              ...prevLinks,
-              {
-                  id: String(Date.now()),
-                  text: newLinkText,
-                  url: newLinkUrl,
-                  target: newLinkTarget ? "_blank" : "_self",
-              },
-          ]);
-          setNewLinkText("");
-          setNewLinkUrl("");
-          setNewLinkTarget(false);
-      }
+    e.preventDefault();
+    if (newLinkText && newLinkUrl) {
+      setLinks((prevLinks) => [
+        ...prevLinks,
+        {
+          id: String(Date.now()),
+          text: newLinkText,
+          url: newLinkUrl,
+          target: newLinkTarget ? "_blank" : "_self",
+        },
+      ]);
+      setNewLinkText("");
+      setNewLinkUrl("");
+      setNewLinkTarget(false);
+    }
   };
 
   const handleLinkRemove = (idToRemove: string) => {
@@ -71,6 +76,7 @@ export default function MenuForm() {
     setLoading(true);
     setMessage("");
 
+    // A requisição de upload não precisa de autenticação se a API for configurada para isso
     let uploadedLogoUrl = logoUrl;
     if (logoFile) {
       const formData = new FormData();
@@ -98,6 +104,12 @@ export default function MenuForm() {
     }
 
     try {
+      if (!session || session.user?.role !== 'ADMIN') {
+        setMessage("Acesso não autorizado.");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch("/api/crud/menu", {
         method: "POST",
         headers: {
@@ -118,6 +130,10 @@ export default function MenuForm() {
       setLoading(false);
     }
   };
+  
+  const isButtonDisabled = !session || session.user?.role !== "ADMIN" || loading;
+  if (status === 'loading') return <p>Carregando...</p>;
+  if (session?.user?.role !== 'ADMIN') return <p>Acesso não autorizado.</p>;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
@@ -227,9 +243,9 @@ export default function MenuForm() {
       <button
         type="button"
         onClick={handleSave}
-        className={`w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+        className={`w-full p-3 text-white font-bold rounded-md ${isButtonDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
           }`}
-        disabled={loading}
+        disabled={isButtonDisabled}
       >
         {loading ? "Salvando..." : "Salvar Menu"}
       </button>

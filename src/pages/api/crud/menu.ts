@@ -1,42 +1,45 @@
 // src/pages/api/crud/menu.ts
 
-import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]";
+import prisma from "../../../lib/prisma";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Lógica para lidar com a requisição GET
-  if (req.method === 'GET') {
-    try {
-      // @ts-ignore
-      const menuData = await prisma.menu.findUnique({
-        where: { id: 1 },
-      });
-      return res.status(200).json(menuData);
-    } catch (error) {
-      return res.status(500).json({ message: "Erro ao buscar menu" });
+    if (req.method === 'GET') {
+        try {
+            const menuData = await prisma.menu.findUnique({
+                where: { id: 1 },
+            });
+            return res.status(200).json(menuData);
+        } catch (error) {
+            return res.status(500).json({ message: "Erro ao buscar menu" });
+        }
     }
-  }
+    
+    // A partir daqui, todas as requisições exigem autenticação
+    const session = await getServerSession(req, res, authOptions);
 
-  // Lógica para lidar com a requisição POST
-  if (req.method === 'POST') {
-    const { logoUrl, links } = req.body;
-
-    try {
-      // @ts-ignore
-      const updatedMenu = await prisma.menu.upsert({
-        where: { id: 1 },
-        update: { logoUrl, links },
-        create: { id: 1, logoUrl, links },
-      });
-      return res.status(200).json(updatedMenu);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Erro ao salvar o menu" });
+    if (!session || session.user?.role !== 'ADMIN') {
+      return res.status(401).json({ message: 'Acesso não autorizado.' });
     }
-  }
 
-  res.setHeader('Allow', ['GET', 'POST']);
-  res.status(405).end(`Method ${req.method} Not Allowed`);
+    if (req.method === 'POST') {
+      const { logoUrl, links } = req.body;
+
+      try {
+        const updatedMenu = await prisma.menu.upsert({
+          where: { id: 1 },
+          update: { logoUrl, links },
+          create: { id: 1, logoUrl, links },
+        });
+        return res.status(200).json(updatedMenu);
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Erro ao salvar o menu" });
+      }
+    }
+
+    res.setHeader('Allow', ['GET', 'POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
 }
