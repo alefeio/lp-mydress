@@ -1,25 +1,43 @@
+// DressesGallery.tsx
+
 import { useState, useEffect } from "react";
 import { GallerySection } from "./GallerySection";
-import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
 import { useRouter } from "next/router";
 import ModalPhotos from "./ModalPhotos";
-import { BaseProduct, Collection, CollectionKey } from "types";
+import { BaseProduct, Collection } from "types";
+import useSWR from 'swr';
+
+const fetcher = async (url: string) => {
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error('Erro ao buscar dados.');
+    }
+    return res.json();
+};
 
 export default function DressesGallery() {
-    const [modalType, setModalType] = useState<CollectionKey | null>(null);
+    const [modalType, setModalType] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [modalIdx, setModalIdx] = useState(0);
 
     const router = useRouter();
-    const { collection, id } = router.query;
+    const { collectionId, id } = router.query;
 
-    function getCollectionByKey(key: CollectionKey | null): Collection | null {
-        return key ? collections[key] || null : null;
+    const { data: collections, error } = useSWR<Collection[]>('/api/crud/collections', fetcher);
+
+    // Mapeia o array de coleções para um objeto para busca rápida
+    const collectionsMap: Record<string, Collection> = collections ? collections.reduce((map, collection) => {
+        map[collection.id] = collection;
+        return map;
+    }, {} as Record<string, Collection>) : {};
+
+    function getCollectionById(id: string | null): Collection | null {
+        return id ? collectionsMap[id] || null : null;
     }
 
-    const openModal = (index: number, type: CollectionKey) => {
-        router.push(`/${type}/${index}`, undefined, { shallow: true, scroll: false });
+    const openModal = (index: number, collectionId: string) => {
+        router.push(`/${collectionId}/${index}`, undefined, { shallow: true, scroll: false });
     };
 
     const closeModal = () => {
@@ -30,34 +48,22 @@ export default function DressesGallery() {
     };
 
     useEffect(() => {
-        if (typeof collection === "string" && typeof id === "string") {
-            const colKey = collection as CollectionKey;
+        if (typeof collectionId === "string" && typeof id === "string" && collections) {
+            const col = getCollectionById(collectionId);
             const idx = Number(id);
 
-            const col = getCollectionByKey(colKey);
-
             if (col && idx >= 0 && idx < col.items.length && !isNaN(idx)) {
-                setModalType(colKey);
+                setModalType(collectionId);
                 setModalIdx(idx);
                 setShowModal(true);
             } else {
                 closeModal();
             }
         }
-    }, [collection, id]);
+    }, [collectionId, id, collections]);
 
-    const galleryMap = {} as Record<
-        CollectionKey,
-        ReturnType<typeof useGalleryNavigation<BaseProduct>>
-    >;
-
-    (Object.keys(collections) as CollectionKey[]).forEach((key) => {
-        const collectionItems = collections[key]?.items;
-        const length = collectionItems ? collectionItems.length : 0;
-        if (length > 0) {
-            galleryMap[key] = useGalleryNavigation<BaseProduct>(length);
-        }
-    });
+    if (error) return <p className="text-center py-8">Falha ao carregar as coleções.</p>;
+    if (!collections) return <p className="text-center py-8">Carregando...</p>;
 
     return (
         <>
@@ -74,25 +80,25 @@ export default function DressesGallery() {
                     </p>
                 </div>
 
-                {Object.keys(collections).map((key) => {
-                    const colKey = key as CollectionKey;
-                    const col = collections[colKey];
+                {collections.map((collection: Collection) => {
+                    const gallery = useGalleryNavigation<BaseProduct>(collection.items.length);
 
-                    if (!col || !galleryMap[colKey]) return null;
+                    if (!collection || collection.items.length === 0) return null;
 
                     return (
                         <GallerySection
-                            key={colKey}
-                            collectionKey={colKey}
-                            buttonHref={`https://wa.me//5591985810208?text=Olá! Gostaria do Catálogo de ${col.title}.`}
-                            gallery={galleryMap[colKey]}
-                            onOpenModal={(index) => openModal(index, colKey)}
+                            key={collection.id}
+                            collection={collection}
+                            buttonHref={`https://wa.me//5591985810208?text=Olá! Gostaria do Catálogo de ${collection.title}.`}
+                            gallery={gallery}
+                            onOpenModal={(index) => openModal(index, collection.id)}
                         />
                     );
                 })}
 
                 {showModal && modalType && (
                     <ModalPhotos
+                        collections={collections}
                         modalType={modalType}
                         setModalIdx={setModalIdx}
                         setShowModal={setShowModal}

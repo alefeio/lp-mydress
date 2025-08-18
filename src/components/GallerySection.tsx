@@ -1,24 +1,23 @@
+// GallerySection.tsx
+
 import React, { useEffect, useState } from "react";
-import { collections } from "./Collections";
 import { useGalleryNavigation } from "./useGalleryNavigation";
-import { useRouter } from "next/router";
-import { BaseProduct, Collection, CollectionKey } from "types";
+import { BaseProduct, Collection } from "types";
 import { FaWhatsapp, FaShareAlt } from "react-icons/fa";
 
 type GallerySectionProps = {
-    collectionKey: CollectionKey;
+    collection: Collection;
     buttonHref: string;
-    onOpenModal: (index: number, collectionKey: CollectionKey) => void;
+    onOpenModal: (index: number) => void;
     gallery: ReturnType<typeof useGalleryNavigation<BaseProduct>>;
 };
 
 export function GallerySection({
-    collectionKey,
+    collection,
     buttonHref,
     onOpenModal,
     gallery,
 }: GallerySectionProps) {
-    const router = useRouter();
     const [canShare, setCanShare] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
 
@@ -27,12 +26,6 @@ export function GallerySection({
             setCanShare(true);
         }
     }, []);
-
-    const collection = collections[collectionKey] as Collection;
-
-    if (!collection) {
-        return <p className="text-center py-8">Coleção não encontrada.</p>;
-    }
 
     const handleShare = async (item: BaseProduct, shareUrl: string) => {
         if (isSharing) return;
@@ -70,9 +63,8 @@ export function GallerySection({
 
                         const actualIndex = (gallery.index + idx - 1 + collection.items.length) % collection.items.length;
                         
-                        // CORRIGIDO: Adicionando o timestamp para evitar cache
                         const timestamp = Date.now();
-                        const shareUrl = `https://www.mydressbelem.com.br/share/${collectionKey}/${actualIndex}?v=${timestamp}`;
+                        const shareUrl = `https://www.mydressbelem.com.br/share/${collection.id}/${actualIndex}?v=${timestamp}`;
 
                         return (
                             <nav key={actualIndex}>
@@ -83,7 +75,7 @@ export function GallerySection({
                                         className="w-full h-full object-cover"
                                     />
                                     <button
-                                        onClick={() => onOpenModal(actualIndex, collectionKey)}
+                                        onClick={() => onOpenModal(actualIndex)}
                                         className="absolute top-2 right-2 cursor-pointer text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition"
                                         aria-label="Ver produto"
                                     >

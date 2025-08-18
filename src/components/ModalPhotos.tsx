@@ -1,46 +1,43 @@
+// ModalPhotos.tsx
+
 import { useEffect, useState } from "react";
-import { collections } from "./Collections";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { ZoomableImage } from "./ZoomableImage";
 import { ModalHeaderFooter } from "./ModalHeaderFooter";
 import { Collection } from "types";
 
-type CollectionKey = keyof typeof collections;
-
 interface ModalPhotosProps {
-    modalType: CollectionKey | null;
+    collections: Collection[];
+    modalType: string | null;
     setModalIdx: React.Dispatch<React.SetStateAction<number>>;
     setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-    setModalType: React.Dispatch<React.SetStateAction<CollectionKey | null>>;
+    setModalType: React.Dispatch<React.SetStateAction<string | null>>;
     modalIdx: number;
     onClose: () => void;
 }
 
-function getCollectionByKey(key: CollectionKey | null): Collection | null {
-    return key ? collections[key] || null : null;
+function getCollectionById(collections: Collection[], id: string | null): Collection | null {
+    return id ? collections.find(c => c.id === id) || null : null;
 }
 
 export default function ModalPhotos({
+    collections,
     modalType,
     setModalIdx,
-    setShowModal,
-    setModalType,
     modalIdx,
     onClose,
 }: ModalPhotosProps) {
     const router = useRouter();
     const [shareUrl, setShareUrl] = useState("");
     
-    const currentCollection = getCollectionByKey(modalType);
+    const currentCollection = getCollectionById(collections, modalType);
 
     useEffect(() => {
         if (modalType !== null) {
-            // CORRIGIDO: Adicionando o timestamp à URL de compartilhamento
             const timestamp = Date.now();
             setShareUrl(`${window.location.origin}/share/${modalType}/${modalIdx}?v=${timestamp}`);
             
-            // O router.replace deve usar a URL sem o timestamp, pois é a URL real da página
             router.replace(`/${modalType}/${modalIdx}`, undefined, { shallow: true });
         }
     }, [modalIdx, modalType, router]);
@@ -51,13 +48,13 @@ export default function ModalPhotos({
 
     const modalPrev = () => {
         if (!modalType) return;
-        const items = collections[modalType].items;
+        const items = currentCollection.items;
         setModalIdx((idx) => (idx === 0 ? items.length - 1 : idx - 1));
     };
 
     const modalNext = () => {
         if (!modalType) return;
-        const items = collections[modalType].items;
+        const items = currentCollection.items;
         setModalIdx((idx) => (idx === items.length - 1 ? 0 : idx + 1));
     };
 
@@ -92,12 +89,9 @@ export default function ModalPhotos({
             >
                 <div
                     className="relative bg-background-100 md:rounded-xl shadow-2xl max-w-[100vw] max-h-[90vh] flex flex-col"
-                    // Remova o onClick daqui
-                    // onClick={(e) => e.stopPropagation()} 
                     style={{ width: "min(900px, 100%)" }}
                 >
                     <div
-                        // Adicione um wrapper com stopPropagation para as partes do modal que não devem fechar o modal
                         onClick={(e) => e.stopPropagation()}
                         className="relative w-full h-full flex flex-col"
                     >
