@@ -1,71 +1,74 @@
-// DressesGallery.tsx
+// src/components/DressesGallery.tsx
 
-import { useState, useEffect } from "react";
-import { GallerySection } from "./GallerySection";
-import { useGalleryNavigation } from "./useGalleryNavigation";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import ModalPhotos from "./ModalPhotos";
-import { BaseProduct, Collection } from "types";
-import useSWR from 'swr';
+import CollectionGallerySection from "./CollectionGallerySection";
+// Certifique-se de que as tipagens estão importadas corretamente
+import { ColecaoProps, ColecaoItem } from "../types"; 
 
-const fetcher = async (url: string) => {
-    const res = await fetch(url);
-    if (!res.ok) {
-        throw new Error('Erro ao buscar dados.');
-    }
-    const data = await res.json();
-    // AQUI ESTÁ A CORREÇÃO: RETORNA O ARRAY DENTRO DO OBJETO
-    return data.colecoes; 
-};
+interface DressesGalleryProps {
+    colecoes: ColecaoProps[];
+}
 
-export default function DressesGallery() {
+export default function DressesGallery({ colecoes }: DressesGalleryProps) {
     const [modalType, setModalType] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [modalIdx, setModalIdx] = useState(0);
 
     const router = useRouter();
-    const { collectionId, id } = router.query;
+    const { collectionSlug, itemSlug } = router.query;
 
-    const { data: collections, error } = useSWR<Collection[]>('/api/crud/colecoes', fetcher);
+    const openModal = useCallback((collectionSlug: string, itemSlug: string) => {
+        if (collectionSlug && itemSlug) {
+            router.push({
+                pathname: router.pathname,
+                query: { collectionSlug, itemSlug }
+            }, undefined, { shallow: true, scroll: false });
+        } else {
+            console.error("Erro: slugs da coleção ou do item são nulos/undefined. Verifique seus dados.");
+        }
+    }, [router]);
 
-    // Mapeia o array de coleções para um objeto para busca rápida
-    const collectionsMap: Record<string, Collection> = collections ? collections.reduce((map, collection) => {
-        map[collection.id] = collection;
-        return map;
-    }, {} as Record<string, Collection>) : {};
-
-    function getCollectionById(id: string | null): Collection | null {
-        return id ? collectionsMap[id] || null : null;
-    }
-
-    const openModal = (index: number, collectionId: string) => {
-        router.push(`/${collectionId}/${index}`, undefined, { shallow: true, scroll: false });
-    };
-
-    const closeModal = () => {
-        setShowModal(false);
+    const closeModal = useCallback(() => {
         setModalType(null);
         setModalIdx(0);
-        router.push("/", undefined, { shallow: true });
-    };
+        setShowModal(false);
+        router.replace(router.pathname, undefined, { shallow: true, scroll: false });
+    }, [router]);
 
     useEffect(() => {
-        if (typeof collectionId === "string" && typeof id === "string" && collections) {
-            const col = getCollectionById(collectionId);
-            const idx = Number(id);
+        if (router.isReady && colecoes.length > 0) {
+            if (typeof collectionSlug === "string" && typeof itemSlug === "string") {
+                const col = colecoes.find(c => c.slug === collectionSlug);
+                const idx = col?.items.findIndex(item => item.slug === itemSlug);
 
-            if (col && idx >= 0 && idx < col.items.length && !isNaN(idx)) {
-                setModalType(collectionId);
-                setModalIdx(idx);
-                setShowModal(true);
-            } else {
+                if (col && idx !== -1 && idx !== undefined) {
+                    setModalType(col.slug);
+                    setModalIdx(idx);
+                    setShowModal(true);
+                } else if (showModal) {
+                    closeModal();
+                }
+            } else if (showModal) {
                 closeModal();
             }
         }
-    }, [collectionId, id, collections]);
+    }, [router.isReady, collectionSlug, itemSlug, colecoes, showModal, closeModal]);
 
-    if (error) return <p className="text-center py-8">Falha ao carregar as coleções.</p>;
-    if (!collections) return <p className="text-center py-8">Carregando...</p>;
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                closeModal();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [closeModal]);
+
+    if (!colecoes || colecoes.length === 0) {
+        return <p className="text-center py-8">Falha ao carregar a galeria.</p>;
+    }
 
     return (
         <>
@@ -82,35 +85,22 @@ export default function DressesGallery() {
                     </p>
                 </div>
 
-                {collections.map((collection: Collection) => {
-                    const gallery = useGalleryNavigation<BaseProduct>(collection.items.length);
-
-                    if (!collection || collection.items.length === 0) return null;
-
-                    return (
-                        <GallerySection
-                            key={collection.id}
-                            collection={collection}
-                            buttonHref={`https://wa.me//5591985810208?text=Olá! Gostaria do Catálogo de ${collection.title}.`}
-                            gallery={gallery}
-                            onOpenModal={(index) => openModal(index, collection.id)}
-                        />
-                    );
-                })}
+                {colecoes.map((colecao: ColecaoProps) => (
+                    <CollectionGallerySection
+                        key={colecao.slug}
+                        collection={colecao}
+                        openModal={openModal}
+                    />
+                ))}
 
                 {showModal && modalType && (
                     <ModalPhotos
-                        collections={collections}
+                        colecoes={colecoes}
                         modalType={modalType}
                         setModalIdx={setModalIdx}
                         setShowModal={setShowModal}
-                        setModalType={setModalType}
                         modalIdx={modalIdx}
-                        onClose={() => {
-                            setShowModal(false);
-                            setModalType(null);
-                            router.push("/", undefined, { shallow: true, scroll: false });
-                        }}
+                        onClose={closeModal}
                     />
                 )}
             </section>

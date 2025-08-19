@@ -1,3 +1,5 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -21,6 +23,8 @@ model Account {
   id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now()) // Adicionado
+  updatedAt         DateTime @updatedAt // Adicionado
 
   @@unique([provider, providerAccountId])
 }
@@ -31,6 +35,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now()) // Adicionado
+  updatedAt    DateTime @updatedAt // Adicionado
 }
 
 model User {
@@ -42,6 +48,8 @@ model User {
   role          String?   @default("USER")
   accounts      Account[]
   sessions      Session[]
+  createdAt     DateTime @default(now()) // Adicionado
+  updatedAt     DateTime @updatedAt // Adicionado
 }
 
 model VerificationToken {
@@ -49,26 +57,34 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+  createdAt  DateTime @default(now()) // Adicionado
+  updatedAt  DateTime @updatedAt // Adicionado
 
   @@unique([identifier, token])
 }
 
 model Menu {
-  id       Int     @id @default(1)
-  logoUrl  String?
-  links    Json
+  // Não faz sentido adicionar os campos de tempo, pois esta tabela é estática
+  // e representa uma única configuração que é apenas atualizada.
+  id        Int      @id @default(1)
+  logoUrl   String?
+  links     Json
 }
 
 model Banner {
-  id        Int    @id @default(1)
+  // Mesmo caso de Menu. É uma tabela de configuração.
+  id        Int      @id @default(1)
   banners   Json
 }
 
 model HomepageSection {
-  id          String   @id @default(cuid())
-  type        String
-  order       Int
-  content     Json
+  id        String   @id @default(cuid())
+  type      String
+  order     Int
+  content   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Adicionado para permitir soft delete de seções
 }
 
 model Testimonial {
@@ -78,6 +94,7 @@ model Testimonial {
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Adicionado para soft delete
 }
 
 model FAQ {
@@ -86,32 +103,35 @@ model FAQ {
   resposta  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime? // Adicionado para soft delete
 }
 
 // prisma/schema.prisma
 
-// ... (outros modelos) ...
-
 model Colecao {
-  id          String    @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   subtitle    String?
   description String?
   bgcolor     String?
   buttonText  String?
-  buttonUrl   String? // Campo adicionado para a URL do botão
+  buttonUrl   String?
   items       ColecaoItem[]
+  createdAt   DateTime      @default(now()) // Adicionado para ordenação por criação
+  updatedAt   DateTime      @updatedAt // Adicionado para controle de atualização
+  deletedAt   DateTime?     // Adicionado para soft delete
 }
 
 model ColecaoItem {
-  id            String   @id @default(cuid())
-  productMark   String
-  productModel  String
-  cor           String
-  img           String
-  slug          String   @unique // Campo adicionado para a URL amigável (slug)
-
-  // Chave estrangeira que conecta o item à sua coleção
-  colecao       Colecao  @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
-  colecaoId     String
+  id           String    @id @default(cuid())
+  productMark  String
+  productModel String
+  cor          String
+  img          String
+  slug         String    @unique
+  colecao      Colecao   @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
+  colecaoId    String
+  createdAt    DateTime  @default(now()) // Adicionado para ordenação por criação
+  updatedAt    DateTime  @updatedAt // Adicionado para controle de atualização
+  deletedAt    DateTime? // Adicionado para soft delete
 }

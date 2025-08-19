@@ -1,136 +1,77 @@
-import { useRef, useState } from "react";
+// src/components/ZoomableImage.tsx
+
+import React, { useRef, useState, useCallback } from "react";
+import { AiOutlineSearch } from "react-icons/ai";
 
 interface ZoomableImageProps {
     src: string;
     alt: string;
-    lensSize?: number;
-    zoomFactor?: number;
-    onZoomChange?: (zoomActive: boolean) => void;
 }
 
-export function ZoomableImage({
-    src,
-    alt,
-    lensSize = 500,
-    zoomFactor = 2,
-    onZoomChange,
-}: ZoomableImageProps) {
-    const [showLens, setShowLens] = useState(false);
-    const [lensPos, setLensPos] = useState({ x: 0, y: 0 });
-    const zoomImgRef = useRef<HTMLImageElement | null>(null);
+export function ZoomableImage({ src, alt }: ZoomableImageProps) {
+    const [isZoomed, setIsZoomed] = useState(false);
+    const [zoomPosition, setZoomPosition] = useState({ x: '50%', y: '50%' });
+    const imageRef = useRef<HTMLImageElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    // Calcula a posição da lente e evita que saia do container da imagem
-    const calculateLensPosition = (x: number, y: number) => {
-        const img = zoomImgRef.current;
-        if (!img) return { x, y };
+    const handleToggleZoom = useCallback(() => {
+        setIsZoomed((prevIsZoomed) => !prevIsZoomed);
+        // Reseta a posição ao zoom in/out para evitar comportamentos inesperados
+        setZoomPosition({ x: '50%', y: '50%' });
+    }, []);
 
-        const rect = img.getBoundingClientRect();
+    const handleInteraction = useCallback((e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+        if (!imageRef.current || !isZoomed || !containerRef.current) return;
 
-        // Coordenadas relativas dentro da imagem
-        let posX = x - rect.left;
-        let posY = y - rect.top;
+        let clientX, clientY;
 
-        // Limitar posição para não ultrapassar bordas
-        if (posX < lensSize / (2 * zoomFactor)) posX = lensSize / (2 * zoomFactor);
-        if (posY < lensSize / (2 * zoomFactor)) posY = lensSize / (2 * zoomFactor);
-        if (posX > rect.width - lensSize / (2 * zoomFactor))
-            posX = rect.width - lensSize / (2 * zoomFactor);
-        if (posY > rect.height - lensSize / (2 * zoomFactor))
-            posY = rect.height - lensSize / (2 * zoomFactor);
-
-        return { x: posX, y: posY };
-    };
-
-    const toggleZoom = (e: React.MouseEvent | React.TouchEvent) => {
-        e.stopPropagation();
-        setShowLens((prev) => {
-            onZoomChange?.(!prev);
-            return !prev;
-        });
-    };
-
-    const closeZoom = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setShowLens(false);
-        onZoomChange?.(false);
-    };
-
-    const handleMove = (
-        e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
-    ) => {
-        if (!showLens) return;
-
-        if ("touches" in e) {
+        if ('touches' in e) {
+            // Lida com eventos de toque
             const touch = e.touches[0];
-            if (!touch) return;
-            const pos = calculateLensPosition(touch.clientX, touch.clientY);
-            setLensPos(pos);
+            clientX = touch.clientX;
+            clientY = touch.clientY;
             e.preventDefault();
         } else {
-            const pos = calculateLensPosition(e.clientX, e.clientY);
-            setLensPos(pos);
+            // Lida com eventos de mouse
+            clientX = e.clientX;
+            clientY = e.clientY;
         }
-    };
+
+        const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+        const x = clientX - left;
+        const y = clientY - top;
+
+        // Calcula a posição relativa dentro da imagem (entre 0 e 1)
+        const relativeX = Math.max(0, Math.min(x / width, 1));
+        const relativeY = Math.max(0, Math.min(y / height, 1));
+
+        // Define a nova posição de zoom em porcentagem
+        setZoomPosition({ x: `${relativeX * 100}%`, y: `${relativeY * 100}%` });
+    }, [isZoomed]);
 
     return (
         <div
-            className="relative flex justify-center items-center flex-grow bg-background-50 rounded-b-xl cursor-zoom-in"
-            onClick={toggleZoom}
-            onMouseMove={handleMove}
-            onTouchMove={handleMove}
-            onTouchStart={toggleZoom}
-            role="presentation"
+            className="flex-grow flex items-center justify-center relative w-full h-full cursor-zoom-in overflow-hidden"
+            onClick={handleToggleZoom}
+            onMouseMove={handleInteraction}
+            onTouchStart={handleToggleZoom}
+            onTouchMove={handleInteraction}
+            ref={containerRef}
         >
-            <button
-                // onClick={() => onOpenModal(actualIndex, collectionKey)}
-                className="flex gap-2 absolute bottom-2 cursor-pointer text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition"
-                aria-label="Ver produto"
-            >
-                {/* <span></span> */}
-                <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-                    />
-                </svg>
-            </button>
             <img
-                ref={zoomImgRef}
+                ref={imageRef}
                 src={src}
                 alt={alt}
-                className="max-w-full max-h-[70vh] object-contain select-none"
-                draggable={false}
-                onClick={(e) => e.stopPropagation()}
+                className="max-h-full max-w-full object-contain transition-transform ease-in-out duration-300"
+                style={{
+                    transform: isZoomed ? 'scale(2)' : 'scale(1)',
+                    transformOrigin: `${zoomPosition.x} ${zoomPosition.y}`,
+                }}
             />
 
-            {showLens && (
-                <div
-                    onClick={closeZoom}
-                    className="absolute rounded-full border border-gray-300 shadow-lg cursor-zoom-out"
-                    style={{
-                        width: lensSize,
-                        height: lensSize,
-                        top: lensPos.y - lensSize / 2,
-                        left: lensPos.x - lensSize / 2,
-                        backgroundImage: `url(${src})`,
-                        backgroundRepeat: "no-repeat",
-                        backgroundSize: `${(zoomImgRef.current?.width || 0) * zoomFactor
-                            }px ${(zoomImgRef.current?.height || 0) * zoomFactor}px`,
-                        backgroundPosition: `-${lensPos.x * zoomFactor - lensSize / 2}px -${lensPos.y * zoomFactor - lensSize / 2
-                            }px`,
-                        zIndex: 40,
-                        pointerEvents: "auto",
-                    }}
-                    title="Clique para ocultar o zoom"
-                />
-            )}
+            <div className={`absolute bottom-4 right-4 text-white bg-black/60 p-2 rounded-full transition-opacity duration-300 ${isZoomed ? 'opacity-0' : 'opacity-100'}`}>
+                <AiOutlineSearch size={24} />
+            </div>
         </div>
     );
 }

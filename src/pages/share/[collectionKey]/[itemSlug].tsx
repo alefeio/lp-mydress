@@ -2,11 +2,12 @@
 
 import Head from 'next/head';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { Collection, BaseProduct } from 'types';
+// Importação ajustada para as novas tipagens
+import { ColecaoProps, ColecaoItem } from 'types'; 
 import { FaWhatsapp, FaHome } from 'react-icons/fa';
 
 interface ShareProps {
-  product: BaseProduct;
+  product: ColecaoItem;
   collectionTitle: string;
   shareUrl: string;
 }
@@ -29,9 +30,10 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
       throw new Error('Failed to fetch collections');
     }
     const data = await res.json();
-    const collections: Collection[] = data.colecoes;
+    // Tipagem ajustada para o dado da coleção
+    const collections: ColecaoProps[] = data.colecoes;
 
-    const currentCollection = collections.find((c) => c.id === collectionKey);
+    const currentCollection = collections.find((c) => c.slug === collectionKey);
 
     if (!currentCollection) {
       return {
@@ -39,10 +41,9 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
       };
     }
 
-    const productIndex = parseInt(id, 10);
-    const product = currentCollection.items[productIndex];
+    const product = currentCollection.items.find(item => item.slug === id);
 
-    if (!product || isNaN(productIndex)) {
+    if (!product) {
       return {
         notFound: true,
       };

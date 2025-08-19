@@ -1,28 +1,56 @@
-// types/index.ts
-import React from "react";
+// src/types/index.ts
 
-export interface BaseProduct {
-    img: string;
-    productMark?: string;
-    productModel?: string;
-    description?: string;
+export interface Banner {
+    id: number;
+    banners: {
+        id: string;
+        url: string;
+        link: string;
+        title: string;
+        target: string;
+    }[];
 }
 
-export interface Collection {
+export interface MenuItem {
+    id: number;
+    logoUrl: string;
+    links: {
+        id: string;
+        url: string;
+        text: string;
+        target: string;
+    }[];
+}
+
+export interface TestimonialItem {
     id: string;
-    title: string;
-    subtitle?: string;
-    description?: string;
-    items: BaseProduct[];
-    bgcolor: string;
-    buttonText: string;
+    name: string;
+    content: string;
+    type: string;
 }
 
-export interface ModalHeaderFooterProps {
-    productMark: string | undefined;
-    productModel: string | undefined;
-    shareUrl: string;
-    modalIdx: number;
-    modalType: string | null;
-    onReserveClick?: () => void;
+export interface FaqItem {
+    id: string;
+    pergunta: string;
+    resposta: string;
+}
+
+export interface ColecaoItem {
+    id: string; productMark: string; productModel: string; cor: string;
+    img: string; slug: string; colecaoId: string;
+    description?: string | null; // <-- Propriedade 'description' adicionada aqui
+}
+
+export interface ColecaoProps {
+    id: string; title: string; subtitle: string | null; description: string | null;
+    bgcolor: string | null; buttonText: string | null; buttonUrl: string | null;
+    slug: string; items: ColecaoItem[];
+}
+
+export interface HomePageProps {
+    banners: Banner[];
+    menu: MenuItem | null;
+    testimonials: TestimonialItem[];
+    faqs: FaqItem[];
+    colecoes: ColecaoProps[];
 }

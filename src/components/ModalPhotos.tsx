@@ -1,168 +1,140 @@
-// ModalPhotos.tsx
+// src/components/ModalPhotos.tsx
 
-import { useEffect, useState } from "react";
-import Head from "next/head";
+import React, { useState, useEffect, useRef } from "react";
+import { AiOutlineClose } from "react-icons/ai";
+import { SlArrowLeft, SlArrowRight } from "react-icons/sl";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import { ZoomableImage } from "./ZoomableImage";
 import { ModalHeaderFooter } from "./ModalHeaderFooter";
-import { Collection } from "types";
+import { ColecaoItem, ColecaoProps } from "types";
 
 interface ModalPhotosProps {
-    collections: Collection[];
-    modalType: string | null;
-    setModalIdx: React.Dispatch<React.SetStateAction<number>>;
-    setShowModal: React.Dispatch<React.SetStateAction<boolean>>;
-    setModalType: React.Dispatch<React.SetStateAction<string | null>>;
+    colecoes: ColecaoProps[];
+    modalType: string;
     modalIdx: number;
+    setModalIdx: (idx: number | ((prevIdx: number) => number)) => void;
+    setShowModal: (show: boolean) => void;
     onClose: () => void;
 }
 
-function getCollectionById(collections: Collection[], id: string | null): Collection | null {
-    return id ? collections.find(c => c.id === id) || null : null;
-}
-
 export default function ModalPhotos({
-    collections,
+    colecoes,
     modalType,
-    setModalIdx,
     modalIdx,
-    onClose,
+    setModalIdx,
+    setShowModal,
+    onClose
 }: ModalPhotosProps) {
     const router = useRouter();
-    const [shareUrl, setShareUrl] = useState("");
-    
-    const currentCollection = getCollectionById(collections, modalType);
+    const [isSharing, setIsSharing] = useState(false);
 
+    const colecaoAtual = colecoes.find(c => c.slug === modalType);
+    const totalItens = colecaoAtual?.items.length || 0;
+
+    const nextItem = () => {
+        // Tipagem explícita para 'prevIdx'
+        setModalIdx((prevIdx: number) => (prevIdx + 1) % totalItens);
+    };
+
+    const prevItem = () => {
+        // Tipagem explícita para 'prevIdx'
+        setModalIdx((prevIdx: number) => (prevIdx - 1 + totalItens) % totalItens);
+    };
+
+    // Fechar com a tecla ESC
     useEffect(() => {
-        if (modalType !== null) {
-            const timestamp = Date.now();
-            setShareUrl(`${window.location.origin}/share/${modalType}/${modalIdx}?v=${timestamp}`);
-            
-            router.replace(`/${modalType}/${modalIdx}`, undefined, { shallow: true });
-        }
-    }, [modalIdx, modalType, router]);
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
 
-    if (!currentCollection || currentCollection.items.length === 0) return null;
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [onClose]);
 
-    const product = currentCollection.items[modalIdx];
+    const itemAtual = colecaoAtual?.items[modalIdx];
 
-    const modalPrev = () => {
-        if (!modalType) return;
-        const items = currentCollection.items;
-        setModalIdx((idx) => (idx === 0 ? items.length - 1 : idx - 1));
-    };
+    if (!itemAtual) {
+        return null;
+    }
 
-    const modalNext = () => {
-        if (!modalType) return;
-        const items = currentCollection.items;
-        setModalIdx((idx) => (idx === items.length - 1 ? 0 : idx + 1));
-    };
+    // Gerar a URL de compartilhamento corretamente
+    const shareUrl = `${window.location.origin}/share/${colecaoAtual?.slug}/${itemAtual.slug}`;
 
     return (
         <>
             <Head>
-                <title>{`Foto ${modalIdx + 1} - ${currentCollection.title}`}</title>
+                <title>{`Foto ${modalIdx + 1} - ${colecaoAtual?.title}`}</title>
                 <meta
                     name="description"
-                    content={`Confira este modelo da coleção ${currentCollection.title}.`}
+                    content={`Confira este modelo da coleção ${colecaoAtual?.title}.`}
                 />
-                <meta property="og:title" content={`Foto ${modalIdx + 1} - ${currentCollection.title}`} />
+                <meta property="og:title" content={`Foto ${modalIdx + 1} - ${colecaoAtual?.title}`} />
                 <meta
                     property="og:description"
-                    content={`Confira este modelo da coleção ${currentCollection.title}.`}
+                    content={`Confira este modelo da coleção ${colecaoAtual?.title}.`}
                 />
-                <meta property="og:image" content={product.img} />
+                <meta property="og:image" content={itemAtual.img} />
                 <meta property="og:url" content={shareUrl} />
                 <meta property="og:type" content="website" />
                 <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={`Foto ${modalIdx + 1} - ${currentCollection.title}`} />
+                <meta name="twitter:title" content={`Foto ${modalIdx + 1} - ${colecaoAtual?.title}`} />
                 <meta
                     name="twitter:description"
-                    content={`Confira este modelo da coleção ${currentCollection.title}.`}
+                    content={`Confira este modelo da coleção ${colecaoAtual?.title}.`}
                 />
-                <meta name="twitter:image" content={product.img} />
+                <meta name="twitter:image" content={itemAtual.img} />
             </Head>
 
             <div
-                className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center"
+                className="fixed inset-0 z-[100] bg-black bg-opacity-90 flex items-center justify-center p-4"
                 onClick={onClose}
             >
                 <div
-                    className="relative bg-background-100 md:rounded-xl shadow-2xl max-w-[100vw] max-h-[90vh] flex flex-col"
-                    style={{ width: "min(900px, 100%)" }}
+                    className="relative w-full max-w-7xl h-full flex flex-col items-center"
+                    onClick={(e) => e.stopPropagation()}
                 >
-                    <div
-                        onClick={(e) => e.stopPropagation()}
-                        className="relative w-full h-full flex flex-col"
+                    {/* Botão de fechar */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 text-white z-50 p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                     >
-                        {/* Botão fechar */}
-                        <button
-                            onClick={onClose}
-                            className="absolute top-4 right-4 text-white bg-black/60 hover:bg-black/80 rounded-full p-2 transition z-50"
-                            aria-label="Fechar"
-                        >
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="white"
-                                strokeWidth={2}
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
+                        <AiOutlineClose size={24} />
+                    </button>
 
-                        {/* Cabeçalho fixo */}
-                        <div className="sticky top-0 bg-background-200 text-white px-6 py-2 rounded-t-xl text-center select-none z-30">
-                            <h3 className="text-2xl font-semibold">{product.productMark || 'Sem Marca'}</h3>
-                            <p className="text-sm mt-1">Modelo: {product.productModel || 'Sem Modelo'}</p>
-                        </div>
-
+                    {/* Container da imagem com o componente ZoomableImage */}
+                    <div className="flex-grow flex items-center justify-center w-full my-8 md:my-0 overflow-hidden rounded-lg">
                         <ZoomableImage
-                            src={product.img}
-                            alt={`${product.productMark || ''} - ${product.productModel || ''}`}
+                            src={itemAtual.img}
+                            alt={`${itemAtual.productMark} - ${itemAtual.productModel}`}
                         />
+                    </div>
 
+                    {/* Controles de navegação (setas) */}
+                    <div className="absolute top-1/2 left-0 right-0 flex justify-between transform -translate-y-1/2 w-full p-4">
+                        <button
+                            onClick={prevItem}
+                            className="text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
+                        >
+                            <SlArrowLeft size={24} />
+                        </button>
+                        <button
+                            onClick={nextItem}
+                            className="text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
+                        >
+                            <SlArrowRight size={24} />
+                        </button>
+                    </div>
+
+                    {/* Informações e Botões com o componente ModalHeaderFooter */}
+                    <div className="flex flex-col items-center p-4 text-white text-center">
                         <ModalHeaderFooter
-                            productMark={product.productMark}
-                            productModel={product.productModel}
+                            productMark={itemAtual.productMark}
+                            productModel={itemAtual.productModel}
                             shareUrl={shareUrl}
-                            modalIdx={modalIdx}
-                            modalType={modalType}
                         />
-
-                        {/* Botões de navegação */}
-                        <button
-                            onClick={modalPrev}
-                            className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition z-50"
-                            aria-label="Anterior"
-                        >
-                            <svg
-                                className="w-6 h-6 text-gray-800"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={3}
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </button>
-
-                        <button
-                            onClick={modalNext}
-                            className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition z-50"
-                            aria-label="Próximo"
-                        >
-                            <svg
-                                className="w-6 h-6 text-gray-800"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={3}
-                                viewBox="0 0 24 24"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </div>
