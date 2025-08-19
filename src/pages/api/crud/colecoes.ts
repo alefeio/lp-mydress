@@ -16,6 +16,13 @@ function slugify(text: string): string {
         .replace(/-+$/, '');
 }
 
+// Tipos auxiliares que correspondem ao que o Prisma retorna.
+// O tipo 'ColecaoItem' já é a sua interface e o Prisma retorna um objeto compatível.
+type PrismaColecaoWithItems = Omit<ColecaoProps, 'slug'> & {
+    items: ColecaoItem[];
+};
+
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { method } = req;
 
@@ -31,11 +38,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     },
                 });
 
-                // Tipagem explícita para 'colecao' e 'item'
-                const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: ColecaoProps) => ({
+                // Tipagem explícita para o parâmetro 'colecao' usando o tipo auxiliar
+                const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: PrismaColecaoWithItems) => ({
                     ...colecao,
                     slug: slugify(colecao.title),
-                    items: colecao.items.map((item: ColecaoItem) => ({
+                    // Tipagem explícita para o parâmetro 'item'
+                    items: colecao.items.map((item: ColecaoItem) => ({ 
                         ...item,
                         slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
                     }))
@@ -104,7 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
                     }));
                     
-                    const transaction = itemsWithSlugs.map(item => {
+                    const transaction = itemsWithSlugs.map((item: ColecaoItem) => {
                         if (item.id) {
                             return prisma.colecaoItem.update({
                                 where: { id: item.id },
