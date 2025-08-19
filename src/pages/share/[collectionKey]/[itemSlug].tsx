@@ -1,5 +1,3 @@
-// src/pages/share/[collectionKey]/[id].tsx
-
 import Head from 'next/head';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 // Importação ajustada para as novas tipagens
@@ -15,9 +13,10 @@ interface ShareProps {
 export const getServerSideProps: GetServerSideProps<ShareProps> = async (
   context: GetServerSidePropsContext
 ) => {
-  const { collectionKey, id } = context.params as {
+  // AQUI: A variável 'itemSlug' é o nome correto do parâmetro
+  const { collectionKey, itemSlug } = context.params as {
     collectionKey: string;
-    id: string;
+    itemSlug: string;
   };
 
   const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
@@ -41,7 +40,8 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
       };
     }
 
-    const product = currentCollection.items.find(item => item.slug === id);
+    // AQUI: Use 'itemSlug' na busca do produto
+    const product = currentCollection.items.find(item => item.slug === itemSlug);
 
     if (!product) {
       return {
@@ -51,7 +51,7 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
 
     const host = context.req.headers.host;
     const protocol = context.req.headers['x-forwarded-proto'] || 'http';
-    const shareUrl = `${protocol}://${host}/share/${collectionKey}/${id}`;
+    const shareUrl = `${protocol}://${host}/share/${collectionKey}/${itemSlug}`;
 
     return {
       props: {
