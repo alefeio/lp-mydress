@@ -73,7 +73,7 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
     window.open(whatsappUrl, '_blank');
   };
   return (
-    <div className="bg-background-50 min-h-screen flex items-center justify-center p-4">
+    <div className="bg-background-100 min-h-screen flex items-center justify-center p-4">
       <Head>
         <title>{`Vestido ${product.productModel || ''} - ${collectionTitle}`}</title>
         <meta
@@ -92,11 +92,10 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
         <meta name="twitter:title" content={`Vestido ${product.productModel || ''} - ${collectionTitle}`} />
         <meta name="twitter:image" content={product.img} />
       </Head>
-      <div className="w-full max-w-xl bg-white rounded-lg shadow-lg overflow-hidden md:max-w-xl">
-        <div className="p-4 bg-gray-100 text-center">
+      <div className="w-full max-w-xl bg-background-200 rounded-lg shadow-lg overflow-hidden md:max-w-xl">
+        <div className="p-4 bg-background-200 text-center">
           <h1 className="text-xl font-bold">{product.productMark}</h1>
           <p className="text-sm text-gray-600">Modelo: {product.productModel}</p>
-          <p className="text-sm text-gray-600">Cor: {product.cor}</p>
         </div>
         <div className="relative w-full h-auto">
           <img
@@ -112,15 +111,15 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
               onClick={handleWhatsappClick}
               className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-              <FaWhatsapp />
-              <span>Reservar via WhatsApp</span>
+              <FaWhatsapp className='text-white' />
+              <span>Reservar</span>
             </button>
             <a
               href="/"
               className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-              <FaHome />
-              <span>Voltar para a home</span>
+              <FaHome className='text-white' />
+              <span>Site</span>
             </a>
           </div>
         </div>

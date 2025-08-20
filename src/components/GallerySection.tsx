@@ -187,12 +187,14 @@ export function GallerySection({
             </div>
 
             <div className="py-4 w-fit mx-auto text-center flex flex-col">
-                {collection.description}
+                <p className="px-4 leading-6">
+                    {collection.description}
+                </p>
                 <a
                     href={buttonHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold text-sm transition-colors duration-300"
+                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold transition-colors duration-300"
                 >
                     {collection.buttonText}
                 </a>

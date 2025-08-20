@@ -36,8 +36,8 @@ export default function Header() {
       <aside className="my-16 md:max-w-5xl mx-auto">
         <div className="w-full mx-auto">
           <div className="mb-6 text-center md:max-w-4xl mx-auto px-4">
-            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6">
-              Seja única com a My Dress
+            <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6 leading-16">
+              Seja única com a<br />My Dress
             </h2>
             <p className="border-t-2 border-textcolor-200 py-6">
               Na My Dress, você encontra mais do que vestidos — vive uma experiência completa, com estilo, cuidado e o melhor custo-benefício de Belém.
