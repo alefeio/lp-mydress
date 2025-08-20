@@ -5,8 +5,8 @@ import Script from 'next/script';
 import HeroSlider from '../components/HeroSlider';
 import WhatsAppButton from '../components/WhatsAppButton';
 import DressesGallery from '../components/DressesGallery';
-import TestimonialsComponent from '../components/Testimonials';
-import FAQComponent from '../components/FAQ';
+import Testimonials from '../components/Testimonials';
+import FAQ from '../components/FAQ';
 import LocationMap from '../components/LocationMap';
 import Header from 'components/Header';
 import { Menu as MenuComponent } from 'components/Menu';
@@ -175,8 +175,8 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     <Hero />
                     <DressesGallery colecoes={colecoes} />
                     <Header />
-                    <TestimonialsComponent testimonials={testimonials} />
-                    <FAQComponent faqs={faqs} />
+                    <Testimonials testimonials={testimonials} />
+                    <FAQ faqs={faqs} />
                     <LocationMap />
                 </main>
                 <WhatsAppButton />

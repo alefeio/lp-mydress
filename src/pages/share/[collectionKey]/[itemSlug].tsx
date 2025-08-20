@@ -2,7 +2,7 @@
 
 import Head from 'next/head';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { ColecaoProps, ColecaoItem } from 'types'; 
+import { ColecaoProps, ColecaoItem } from 'types';
 import { FaWhatsapp, FaHome } from 'react-icons/fa';
 
 interface ShareProps {
@@ -19,8 +19,10 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
     itemSlug: string;
   };
 
-  // AQUI: Usando URL relativa para uma chamada de API interna
-  const API_URL = '/api/crud/colecoes';
+  // CORRIGIDO: Usando URL absoluta para chamadas de API no lado do servidor
+  const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/colecoes`
+    : 'http://localhost:3000/api/crud/colecoes';
 
   try {
     const res = await fetch(API_URL);
@@ -69,8 +71,8 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
   if (!product) {
     return <div>Produto não encontrado.</div>;
   }
-    // ... restante do código
-    const handleWhatsappClick = () => {
+  // ... restante do código
+  const handleWhatsappClick = () => {
     const whatsappMessage = `Olá! Gostaria de reservar o modelo ${product.productModel}. Link para a foto: ${shareUrl}`;
     const whatsappUrl = `https://wa.me/5591985810208?text=${encodeURIComponent(
       whatsappMessage
@@ -84,9 +86,8 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
         <title>{`Vestido ${product.productModel || ''} - ${collectionTitle}`}</title>
         <meta
           name="description"
-          content={`Confira este lindo vestido da coleção ${collectionTitle}. Modelo ${
-            product.productModel || ''
-          }.`}
+          content={`Confira este lindo vestido da coleção ${collectionTitle}. Modelo ${product.productModel || ''
+            }.`}
         />
         <meta property="og:title" content={`Vestido ${product.productModel || ''} - ${collectionTitle}`} />
         <meta
