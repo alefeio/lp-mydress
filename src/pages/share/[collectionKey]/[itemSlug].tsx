@@ -1,6 +1,7 @@
+// src/pages/share/[collectionKey]/[itemSlug].tsx
+
 import Head from 'next/head';
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-// Importação ajustada para as novas tipagens
 import { ColecaoProps, ColecaoItem } from 'types'; 
 import { FaWhatsapp, FaHome } from 'react-icons/fa';
 
@@ -13,15 +14,13 @@ interface ShareProps {
 export const getServerSideProps: GetServerSideProps<ShareProps> = async (
   context: GetServerSidePropsContext
 ) => {
-  // AQUI: A variável 'itemSlug' é o nome correto do parâmetro
   const { collectionKey, itemSlug } = context.params as {
     collectionKey: string;
     itemSlug: string;
   };
 
-  const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/colecoes`
-    : 'http://localhost:3000/api/crud/colecoes';
+  // AQUI: Usando URL relativa para uma chamada de API interna
+  const API_URL = '/api/crud/colecoes';
 
   try {
     const res = await fetch(API_URL);
@@ -29,7 +28,6 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
       throw new Error('Failed to fetch collections');
     }
     const data = await res.json();
-    // Tipagem ajustada para o dado da coleção
     const collections: ColecaoProps[] = data.colecoes;
 
     const currentCollection = collections.find((c) => c.slug === collectionKey);
@@ -40,7 +38,6 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
       };
     }
 
-    // AQUI: Use 'itemSlug' na busca do produto
     const product = currentCollection.items.find(item => item.slug === itemSlug);
 
     if (!product) {
@@ -72,8 +69,8 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
   if (!product) {
     return <div>Produto não encontrado.</div>;
   }
-
-  const handleWhatsappClick = () => {
+    // ... restante do código
+    const handleWhatsappClick = () => {
     const whatsappMessage = `Olá! Gostaria de reservar o modelo ${product.productModel}. Link para a foto: ${shareUrl}`;
     const whatsappUrl = `https://wa.me/5591985810208?text=${encodeURIComponent(
       whatsappMessage
@@ -121,17 +118,17 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
           <div className="flex space-x-4">
             <button
               onClick={handleWhatsappClick}
-              className=" flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
+              className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-              <FaWhatsapp className='text-white' />
-              <span>Reservar</span>
+              <FaWhatsapp />
+              <span>Reservar via WhatsApp</span>
             </button>
             <a
               href="/"
               className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-              <FaHome className='text-white' />
-              <span>Site</span>
+              <FaHome />
+              <span>Voltar para a home</span>
             </a>
           </div>
         </div>

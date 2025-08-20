@@ -1,5 +1,3 @@
-// src/pages/index.tsx
-
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -7,20 +5,21 @@ import Script from 'next/script';
 import HeroSlider from '../components/HeroSlider';
 import WhatsAppButton from '../components/WhatsAppButton';
 import DressesGallery from '../components/DressesGallery';
-import Testimonials from '../components/Testimonials';
-import FAQ from '../components/FAQ';
+import TestimonialsComponent from '../components/Testimonials';
+import FAQComponent from '../components/FAQ';
 import LocationMap from '../components/LocationMap';
 import Header from 'components/Header';
-import { Menu } from 'components/Menu';
+import { Menu as MenuComponent } from 'components/Menu';
 import Hero from 'components/Hero';
 import { Analytics } from "@vercel/analytics/next";
 import { 
-  HomePageProps,
-  ColecaoProps
-} from '../types';
+    HomePageProps,
+    ColecaoProps,
+    ColecaoItem
+} from '../types/index';
 
-// FUNÇÃO SLUGIFY - COPIADA DO SEU ARQUIVO DE API
-function slugify(text: string) {
+// FUNÇÃO SLUGIFY
+function slugify(text: string): string {
     return text.toString().toLowerCase()
         .trim()
         .replace(/\s+/g, '-')
@@ -59,7 +58,7 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             }))
         }));
 
-        const menu = menus.length > 0 ? menus[0] : null;
+        const menu: any | null = menus.length > 0 ? menus[0] : null;
 
         return {
             props: {
@@ -170,15 +169,14 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
 
             <div className="min-h-screen font-sans">
                 <Analytics />
-                <Menu menuData={menu} />
+                <MenuComponent menuData={menu} />
                 <HeroSlider banners={banners} />
                 <main className="max-w-7xl mx-auto">
                     <Hero />
-                    {/* Agora a galeria de vestidos recebe todas as coleções */}
                     <DressesGallery colecoes={colecoes} />
                     <Header />
-                    <Testimonials testimonials={testimonials} />
-                    <FAQ faqs={faqs} />
+                    <TestimonialsComponent testimonials={testimonials} />
+                    <FAQComponent faqs={faqs} />
                     <LocationMap />
                 </main>
                 <WhatsAppButton />
