@@ -93,19 +93,19 @@ export default function ModalPhotos({
                 onClick={onClose}
             >
                 <div
-                    className="relative w-full max-w-7xl h-full flex flex-col items-center"
+                    className="relative w-fit h-full flex flex-col items-center"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Botão de fechar */}
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 text-white z-50 p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
+                        className="absolute top-4 right-4 text-background-100 z-50 p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                     >
-                        <AiOutlineClose size={24} />
+                        <AiOutlineClose size={24} className="text-background-100" />
                     </button>
 
                     {/* Container da imagem com o componente ZoomableImage */}
-                    <div className="flex-grow flex items-center justify-center w-full my-8 md:my-0 overflow-hidden rounded-lg">
+                    <div className="flex-grow flex items-center justify-center w-full my-8 md:my-0 overflow-hidden rounded-t-xl">
                         <ZoomableImage
                             src={itemAtual.img}
                             alt={`${itemAtual.productMark} - ${itemAtual.productModel}`}
@@ -116,20 +116,20 @@ export default function ModalPhotos({
                     <div className="absolute top-1/2 left-0 right-0 flex justify-between transform -translate-y-1/2 w-full p-4">
                         <button
                             onClick={prevItem}
-                            className="text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
+                            className="p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                         >
-                            <SlArrowLeft size={24} />
+                            <SlArrowLeft size={24} className="text-background-100" />
                         </button>
                         <button
                             onClick={nextItem}
-                            className="text-white p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
+                            className="p-2 rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition-colors"
                         >
-                            <SlArrowRight size={24} />
+                            <SlArrowRight size={24} className="text-background-100" />
                         </button>
                     </div>
 
                     {/* Informações e Botões com o componente ModalHeaderFooter */}
-                    <div className="flex flex-col items-center p-4 text-white text-center">
+                    <div className="flex flex-col items-center text-background-100 text-center w-full">
                         <ModalHeaderFooter
                             productMark={itemAtual.productMark}
                             productModel={itemAtual.productModel}

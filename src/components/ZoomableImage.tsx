@@ -51,7 +51,7 @@ export function ZoomableImage({ src, alt }: ZoomableImageProps) {
 
     return (
         <div
-            className="flex-grow flex items-center justify-center relative w-full h-full cursor-zoom-in overflow-hidden"
+            className="bg-background-50 flex-grow flex items-center justify-center relative w-full h-full cursor-zoom-in overflow-hidden"
             onClick={handleToggleZoom}
             onMouseMove={handleInteraction}
             onTouchStart={handleToggleZoom}
@@ -69,8 +69,8 @@ export function ZoomableImage({ src, alt }: ZoomableImageProps) {
                 }}
             />
 
-            <div className={`absolute bottom-4 right-4 text-white bg-black/60 p-2 rounded-full transition-opacity duration-300 ${isZoomed ? 'opacity-0' : 'opacity-100'}`}>
-                <AiOutlineSearch size={24} />
+            <div className={`absolute bottom-4 right-4 bg-black/60 p-2 rounded-full transition-opacity duration-300 ${isZoomed ? 'opacity-0' : 'opacity-100'}`}>
+                <AiOutlineSearch className="text-background-100" size={24} />
             </div>
         </div>
     );

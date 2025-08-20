@@ -39,7 +39,7 @@ export const ModalHeaderFooter = ({
     };
 
     return (
-        <div className="flex-shrink-0 flex justify-between items-center bg-background-200 text-white px-6 py-4 rounded-b-xl z-30">
+        <div className="w-full flex-shrink-0 flex justify-between items-center bg-background-200 gap-4 text-white p-4 rounded-b-xl z-30">
             <div className="flex flex-col text-left">
                 <h3 className="font-semibold text-lg">{productMark || 'Sem Marca'}</h3>
                 <p className="text-sm mt-1">Modelo: {productModel || 'Sem Modelo'}</p>
@@ -53,7 +53,7 @@ export const ModalHeaderFooter = ({
                     className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg p-3 font-bold text-sm transition-colors duration-300"
                     aria-label="Reservar via WhatsApp"
                 >
-                    <FaWhatsapp className="w-6 h-6" />
+                    <FaWhatsapp className="w-6 h-6 text-white" />
                 </a>
 
                 {canShare && (
@@ -63,7 +63,7 @@ export const ModalHeaderFooter = ({
                         aria-label="Compartilhar"
                         disabled={isSharing}
                     >
-                        <FaShareAlt className="w-6 h-6" />
+                        <FaShareAlt className="w-6 h-6 text-white" />
                     </button>
                 )}
             </div>
