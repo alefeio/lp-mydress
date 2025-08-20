@@ -12,7 +12,7 @@ import Header from 'components/Header';
 import { Menu as MenuComponent } from 'components/Menu';
 import Hero from 'components/Hero';
 import { Analytics } from "@vercel/analytics/next";
-import { 
+import {
     HomePageProps,
     ColecaoProps,
     ColecaoItem
@@ -89,7 +89,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "Dresses Belém",
+        "name": "My Dress - Aluguel de Vestidos",
         "image": "https://www.mydressbelem.com.br/images/logo.png",
         "address": {
             "@type": "PostalAddress",
@@ -104,6 +104,17 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     return (
         <>
             <Head>
+                {/* Google Analytics (via GTM) - Código para a tag <head> */}
+                <Script
+                    strategy="afterInteractive"
+                    dangerouslySetInnerHTML={{
+                        __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                        })(window,document,'script','dataLayer','GTM-W4S94NS');`
+                    }}
+                />
                 <title>My Dress Belém | Aluguel de Vestidos de Festa para Madrinhas, Formandas e Convidadas | O melhor custo-benefício</title>
                 <meta name="description" content="Aluguel de vestidos de festa em Belém‑PA: madrinhas, formandas, convidadas. Atendimento por agendamento, atendimento personalizado, catálogo atualizado, agende via WhatsApp 91 98581-0208." />
                 <meta name="keywords" content="aluguel vestidos festa Belém, aluguel vestidos madrinhas Belém, vestidos formatura Belém, aluguel vestidos convidadas Belém, My Dress Belém, aluguel de trajes finos em belém, aluguel de vestidos de festa belem, aluguel de vestidos de gala belem, aluguel de vestidos de festa para madrinhas belem, aluguel de vestidos de festa para formandas belem, aluguel de vestidos de festa para convidadas belem, loja de aluguel de vestido belem, mydress, vestidos de debutantes, vestidos de festa, aluguel de roupas pedreira, aluguel de roupas marco, aluguel de roupas são brás, aluguel de roupas são braz, aluguel de roupas nazaré, aluguel de roupas umarizal, aluguel de roupas, aluguel roupa festa, aluguel vestidos festa luxo, vestido para alugar" />
@@ -118,8 +129,27 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                 <meta name="twitter:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+                <Script id="google-ads-init" strategy="afterInteractive">
+                    {`
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', 'AW-17411208522');
+                `}
+                </Script>
             </Head>
 
+            {/* Google Analytics (via GTM) - Código para logo após a tag <body> */}
+            <noscript>
+                <iframe
+                    src="https://www.googletagmanager.com/ns.html?id=GTM-W4S94NS"
+                    height="0"
+                    width="0"
+                    style={{ display: 'none', visibility: 'hidden' }}
+                ></iframe>
+            </noscript>
+
+            {/* JSON-LD */}
             <Script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -130,32 +160,24 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                 src="https://www.googletagmanager.com/gtag/js?id=AW-17411208522"
                 strategy="afterInteractive"
             />
-            <Script id="google-ads-init" strategy="afterInteractive">
-                {`
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', 'AW-17411208522');
-                `}
-            </Script>
 
             {/* Facebook Pixel */}
             <Script id="facebook-pixel" strategy="afterInteractive">
                 {`
-                    !function(f,b,e,v,n,t,s)
-                    {if(f.fbq)return;n=f.fbq=function(){
-                        n.callMethod ?
-                        n.callMethod.apply(n,arguments) : n.queue.push(arguments)};
-                    if(!f._fbq)f._fbq=n;
-                    n.push=n; n.loaded=!0; n.version='2.0';
-                    n.queue=[]; t=b.createElement(e); t.async=!0;
-                    t.src=v; s=b.getElementsByTagName(e)[0];
-                    s.parentNode.insertBefore(t,s)}
-                    (window, document,'script',
-                    'https://connect.facebook.net/en_US/fbevents.js');
-                    fbq('init', '754061187167582');
-                    fbq('track', 'PageView');
-                `}
+                    !function(f,b,e,v,n,t,s)
+                    {if(f.fbq)return;n=f.fbq=function(){
+                        n.callMethod ?
+                        n.callMethod.apply(n,arguments) : n.queue.push(arguments)};
+                    if(!f._fbq)f._fbq=n;
+                    n.push=n; n.loaded=!0; n.version='2.0';
+                    n.queue=[]; t=b.createElement(e); t.async=!0;
+                    t.src=v; s=b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t,s)}
+                    (window, document,'script',
+                    'https://connect.facebook.net/en_US/fbevents.js');
+                    fbq('init', '754061187167582');
+                    fbq('track', 'PageView');
+                `}
             </Script>
             <noscript>
                 <img

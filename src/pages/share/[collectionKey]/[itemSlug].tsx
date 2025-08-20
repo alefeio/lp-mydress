@@ -94,7 +94,7 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
       </Head>
       <div className="w-full max-w-xl bg-background-200 rounded-lg shadow-lg overflow-hidden md:max-w-xl">
         <div className="p-4 bg-background-200 text-center">
-          <h1 className="text-xl font-bold">{product.productMark}</h1>
+          <h1 className="text-xl font-bold">Tecido: {product.productMark}</h1>
           <p className="text-sm text-gray-600">Modelo: {product.productModel}</p>
         </div>
         <div className="relative w-full h-auto">
