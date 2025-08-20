@@ -19,39 +19,33 @@ export const getServerSideProps: GetServerSideProps<ShareProps> = async (
     itemSlug: string;
   };
 
-  // CORRIGIDO: Usando URL absoluta para chamadas de API no lado do servidor
+  // CORRIGIDO: Usando a variável de ambiente diretamente, sem adicionar o protocolo
   const API_URL = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/colecoes`
+    ? `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/crud/colecoes`
     : 'http://localhost:3000/api/crud/colecoes';
 
   try {
     const res = await fetch(API_URL);
     if (!res.ok) {
-      throw new Error('Failed to fetch collections');
+      throw new Error(`Failed to fetch collections: Status ${res.status}`);
     }
     const data = await res.json();
     const collections: ColecaoProps[] = data.colecoes;
-
     const currentCollection = collections.find((c) => c.slug === collectionKey);
-
     if (!currentCollection) {
       return {
         notFound: true,
       };
     }
-
     const product = currentCollection.items.find(item => item.slug === itemSlug);
-
     if (!product) {
       return {
         notFound: true,
       };
     }
-
     const host = context.req.headers.host;
     const protocol = context.req.headers['x-forwarded-proto'] || 'http';
     const shareUrl = `${protocol}://${host}/share/${collectionKey}/${itemSlug}`;
-
     return {
       props: {
         product,
@@ -71,7 +65,6 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
   if (!product) {
     return <div>Produto não encontrado.</div>;
   }
-  // ... restante do código
   const handleWhatsappClick = () => {
     const whatsappMessage = `Olá! Gostaria de reservar o modelo ${product.productModel}. Link para a foto: ${shareUrl}`;
     const whatsappUrl = `https://wa.me/5591985810208?text=${encodeURIComponent(
@@ -79,7 +72,6 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
     )}`;
     window.open(whatsappUrl, '_blank');
   };
-
   return (
     <div className="bg-background-50 min-h-screen flex items-center justify-center p-4">
       <Head>
@@ -100,11 +92,11 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
         <meta name="twitter:title" content={`Vestido ${product.productModel || ''} - ${collectionTitle}`} />
         <meta name="twitter:image" content={product.img} />
       </Head>
-
       <div className="w-full max-w-xl bg-white rounded-lg shadow-lg overflow-hidden md:max-w-xl">
         <div className="p-4 bg-gray-100 text-center">
           <h1 className="text-xl font-bold">{product.productMark}</h1>
           <p className="text-sm text-gray-600">Modelo: {product.productModel}</p>
+          <p className="text-sm text-gray-600">Cor: {product.cor}</p>
         </div>
         <div className="relative w-full h-auto">
           <img
@@ -113,7 +105,6 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
             className="w-full h-auto object-contain"
           />
         </div>
-
         <div className="p-4 flex flex-col items-center">
           <p className="text-center text-sm text-gray-700 mb-4">{product.description}</p>
           <div className="flex space-x-4">
