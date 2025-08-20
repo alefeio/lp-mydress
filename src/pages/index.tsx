@@ -137,6 +137,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         gtag('config', 'AW-17411208522');
                     `}
                 </Script>
+
+                {/* Facebook Pixel */}
+                <Script id="facebook-pixel" strategy="afterInteractive">
+                    {`
+                        !function(f,b,e,v,n,t,s)
+                        {if(f.fbq)return;n=f.fbq=function(){
+                        n.callMethod ?
+                        n.callMethod.apply(n,arguments) : n.queue.push(arguments)};
+                        if(!f._fbq)f._fbq=n;
+                        n.push=n; n.loaded=!0; n.version='2.0';
+                        n.queue=[]; t=b.createElement(e); t.async=!0;
+                        t.src=v; s=b.getElementsByTagName(e)[0];
+                        s.parentNode.insertBefore(t,s)}
+                        (window, document,'script',
+                        'https://connect.facebook.net/en_US/fbevents.js');
+                        fbq('init', '754061187167582');
+                        fbq('track', 'PageView');
+                    `}
+                </Script>
             </Head>
 
             {/* Google Analytics (via GTM) - Código para logo após a tag <body> */}
@@ -155,24 +174,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 strategy="afterInteractive"
             />
 
-            {/* Facebook Pixel */}
-            <Script id="facebook-pixel" strategy="afterInteractive">
-                {`
-                    !function(f,b,e,v,n,t,s)
-                    {if(f.fbq)return;n=f.fbq=function(){
-                        n.callMethod ?
-                        n.callMethod.apply(n,arguments) : n.queue.push(arguments)};
-                    if(!f._fbq)f._fbq=n;
-                    n.push=n; n.loaded=!0; n.version='2.0';
-                    n.queue=[]; t=b.createElement(e); t.async=!0;
-                    t.src=v; s=b.getElementsByTagName(e)[0];
-                    s.parentNode.insertBefore(t,s)}
-                    (window, document,'script',
-                    'https://connect.facebook.net/en_US/fbevents.js');
-                    fbq('init', '754061187167582');
-                    fbq('track', 'PageView');
-                `}
-            </Script>
             <noscript>
                 <img
                     height="1"
