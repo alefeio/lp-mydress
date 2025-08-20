@@ -109,10 +109,10 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                     strategy="afterInteractive"
                     dangerouslySetInnerHTML={{
                         __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-                        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-                        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-                        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-                        })(window,document,'script','dataLayer','GTM-W4S94NS');`
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-W4S948NS');`
                     }}
                 />
                 <title>My Dress Belém | Aluguel de Vestidos de Festa para Madrinhas, Formandas e Convidadas | O melhor custo-benefício</title>
@@ -131,23 +131,17 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
                 <Script id="google-ads-init" strategy="afterInteractive">
                     {`
-                    window.dataLayer = window.dataLayer || [];
-                    function gtag(){dataLayer.push(arguments);}
-                    gtag('js', new Date());
-                    gtag('config', 'AW-17411208522');
-                `}
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', 'AW-17411208522');
+                    `}
                 </Script>
             </Head>
 
             {/* Google Analytics (via GTM) - Código para logo após a tag <body> */}
-            <noscript>
-                <iframe
-                    src="https://www.googletagmanager.com/ns.html?id=GTM-W4S94NS"
-                    height="0"
-                    width="0"
-                    style={{ display: 'none', visibility: 'hidden' }}
-                ></iframe>
-            </noscript>
+            <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W4S948NS"
+                height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe></noscript>
 
             {/* JSON-LD */}
             <Script
