@@ -73,10 +73,10 @@ export function GallerySection({
 
             <div className="relative flex items-center justify-center overflow-hidden py-4 md:max-w-6xl mx-auto">
                 <div className="flex gap-2 md:gap-4">
-                    {/* A asserção de tipo é aplicada à chamada da função getVisibleItems */}
                     {(gallery.getVisibleItems(collection.items) as (ColecaoItem | null)[]).map(item => {
                         if (!item) return null;
-                        const shareUrl = `${originUrl}/colecoes/${collection.slug}/${item.slug}`;
+                        // AQUI: A URL de compartilhamento é corrigida para apontar para o share page
+                        const shareUrl = `${originUrl}/share/${collection.slug}/${item.slug}`;
 
                         return (
                             <div

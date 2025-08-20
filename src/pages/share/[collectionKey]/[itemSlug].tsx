@@ -121,17 +121,17 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
           <div className="flex space-x-4">
             <button
               onClick={handleWhatsappClick}
-              className="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
+              className=" flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-              <FaWhatsapp />
-              <span>Reservar via WhatsApp</span>
+              <FaWhatsapp className='text-white' />
+              <span>Reservar</span>
             </button>
             <a
               href="/"
               className="flex items-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200"
             >
-              <FaHome />
-              <span>Voltar para a home</span>
+              <FaHome className='text-white' />
+              <span>Site</span>
             </a>
           </div>
         </div>

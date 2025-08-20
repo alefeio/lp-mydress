@@ -1,5 +1,3 @@
-// src/components/ModalHeaderFooter.tsx
-
 import React, { useEffect, useState } from 'react';
 import { FaWhatsapp, FaShareAlt } from "react-icons/fa";
 
@@ -48,7 +46,8 @@ export const ModalHeaderFooter = ({
             </div>
             <div className="flex gap-2">
                 <a
-                    href={`https://wa.me/5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(productModel || '')} - ${encodeURIComponent(productMark || '')}.`}
+                    // AQUI: A URL de compartilhamento é adicionada à mensagem do WhatsApp
+                    href={`https://wa.me/5591985810208?text=Olá! Gostaria de reservar o modelo ${encodeURIComponent(productModel || '')} - ${encodeURIComponent(productMark || '')}. Link para a foto: ${encodeURIComponent(shareUrl)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg p-3 font-bold text-sm transition-colors duration-300"
