@@ -13,6 +13,9 @@ interface ColecaoItem {
   cor: string;
   img: string | File;
   slug?: string;
+  tamanho: string; // Novo campo
+  preco: number; // Novo campo
+  precoParcelado: number; // Novo campo
 }
 
 interface Colecao {
@@ -23,6 +26,7 @@ interface Colecao {
   bgcolor: string | null;
   buttonText: string | null;
   buttonUrl: string | null;
+  ordem: number; // Novo campo
   items: ColecaoItem[];
 }
 
@@ -34,6 +38,7 @@ interface FormState {
   bgcolor: string;
   buttonText: string;
   buttonUrl: string;
+  ordem: number; // Novo campo
   items: ColecaoItem[];
 }
 
@@ -46,7 +51,8 @@ export default function AdminColecoes() {
     bgcolor: "",
     buttonText: "",
     buttonUrl: "",
-    items: [{ productMark: "", productModel: "", cor: "", img: "" }],
+    ordem: 0, // Novo campo
+    items: [{ productMark: "", productModel: "", cor: "", img: "", tamanho: "", preco: 0, precoParcelado: 0 }],
   });
   
   const [loading, setLoading] = useState(false);
@@ -81,7 +87,8 @@ export default function AdminColecoes() {
       bgcolor: "",
       buttonText: "",
       buttonUrl: "",
-      items: [{ productMark: "", productModel: "", cor: "", img: "" }],
+      ordem: 0, // Novo campo
+      items: [{ productMark: "", productModel: "", cor: "", img: "", tamanho: "", preco: 0, precoParcelado: 0 }],
     });
   };
 
@@ -106,7 +113,7 @@ export default function AdminColecoes() {
   const handleAddItem = () => {
     setForm({
       ...form,
-      items: [...form.items, { productMark: "", productModel: "", cor: "", img: "" }],
+      items: [...form.items, { productMark: "", productModel: "", cor: "", img: "", tamanho: "", preco: 0, precoParcelado: 0 }],
     });
   };
 
@@ -124,6 +131,7 @@ export default function AdminColecoes() {
       bgcolor: colecao.bgcolor || "",
       buttonText: colecao.buttonText || "",
       buttonUrl: colecao.buttonUrl || "",
+      ordem: colecao.ordem || 0, // Novo campo
       items: colecao.items.map(item => ({...item, img: item.img as string}))
     });
     // Rola para o topo do formulário
@@ -222,6 +230,7 @@ export default function AdminColecoes() {
               <input type="text" name="bgcolor" value={form.bgcolor} onChange={handleFormChange} placeholder="Cor de Fundo (Ex: #F4F1DE)" className="p-2 border rounded" />
               <input type="text" name="buttonText" value={form.buttonText} onChange={handleFormChange} placeholder="Texto do Botão" className="p-2 border rounded" />
               <input type="url" name="buttonUrl" value={form.buttonUrl} onChange={handleFormChange} placeholder="URL do Botão" className="p-2 border rounded" />
+              <input type="number" name="ordem" value={form.ordem} onChange={handleFormChange} placeholder="Ordem" required className="p-2 border rounded" />
               
               <h3 className="text-xl font-semibold mt-4">Itens da Coleção</h3>
               {form.items.map((item, index) => (
@@ -229,6 +238,9 @@ export default function AdminColecoes() {
                   <input type="text" name="productMark" value={item.productMark as string} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-2 border rounded flex-1" />
                   <input type="text" name="productModel" value={item.productModel as string} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-2 border rounded flex-1" />
                   <input type="text" name="cor" value={item.cor as string} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-2 border rounded flex-1" />
+                  <input type="text" name="tamanho" value={item.tamanho} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-2 border rounded flex-1" />
+                  <input type="number" name="preco" value={item.preco} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-2 border rounded flex-1" />
+                  <input type="number" name="precoParcelado" value={item.precoParcelado} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-2 border rounded flex-1" />
                   
                   <div className="flex-1 w-full flex items-center gap-2 border rounded p-2">
                     <label htmlFor={`img-${index}`} className="flex-1 text-gray-500 cursor-pointer">
@@ -291,6 +303,7 @@ export default function AdminColecoes() {
                   <div className="mt-2 text-sm text-gray-600">
                     <p><strong>Subtítulo:</strong> {colecao.subtitle}</p>
                     <p><strong>Descrição:</strong> {colecao.description}</p>
+                    <p><strong>Ordem:</strong> {colecao.ordem}</p>
                     <p><strong>URL do Botão:</strong> {colecao.buttonUrl || 'N/A'}</p>
                   </div>
                   <div className="mt-4">
@@ -301,6 +314,9 @@ export default function AdminColecoes() {
                         <div className="flex-1">
                           <span>{item.productMark} - {item.productModel} ({item.cor})</span>
                           <p className="text-xs text-gray-500">Slug: {item.slug}</p>
+                          <p className="text-xs text-gray-500">Tamanho: {item.tamanho}</p>
+                          <p className="text-xs text-gray-500">Preço: R${item.preco}</p>
+                          <p className="text-xs text-gray-500">Preço a prazo: R${item.precoParcelado}</p>
                         </div>
                         <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-400 text-white p-1 rounded text-xs">Excluir Item</button>
                       </div>

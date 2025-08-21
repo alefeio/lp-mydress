@@ -10,7 +10,7 @@ datasource db {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -22,7 +22,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now()) // Adicionado
   updatedAt         DateTime @updatedAt // Adicionado
 
@@ -48,8 +48,9 @@ model User {
   role          String?   @default("USER")
   accounts      Account[]
   sessions      Session[]
-  createdAt     DateTime @default(now()) // Adicionado
-  updatedAt     DateTime @updatedAt // Adicionado
+  site          Site?     // Relacionamento com o novo model Site
+  createdAt     DateTime  @default(now()) // Adicionado
+  updatedAt     DateTime  @updatedAt // Adicionado
 }
 
 model VerificationToken {
@@ -64,49 +65,44 @@ model VerificationToken {
 }
 
 model Menu {
-  // Não faz sentido adicionar os campos de tempo, pois esta tabela é estática
-  // e representa uma única configuração que é apenas atualizada.
-  id        Int      @id @default(1)
-  logoUrl   String?
-  links     Json
+  id      Int     @id @default(1)
+  logoUrl String?
+  links   Json
 }
 
 model Banner {
-  // Mesmo caso de Menu. É uma tabela de configuração.
-  id        Int      @id @default(1)
-  banners   Json
+  id      Int  @id @default(1)
+  banners Json
 }
 
 model HomepageSection {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   type      String
   order     Int
   content   Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime? // Adicionado para permitir soft delete de seções
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model Testimonial {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   name      String
-  type      String   // Pode ser "TEXT", "PHOTO", ou "VIDEO"
+  type      String
   content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime? // Adicionado para soft delete
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model FAQ {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   pergunta  String
   resposta  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime? // Adicionado para soft delete
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
-
-// prisma/schema.prisma
 
 model Colecao {
   id          String        @id @default(cuid())
@@ -117,9 +113,11 @@ model Colecao {
   buttonText  String?
   buttonUrl   String?
   items       ColecaoItem[]
-  createdAt   DateTime      @default(now()) // Adicionado para ordenação por criação
-  updatedAt   DateTime      @updatedAt // Adicionado para controle de atualização
-  deletedAt   DateTime?     // Adicionado para soft delete
+  // Novo campo 'order' com valor padrão 0
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
 }
 
 model ColecaoItem {
@@ -131,7 +129,25 @@ model ColecaoItem {
   slug         String    @unique
   colecao      Colecao   @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
   colecaoId    String
-  createdAt    DateTime  @default(now()) // Adicionado para ordenação por criação
-  updatedAt    DateTime  @updatedAt // Adicionado para controle de atualização
-  deletedAt    DateTime? // Adicionado para soft delete
+  // Novos campos com valor padrão 0
+  size         Int       @default(0)
+  price        Int       @default(0)
+  price_card   Int       @default(0)
+  like         Int       @default(0)
+  view         Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+}
+
+// Novo model 'Site'
+model Site {
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag_google_ads       String?
+  tag_google_analytics String?
+  tag_meta             String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }

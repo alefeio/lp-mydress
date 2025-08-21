@@ -120,6 +120,7 @@ CREATE TABLE "public"."Colecao" (
     "bgcolor" TEXT,
     "buttonText" TEXT,
     "buttonUrl" TEXT,
+    "order" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -136,11 +137,29 @@ CREATE TABLE "public"."ColecaoItem" (
     "img" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "colecaoId" TEXT NOT NULL,
+    "size" INTEGER NOT NULL DEFAULT 0,
+    "price" INTEGER NOT NULL DEFAULT 0,
+    "price_card" INTEGER NOT NULL DEFAULT 0,
+    "like" INTEGER NOT NULL DEFAULT 0,
+    "view" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "ColecaoItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Site" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "tag_google_ads" TEXT,
+    "tag_google_analytics" TEXT,
+    "tag_meta" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Site_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -161,6 +180,9 @@ CREATE UNIQUE INDEX "VerificationToken_identifier_token_key" ON "public"."Verifi
 -- CreateIndex
 CREATE UNIQUE INDEX "ColecaoItem_slug_key" ON "public"."ColecaoItem"("slug");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Site_userId_key" ON "public"."Site"("userId");
+
 -- AddForeignKey
 ALTER TABLE "public"."Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -169,3 +191,6 @@ ALTER TABLE "public"."Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE "public"."ColecaoItem" ADD CONSTRAINT "ColecaoItem_colecaoId_fkey" FOREIGN KEY ("colecaoId") REFERENCES "public"."Colecao"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Site" ADD CONSTRAINT "Site_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
