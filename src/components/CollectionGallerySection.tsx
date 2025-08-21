@@ -1,7 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import { GallerySection } from "./GallerySection";
-import { useGalleryNavigation } from "./useGalleryNavigation";
-// Importação corrigida para ColecaoProps
+// O useGalleryNavigation não é mais necessário aqui, pois a lógica de navegação
+// de rolagem será transferida para o GallerySection.
+// import { useGalleryNavigation } from "./useGalleryNavigation"; 
+// A importação abaixo está correta, não precisa ser alterada.
 import { ColecaoProps } from "types";
 
 // Interface corrigida para usar ColecaoProps
@@ -15,8 +17,6 @@ function CollectionGallerySection({ collection, openModal }: CollectionGallerySe
         return null;
     }
 
-    const gallery = useGalleryNavigation(collection.items.length);
-
     const handleOpenModal = useCallback(
         (collectionSlug: string, itemSlug: string) => {
             openModal(collectionSlug, itemSlug);
@@ -29,7 +29,6 @@ function CollectionGallerySection({ collection, openModal }: CollectionGallerySe
             key={collection.slug}
             collection={collection}
             buttonHref={collection.buttonUrl || `https://wa.me/5591985810208?text=Olá! Gostaria do Catálogo de ${collection.title}.`}
-            gallery={gallery}
             onOpenModal={handleOpenModal}
         />
     );
