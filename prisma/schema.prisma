@@ -113,11 +113,10 @@ model Colecao {
   buttonText  String?
   buttonUrl   String?
   items       ColecaoItem[]
-  // Novo campo 'order' com valor padrão 0
-  order       Int           @default(0)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   deletedAt   DateTime?
+  order       Int?
 }
 
 model ColecaoItem {
@@ -129,15 +128,14 @@ model ColecaoItem {
   slug         String    @unique
   colecao      Colecao   @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
   colecaoId    String
-  // Novos campos com valor padrão 0
-  size         Int       @default(0)
-  price        Int       @default(0)
-  price_card   Int       @default(0)
-  like         Int       @default(0)
-  view         Int       @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
+  size         String?
+  price        Int?
+  price_card   Int?
+  like         Int?
+  view         Int?
 }
 
 // Novo model 'Site'

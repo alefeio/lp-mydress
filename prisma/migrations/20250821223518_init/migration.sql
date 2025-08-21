@@ -120,10 +120,10 @@ CREATE TABLE "public"."Colecao" (
     "bgcolor" TEXT,
     "buttonText" TEXT,
     "buttonUrl" TEXT,
-    "order" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
+    "order" INTEGER,
 
     CONSTRAINT "Colecao_pkey" PRIMARY KEY ("id")
 );
@@ -137,14 +137,14 @@ CREATE TABLE "public"."ColecaoItem" (
     "img" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "colecaoId" TEXT NOT NULL,
-    "size" INTEGER NOT NULL DEFAULT 0,
-    "price" INTEGER NOT NULL DEFAULT 0,
-    "price_card" INTEGER NOT NULL DEFAULT 0,
-    "like" INTEGER NOT NULL DEFAULT 0,
-    "view" INTEGER NOT NULL DEFAULT 0,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
+    "size" TEXT,
+    "price" INTEGER,
+    "price_card" INTEGER,
+    "like" INTEGER,
+    "view" INTEGER,
 
     CONSTRAINT "ColecaoItem_pkey" PRIMARY KEY ("id")
 );
