@@ -2,21 +2,13 @@ import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Script from 'next/script';
-import HeroSlider from '../components/HeroSlider';
-import WhatsAppButton from '../components/WhatsAppButton';
-import DressesGallery from '../components/DressesGallery';
-import Testimonials from '../components/Testimonials';
-import FAQ from '../components/FAQ';
-import LocationMap from '../components/LocationMap';
-import Header from 'components/Header';
-import { Menu as MenuComponent } from 'components/Menu';
-import Hero from 'components/Hero';
+import WhatsAppButton from '../../components/WhatsAppButton';
 import { Analytics } from "@vercel/analytics/next";
 import {
     HomePageProps,
-    ColecaoProps,
-    ColecaoItem
-} from '../types/index';
+    ColecaoProps
+} from '../../types/index';
+import Catalog from 'components/Catalog';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -89,7 +81,7 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "My Dress - Aluguel de Vestidos",
+        "name": "My Dress - Catálogo de Vestidos",
         "image": "https://www.mydressbelem.com.br/images/logo.png",
         "address": {
             "@type": "PostalAddress",
@@ -186,15 +178,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <div className="min-h-screen">
                 <Analytics />
-                <MenuComponent menuData={menu} />
-                <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
-                    <Hero />
-                    <DressesGallery colecoes={colecoes} />
-                    <Header />
-                    <Testimonials testimonials={testimonials} />
-                    <FAQ faqs={faqs} />
-                    <LocationMap />
+                    <Catalog colecoes={colecoes} />
                 </main>
                 <WhatsAppButton />
             </div>

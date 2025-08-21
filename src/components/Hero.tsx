@@ -24,9 +24,9 @@ export default function Hero() {
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center mx-auto mt-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-3 px-8 font-bold text-lg transition-colors duration-300"
         onClick={() => handleClick('/agendar-visita')}
-        aria-label="Agendar visita"
+        aria-label="Solicitar catálogo"
       >
-        Agendar Visita
+        Solicitar catálogo
       </a>
     </header>
   )

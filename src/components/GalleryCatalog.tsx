@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
+// src/components/GalleryCatalog.tsx
+
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { FaWhatsapp, FaShareAlt } from "react-icons/fa";
 
@@ -18,7 +20,7 @@ type GallerySectionProps = {
     onOpenModal: (collectionSlug: string, itemSlug: string) => void;
 };
 
-export function GallerySection({
+export function GalleryCatalog({
     collection,
     buttonHref,
     onOpenModal
@@ -34,7 +36,7 @@ export function GallerySection({
     const [showPrev, setShowPrev] = useState(false);
     const [showNext, setShowNext] = useState(false);
 
-    const checkScroll = () => {
+    const checkScroll = useCallback(() => {
         if (galleryRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current;
             // Verifica se não está no início
@@ -42,7 +44,7 @@ export function GallerySection({
             // Verifica se não está no final (com uma pequena margem de erro)
             setShowNext(scrollLeft + clientWidth < scrollWidth - 1);
         }
-    };
+    }, []);
 
     const prev = () => {
         if (galleryRef.current) {
@@ -75,7 +77,7 @@ export function GallerySection({
                 currentRef.removeEventListener('scroll', checkScroll);
             }
         };
-    }, []);
+    }, [checkScroll]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (galleryRef.current) {
@@ -148,12 +150,12 @@ export function GallerySection({
                 {/* Sombra da esquerda */}
                 <div
                     className="absolute left-0 top-0 bottom-0 w-2 z-20 pointer-events-none
-                               bg-gradient-to-r from-graytone-1000/20 to-transparent"
+                                bg-gradient-to-r from-graytone-1000/20 to-transparent"
                 />
 
                 <div
                     className="absolute right-0 top-0 bottom-0 w-2 z-20 pointer-events-none
-                               bg-gradient-to-l from-graytone-1000/20 to-transparent"
+                                bg-gradient-to-l from-graytone-1000/20 to-transparent"
                 />
 
                 <div
