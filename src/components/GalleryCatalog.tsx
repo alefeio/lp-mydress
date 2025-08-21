@@ -145,7 +145,7 @@ export function GalleryCatalog({
             </div>
 
             {/* ADICIONADO: Contêiner principal com posicionamento relativo */}
-            <div className=" bg-gradient-to-b relative flex items-center justify-center overflow-hidden py-12 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
+            <div className=" bg-gradient-to-b relative flex items-center justify-center overflow-hidden pt-32 pb-12 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
                 {/* ADICIONADO: Overlays com degradê para simular a sombra */}
                 {/* Sombra da esquerda */}
                 <div
