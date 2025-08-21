@@ -141,6 +141,7 @@ export function GallerySection({
                     </h3>
                 </div>
             </div>
+            <div className={`${collection.bgcolor} h-4`}></div>
 
             {/* ADICIONADO: Contêiner principal com posicionamento relativo */}
             <div className=" bg-gradient-to-b relative flex items-center justify-center overflow-hidden pt-32 pb-12 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">

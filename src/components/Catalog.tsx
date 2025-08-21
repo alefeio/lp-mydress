@@ -119,16 +119,9 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                     )}
                 </div>
 
-                <h2 className="font-serif text-3xl md:text-4xl font-bold text-center">
-                    Conheça nosso catálogo
-                </h2>
-
                 {/* Conteúdo da seção de informações importantes */}
                 <div className="bg-white p-6 rounded-lg shadow-lg mx-auto max-w-2xl mt-8">
-                    <div className="flex items-center justify-center mb-4">
-                        <span className="text-3xl mr-2">✨</span>
-                        <h2 className="text-2xl font-semibold text-gray-800">Informações Essenciais para a Sua Experiência</h2>
-                    </div>
+                    <h2 className="text-lg font-semibold text-gray-800 text-center">Informações Essenciais para a Sua Experiência</h2>
 
                     <p className="text-gray-600 mb-4 text-center text-sm">
                         Para que sua experiência seja a mais tranquila e agradável possível, preparamos alguns detalhes importantes sobre nosso serviço de aluguel.
@@ -142,25 +135,29 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                             O valor do aluguel já cobre os ajustes necessários e a lavagem profissional da peça.
                         </li>
                         <li>
-                            <span className="text-lg font-semibold font-medium text-gray-800">Feito para Você</span>
+                            <span className="text-lg font-semibold text-gray-800">Feito para Você</span>
                         </li>
                         <li className="text-sm">
                             Nossos modelos são, em sua maioria, ajustáveis, garantindo um caimento perfeito sem a necessidade de numeração exata.
                         </li>
                         <li>
-                            <span className="text-lg font-semibold font-medium text-gray-800">Facilidade no Pagamento</span>
+                            <span className="text-lg font-semibold text-gray-800">Facilidade no Pagamento</span>
                         </li>
                         <li className="text-sm">
                             Aceitamos Pix, dinheiro ou cartão. E para as reservas pagas com Pix ou dinheiro, oferecemos um desconto especial!
                         </li>
                         <li>
-                            <span className="text-lg font-semiboldfont-medium text-gray-800">Reserva Garantida</span>
+                            <span className="text-lg font-semibold text-gray-800">Reserva Garantida</span>
                         </li>
                         <li className="text-sm">
                             Para confirmar a sua reserva, solicitamos um adiantamento de 50% do valor do aluguel.
                         </li>
                     </ul>
                 </div>
+
+                <h2 className="font-serif text-3xl md:text-4xl font-bold text-center mt-16">
+                    Catálogo de Produtos
+                </h2>
 
                 {colecoes.map((colecao: ColecaoProps) => (
                     <CollectionGalleryCatalog
