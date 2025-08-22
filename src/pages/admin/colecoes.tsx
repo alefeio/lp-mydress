@@ -172,7 +172,6 @@ export default function AdminColecoes() {
     setError("");
   
     try {
-      // Faz o upload de novas imagens para o seu próprio endpoint /api/upload
       const itemsWithUrls = await Promise.all(
         form.items.map(async (item) => {
           if (item.img instanceof File) {
@@ -195,7 +194,7 @@ export default function AdminColecoes() {
       const method = form.id ? "PUT" : "POST";
       const body = { 
         ...form, 
-        items: itemsWithUrls.map(({ tamanho, preco, precoParcelado, ...item }) => item) // Exclui campos temporários antes de enviar
+        items: itemsWithUrls
       };
       
       const res = await fetch("/api/crud/colecoes", {
@@ -276,10 +275,15 @@ export default function AdminColecoes() {
                     <input type="number" name="precoParcelado" value={item.precoParcelado} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
                   </div>
                   
-                  <div className="flex-1 w-full flex items-center gap-2 border border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition duration-200">
-                    <label htmlFor={`img-${index}`} className="flex-1 text-gray-500 cursor-pointer">
-                      <MdAddPhotoAlternate size={24} className="inline-block mr-2" />
-                      {item.img instanceof File ? item.img.name : (item.img ? "Arquivo Selecionado" : "Escolher arquivo...")}
+                  <div className="flex-1 w-full flex flex-col items-center gap-2 border border-gray-300 rounded-lg p-3">
+                    {typeof item.img === 'string' && item.img && (
+                      <div className="w-full flex justify-center mb-2">
+                        <img src={item.img} alt="Visualização do item" className="w-24 h-24 object-cover rounded-lg" />
+                      </div>
+                    )}
+                    <label htmlFor={`img-${index}`} className="w-full flex-1 text-gray-500 cursor-pointer flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 transition duration-200 p-2 rounded-lg">
+                      <MdAddPhotoAlternate size={24} />
+                      {item.img instanceof File ? item.img.name : "Escolher arquivo..."}
                     </label>
                     <input 
                       type="file" 
@@ -342,9 +346,6 @@ export default function AdminColecoes() {
                           <h4 className="font-semibold text-gray-800">{item.productMark} - {item.productModel} ({item.cor})</h4>
                           <p className="text-xs text-gray-500 mt-1">
                             Tamanho: {item.tamanho || 'N/A'} | Preço: R${item.preco || 'N/A'} | A prazo: R${item.precoParcelado || 'N/A'}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            URL: {item.img as string}
                           </p>
                         </div>
                         <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-400 text-white p-2 rounded-lg text-sm hover:bg-red-500 transition duration-200">Excluir</button>
