@@ -79,7 +79,9 @@ export default function AdminColecoes() {
       const res = await fetch("/api/crud/colecoes", { method: "GET" });
       const data = await res.json();
       if (res.ok && data.success) {
-        setColecoes(data.colecoes);
+        // Ordena as coleções pelo campo 'ordem'
+        const sortedColecoes = data.colecoes.sort((a: Colecao, b: Colecao) => a.ordem - b.ordem);
+        setColecoes(sortedColecoes);
       } else {
         setError(data.message || "Erro ao carregar coleções.");
       }
