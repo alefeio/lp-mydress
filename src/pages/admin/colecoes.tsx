@@ -29,7 +29,7 @@ interface Colecao {
   bgcolor: string | null;
   buttonText: string | null;
   buttonUrl: string | null;
-  ordem: number;
+  order: number;
   items: ColecaoItem[];
 }
 
@@ -41,7 +41,7 @@ interface FormState {
   bgcolor: string;
   buttonText: string;
   buttonUrl: string;
-  ordem: number;
+  order: number;
   items: ColecaoItem[];
 }
 
@@ -54,7 +54,7 @@ export default function AdminColecoes() {
     bgcolor: "",
     buttonText: "",
     buttonUrl: "",
-    ordem: 0,
+    order: 0,
     items: [{ 
       productMark: "", 
       productModel: "", 
@@ -79,8 +79,8 @@ export default function AdminColecoes() {
       const res = await fetch("/api/crud/colecoes", { method: "GET" });
       const data = await res.json();
       if (res.ok && data.success) {
-        // Ordena as coleções pelo campo 'ordem'
-        const sortedColecoes = data.colecoes.sort((a: Colecao, b: Colecao) => a.ordem - b.ordem);
+        // Ordena as coleções pelo campo 'order'
+        const sortedColecoes = data.colecoes.sort((a: Colecao, b: Colecao) => a.order - b.order);
         setColecoes(sortedColecoes);
       } else {
         setError(data.message || "Erro ao carregar coleções.");
@@ -100,7 +100,7 @@ export default function AdminColecoes() {
       bgcolor: "",
       buttonText: "",
       buttonUrl: "",
-      ordem: 0,
+      order: 0,
       items: [{ 
         productMark: "", 
         productModel: "", 
@@ -115,7 +115,11 @@ export default function AdminColecoes() {
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    if (name === "order") {
+        setForm({ ...form, [name]: parseInt(value, 10) || 0 });
+    } else {
+        setForm({ ...form, [name]: value });
+    }
   };
 
   const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -154,7 +158,7 @@ export default function AdminColecoes() {
       bgcolor: colecao.bgcolor || "",
       buttonText: colecao.buttonText || "",
       buttonUrl: colecao.buttonUrl || "",
-      ordem: colecao.ordem || 0,
+      order: colecao.order || 0,
       items: colecao.items.map(item => ({
         ...item, 
         img: item.img as string, 
@@ -259,7 +263,7 @@ export default function AdminColecoes() {
               <input type="text" name="bgcolor" value={form.bgcolor} onChange={handleFormChange} placeholder="Cor de Fundo (Ex: #F4F1DE)" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
               <input type="text" name="buttonText" value={form.buttonText} onChange={handleFormChange} placeholder="Texto do Botão" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
               <input type="url" name="buttonUrl" value={form.buttonUrl} onChange={handleFormChange} placeholder="URL do Botão" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-              <input type="number" name="ordem" value={form.ordem} onChange={handleFormChange} placeholder="Ordem" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+              <input type="number" name="order" value={form.order} onChange={handleFormChange} placeholder="Ordem" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
               
               <h3 className="text-xl font-bold mt-6 text-gray-700">Itens da Coleção</h3>
               {form.items.map((item, index) => (
