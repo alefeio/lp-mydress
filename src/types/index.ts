@@ -36,9 +36,28 @@ export interface FaqItem {
 }
 
 export interface ColecaoItem {
-    id: string; productMark: string; productModel: string; cor: string;
-    img: string; slug: string; colecaoId: string;
-    description?: string | null; // <-- Propriedade 'description' adicionada aqui
+    id: string;
+    productMark: string;
+    productModel: string;
+    cor: string;
+    img: string;
+    slug: string;
+    colecaoId: string;
+    
+    // Adicione a propriedade description, se ela existir no seu schema
+    description?: string | null;
+    
+    // Adicione os novos campos aqui, tornando-os opcionais (com '?')
+    size?: string | null;
+    price?: number | null;
+    price_card?: number | null;
+    like?: number | null;
+    view?: number | null;
+
+    // Adicione os campos 'tamanho', 'preco', e 'precoParcelado'
+    tamanho?: string | null;
+    preco?: string | null;
+    precoParcelado?: string | null;
 }
 
 export interface ColecaoProps {
