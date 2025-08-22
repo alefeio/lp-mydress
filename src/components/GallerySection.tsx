@@ -1,15 +1,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { FaWhatsapp, FaShareAlt } from "react-icons/fa";
+import { ColecaoProps } from "types";
 
 interface ColecaoItem {
     id: string; productMark: string; productModel: string; cor: string;
     img: string; slug: string; colecaoId: string;
-}
-interface ColecaoProps {
-    id: string; title: string; subtitle: string | null; description: string | null;
-    bgcolor: string | null; buttonText: string | null; buttonUrl: string | null;
-    slug: string; items: ColecaoItem[];
 }
 
 type GallerySectionProps = {

@@ -1,5 +1,3 @@
-// src/types/index.ts
-
 export interface Banner {
     id: number;
     banners: {
@@ -61,9 +59,17 @@ export interface ColecaoItem {
 }
 
 export interface ColecaoProps {
-    id: string; title: string; subtitle: string | null; description: string | null;
-    bgcolor: string | null; buttonText: string | null; buttonUrl: string | null;
-    slug: string; items: ColecaoItem[];
+    id: string; 
+    title: string; 
+    subtitle: string | null; 
+    description: string | null;
+    bgcolor: string | null; 
+    buttonText: string | null; 
+    buttonUrl: string | null;
+    // Adicionado o campo 'order' aqui e ajustado para ser opcional/nulo
+    order: number | null;
+    slug: string; 
+    items: ColecaoItem[];
 }
 
 export interface HomePageProps {

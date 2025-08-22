@@ -1,5 +1,3 @@
-// src/pages/api/crud/colecoes.ts
-
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { ColecaoProps, ColecaoItem } from '../../../types';
@@ -57,7 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         case 'POST':
             try {
-                const { title, subtitle, description, bgcolor, buttonText, buttonUrl, items } = req.body as ColecaoProps;
+                // Adicionado 'order' na desestruturação
+                const { title, subtitle, description, bgcolor, buttonText, buttonUrl, order, items } = req.body as ColecaoProps;
 
                 const itemsWithSlugs = (items || []).map((item: ColecaoItem) => ({
                     ...item,
@@ -72,6 +71,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         bgcolor,
                         buttonText,
                         buttonUrl,
+                        // Adicionado 'order' na criação
+                        order,
                         items: {
                             create: itemsWithSlugs,
                         },
@@ -103,6 +104,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         bgcolor: rest.bgcolor,
                         buttonText: rest.buttonText,
                         buttonUrl: rest.buttonUrl,
+                        // Adicionado 'order' na atualização
+                        order: rest.order,
                     },
                 });
 
@@ -139,26 +142,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             } catch (error) {
                 console.error('Erro ao atualizar coleção:', error);
                 return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
-            }
-
-        case 'DELETE':
-            try {
-                const { id, isItem } = req.body as { id: string; isItem?: boolean };
-
-                if (isItem) {
-                    await prisma.colecaoItem.delete({
-                        where: { id },
-                    });
-                    return res.status(200).json({ success: true, message: 'Item excluído com sucesso.' });
-                } else {
-                    await prisma.colecao.delete({
-                        where: { id },
-                    });
-                    return res.status(200).json({ success: true, message: 'Coleção e seus itens excluídos com sucesso.' });
-                }
-            } catch (error) {
-                console.error('Erro ao excluir:', error);
-                return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
             }
 
         default:
