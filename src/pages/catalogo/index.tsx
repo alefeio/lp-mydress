@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Script from 'next/script';
@@ -8,9 +7,9 @@ import {
     HomePageProps,
     ColecaoProps
 } from '../../types/index';
-import Catalog from 'components/Catalog';
+import Catalog from '../../components/Catalog';
 
-// FUNÇÃO SLUGIFY
+// A função de slugify ainda é útil para gerar os slugs no frontend, caso necessário
 function slugify(text: string): string {
     return text.toString().toLowerCase()
         .trim()
@@ -21,45 +20,46 @@ function slugify(text: string): string {
         .replace(/-+$/, '');
 }
 
-const prisma = new PrismaClient();
+// Acessar as variáveis de ambiente em tempo de execução
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
-// Função que busca todos os dados necessários no servidor
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
     try {
-        const [banners, menus, testimonials, faqs, colecoes] = await Promise.all([
-            prisma.banner.findMany(),
-            prisma.menu.findMany(),
-            prisma.testimonial.findMany({ orderBy: { createdAt: 'desc' } }),
-            prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
-            prisma.colecao.findMany({
-                include: {
-                    items: true,
-                },
-            }),
+        // Buscando todos os dados necessários através de chamadas de API
+        const [bannersRes, menusRes, testimonialsRes, faqsRes, colecoesRes] = await Promise.all([
+            fetch(`${API_BASE_URL}/api/banners`),
+            fetch(`${API_BASE_URL}/api/menu`),
+            fetch(`${API_BASE_URL}/api/testimonials`),
+            fetch(`${API_BASE_URL}/api/faqs`),
+            // Chamada para a API que criamos. Ela já retorna as coleções ordenadas.
+            fetch(`${API_BASE_URL}/api/colecoes`),
         ]);
 
-        const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: any) => ({
-            ...colecao,
-            slug: slugify(colecao.title),
-            items: colecao.items.map((item: any) => ({
-                ...item,
-                slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-            }))
-        }));
+        const [banners, menus, testimonials, faqs, colecoes] = await Promise.all([
+            bannersRes.json(),
+            menusRes.json(),
+            testimonialsRes.json(),
+            faqsRes.json(),
+            colecoesRes.json(),
+        ]);
+
+        // A lógica de ordenação agora está centralizada na API, então não é mais necessária aqui.
+        // O mapeamento para adicionar o slug é feito na API e retorna em colecoesRes.json()
+        const colecoesData = colecoes.colecoes;
 
         const menu: any | null = menus.length > 0 ? menus[0] : null;
 
         return {
             props: {
-                banners: JSON.parse(JSON.stringify(banners)),
-                menu: JSON.parse(JSON.stringify(menu)),
-                testimonials: JSON.parse(JSON.stringify(testimonials)),
-                faqs: JSON.parse(JSON.stringify(faqs)),
-                colecoes: JSON.parse(JSON.stringify(colecoesComSlugs)),
+                banners: banners,
+                menu: menu,
+                testimonials: testimonials,
+                faqs: faqs,
+                colecoes: colecoesData,
             },
         };
     } catch (error) {
-        console.error("Erro ao buscar dados do banco de dados:", error);
+        console.error("Erro ao buscar dados da API:", error);
         return {
             props: {
                 banners: [],
@@ -69,8 +69,6 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
                 colecoes: [],
             },
         };
-    } finally {
-        await prisma.$disconnect();
     }
 };
 
