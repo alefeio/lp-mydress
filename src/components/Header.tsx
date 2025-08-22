@@ -62,8 +62,11 @@ export default function Header() {
               <h1 className="rounded-xl font-serif text-2xl md:text-3xl font-bold mb-4 mt-8 md:mt-0 text-background-100 bg-background-500 px-4 py-2">
                 Somos especializadas em aluguel de vestidos para madrinhas, formandas e ocasiões especiais, com peças atuais, elegantes e acessíveis.
               </h1>
-              <p className="p-5 text-center">
+              <p className="my-8 text-center">
                 <strong>Cada detalhe da My Dress é pensado para valorizar sua beleza, seu momento e seu estilo único</strong>, sempre com atendimento acolhedor, qualidade impecável e preços que cabem no seu bolso.
+              </p>
+              <p className="my-8 text-center">
+                <strong>Encontre o vestido perfeito para aluguel</strong>, sem abrir mão do estilo ou do orçamento. Com nosso serviço de aluguel de vestidos de festa, você tem acesso a peças que são a união perfeita de elegância e o melhor custo-benefício da cidade.
               </p>
 
               {faqs.map((faq, idx) => (
@@ -92,6 +95,9 @@ export default function Header() {
                   </div>
                 </div>
               ))}
+              <p className="my-8 text-center">
+                Visite-nos em Belém para descobrir por que <strong>somos a escolha ideal para o aluguel de vestidos</strong>. Na My Dress, seu momento especial começa com a confiança de estar vestindo o vestido certo, no lugar certo.
+              </p>
             </div>
           </div>
         </div>

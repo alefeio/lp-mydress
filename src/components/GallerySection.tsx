@@ -45,7 +45,7 @@ export function GallerySection({
             galleryRef.current.scrollBy({ left: -320, behavior: 'smooth' });
         }
     };
-    
+
     const next = () => {
         if (galleryRef.current) {
             galleryRef.current.scrollBy({ left: 320, behavior: 'smooth' });
@@ -132,17 +132,12 @@ export function GallerySection({
                     >
                         {collection.title}
                     </h2>
-                    <h3 className="px-2 font-semibold text-xl text-white w-fit">
-                        {collection.subtitle}
-                    </h3>
                 </div>
             </div>
             <div className={`${collection.bgcolor} h-4`}></div>
 
-            {/* ADICIONADO: Contêiner principal com posicionamento relativo */}
-            <div className=" bg-gradient-to-b relative flex items-center justify-center overflow-hidden pt-32 pb-12 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
-                {/* ADICIONADO: Overlays com degradê para simular a sombra */}
-                {/* Sombra da esquerda */}
+            <div></div>
+            <div className="grid bg-gradient-to-b relative flex items-center justify-center overflow-hidden py-16 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
                 <div
                     className="absolute left-0 top-0 bottom-0 w-2 z-20 pointer-events-none
                                bg-gradient-to-r from-graytone-1000/20 to-transparent"
@@ -152,6 +147,9 @@ export function GallerySection({
                     className="absolute right-0 top-0 bottom-0 w-2 z-20 pointer-events-none
                                bg-gradient-to-l from-graytone-1000/20 to-transparent"
                 />
+                <h3 className="w-full px-2 font-semibold text-xl text-textcolor-800 text-center font-serif w-fit pb-12">
+                    {collection.subtitle}
+                </h3>
 
                 <div
                     className="flex gap-2 md:gap-4 overflow-x-scroll scrollbar-hide"
@@ -172,7 +170,7 @@ export function GallerySection({
                                     src={item.img}
                                     alt={`${item.productMark ?? ""} - ${item.productModel ?? ""}`}
                                     className="w-full h-full object-cover cursor-pointer"
-                                    // onClick={() => onOpenModal(collection.slug, item.slug)}
+                                // onClick={() => onOpenModal(collection.slug, item.slug)}
                                 />
 
                                 <button
