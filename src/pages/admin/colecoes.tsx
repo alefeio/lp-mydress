@@ -17,11 +17,7 @@ interface ColecaoItem {
   price_card?: number | null;
   like?: number | null;
   view?: number | null;
-  // Novos campos do formulário
-  tamanho: string;
-  preco: number;
-  precoParcelado: number;
-  // Campo de relacionamento adicionado para corrigir o erro de compilação
+  // Campo de relacionamento adicionado para correção do erro de compilação anterior
   colecaoId?: string;
 }
 
@@ -64,9 +60,9 @@ export default function AdminColecoes() {
       productModel: "", 
       cor: "", 
       img: "", 
-      tamanho: "", 
-      preco: 0, 
-      precoParcelado: 0 
+      size: "", 
+      price: 0, 
+      price_card: 0 
     }],
   });
   
@@ -108,9 +104,9 @@ export default function AdminColecoes() {
         productModel: "", 
         cor: "", 
         img: "", 
-        tamanho: "", 
-        preco: 0, 
-        precoParcelado: 0 
+        size: "", 
+        price: 0, 
+        price_card: 0 
       }],
     });
   };
@@ -126,7 +122,7 @@ export default function AdminColecoes() {
   
     if (name === "img" && files) {
       newItems[index] = { ...newItems[index], [name]: files[0] };
-    } else if (name === "preco" || name === "precoParcelado") {
+    } else if (name === "price" || name === "price_card") {
       newItems[index] = { ...newItems[index], [name]: parseFloat(value) || 0 };
     } else {
       newItems[index] = { ...newItems[index], [name]: value };
@@ -138,7 +134,7 @@ export default function AdminColecoes() {
   const handleAddItem = () => {
     setForm({
       ...form,
-      items: [...form.items, { productMark: "", productModel: "", cor: "", img: "", tamanho: "", preco: 0, precoParcelado: 0 }],
+      items: [...form.items, { productMark: "", productModel: "", cor: "", img: "", size: "", price: 0, price_card: 0 }],
     });
   };
 
@@ -160,9 +156,9 @@ export default function AdminColecoes() {
       items: colecao.items.map(item => ({
         ...item, 
         img: item.img as string, 
-        tamanho: item.tamanho || '', 
-        preco: item.preco || 0, 
-        precoParcelado: item.precoParcelado || 0 
+        size: item.size || '', 
+        price: item.price || 0, 
+        price_card: item.price_card || 0 
       }))
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -273,9 +269,9 @@ export default function AdminColecoes() {
                     <input type="text" name="productMark" value={item.productMark} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
                     <input type="text" name="productModel" value={item.productModel} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
                     <input type="text" name="cor" value={item.cor} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="text" name="tamanho" value={item.tamanho} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="number" name="preco" value={item.preco} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
-                    <input type="number" name="precoParcelado" value={item.precoParcelado} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                    <input type="text" name="size" value={item.size || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                    <input type="number" name="price" value={item.price || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                    <input type="number" name="price_card" value={item.price_card || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
                   </div>
                   
                   <div className="flex-1 w-full flex flex-col items-center gap-2 border border-gray-300 rounded-lg p-3">
@@ -348,7 +344,7 @@ export default function AdminColecoes() {
                         <div className="flex-1">
                           <h4 className="font-semibold text-gray-800">{item.productMark} - {item.productModel} ({item.cor})</h4>
                           <p className="text-xs text-gray-500 mt-1">
-                            Tamanho: {item.tamanho || 'N/A'} | Preço: R${item.preco || 'N/A'} | A prazo: R${item.precoParcelado || 'N/A'}
+                            Tamanho: {item.size || 'N/A'} | Preço: R${item.price || 'N/A'} | A prazo: R${item.price_card || 'N/A'}
                           </p>
                         </div>
                         <button onClick={() => handleDelete(item.id as string, true)} className="bg-red-400 text-white p-2 rounded-lg text-sm hover:bg-red-500 transition duration-200">Excluir</button>
