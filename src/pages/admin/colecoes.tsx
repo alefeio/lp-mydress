@@ -21,6 +21,8 @@ interface ColecaoItem {
   tamanho: string;
   preco: number;
   precoParcelado: number;
+  // Campo de relacionamento adicionado para corrigir o erro de compilação
+  colecaoId?: string;
 }
 
 interface Colecao {
@@ -192,13 +194,10 @@ export default function AdminColecoes() {
       );
   
       const method = form.id ? "PUT" : "POST";
-
-      // Removendo o campo 'colecaoId' dos itens para evitar o erro do Prisma
-      const sanitizedItems = itemsWithUrls.map(({ colecaoId, ...rest }) => rest);
-
       const body = { 
         ...form, 
-        items: sanitizedItems
+        // Filtra o campo 'colecaoId' de cada item antes de enviar
+        items: itemsWithUrls.map(({ colecaoId, ...rest }) => rest)
       };
       
       const res = await fetch("/api/crud/colecoes", {
