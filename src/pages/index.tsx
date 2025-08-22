@@ -17,6 +17,7 @@ import {
     ColecaoProps,
     ColecaoItem
 } from '../types/index';
+import PromotionsForm from 'components/PromotionsForm';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -189,6 +190,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <Hero />
                     <DressesGallery colecoes={colecoes} />
                     <Header />
+                    <PromotionsForm />
                     <Testimonials testimonials={testimonials} />
                     <FAQ faqs={faqs} />
                     <LocationMap />

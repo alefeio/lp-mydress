@@ -33,7 +33,7 @@ export default function Header() {
   return (
     <>
       <div id="empresa">&nbsp;</div>
-      <aside className="my-16 md:max-w-5xl mx-auto">
+      <aside className="my-16 md:max-w-6xl mx-auto">
         <div className="w-full mx-auto">
           <div className="mb-6 text-center md:max-w-4xl mx-auto px-4">
             <h2 className="font-serif text-4xl md:text-5xl font-bold mb-6 leading-16">
