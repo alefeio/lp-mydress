@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         items: true,
                     },
                     orderBy: {
-                        title: 'asc',
+                        order: 'asc',
                     },
                 });
 
