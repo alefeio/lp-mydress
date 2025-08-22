@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import ModalPhotos from "./ModalPhotos";
 import CollectionGallerySection from "./CollectionGallerySection";
 // Certifique-se de que as tipagens estão importadas corretamente
-import { ColecaoProps, ColecaoItem } from "../types"; 
+import { ColecaoProps, ColecaoItem } from "../types";
 
 interface DressesGalleryProps {
     colecoes: ColecaoProps[];
@@ -86,11 +86,12 @@ export default function DressesGallery({ colecoes }: DressesGalleryProps) {
                 </div>
 
                 {colecoes.map((colecao: ColecaoProps) => (
-                    <CollectionGallerySection
-                        key={colecao.slug}
-                        collection={colecao}
-                        openModal={openModal}
-                    />
+                    <div key={colecao.slug} id={colecao.slug}>
+                        <CollectionGallerySection
+                            collection={colecao}
+                            openModal={openModal}
+                        />
+                    </div>
                 ))}
 
                 {showModal && modalType && (

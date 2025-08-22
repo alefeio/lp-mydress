@@ -276,6 +276,22 @@ export function GalleryCatalog({
                                     <div className="font-semibold text-sm flex-1 text-left">
                                         <h3 className="text-textcolor-50">Tecido: {item.productMark}</h3>
                                         <h3 className="text-textcolor-50">Modelo: {item.productModel}</h3>
+                                        {/* NOVO: Adicionando Tamanho, Preço e Preço Parcelado */}
+                                        {item.size ? <h3 className="text-textcolor-50">Tamanho: {item.size}</h3> : ''}
+                                        {item.price ? (
+                                            <div className="mt-2">
+                                                <h3 className="text-textcolor-50 text-lg font-bold">Preço: {`R$ ${item.price}`}</h3>
+                                                {item.price_card && (
+                                                    <h4 className="text-textcolor-50 text-sm">
+                                                        Em 3x de {`R$ ${new Intl.NumberFormat('pt-BR', {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }).format(item.price_card / 3)
+                                                            }`}
+                                                    </h4>
+                                                )}
+                                            </div>
+                                        ) : ''}
                                     </div>
 
                                     <div className="flex gap-2">

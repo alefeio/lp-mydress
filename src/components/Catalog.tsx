@@ -160,11 +160,12 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                 </div>
 
                 {colecoes.map((colecao: ColecaoProps) => (
-                    <CollectionGalleryCatalog
-                        key={colecao.slug}
-                        collection={colecao}
-                        openModal={openModal}
-                    />
+                    <div key={colecao.slug} id={colecao.slug}>
+                        <CollectionGalleryCatalog
+                            collection={colecao}
+                            openModal={openModal}
+                        />
+                    </div>
                 ))}
 
                 {showModal && modalType && (

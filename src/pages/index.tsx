@@ -18,6 +18,7 @@ import {
     ColecaoItem
 } from '../types/index';
 import PromotionsForm from 'components/PromotionsForm';
+import FloatingButtons from 'components/FloatingButtons';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -196,6 +197,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <HeroSlider banners={banners} />
                 <main className="max-w-full mx-auto">
                     <Hero />
+                    <FloatingButtons colecoes={colecoes} />
                     <DressesGallery colecoes={colecoes} />
                     <Header />
                     <PromotionsForm />
