@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
 import Script from 'next/script';
@@ -5,11 +6,10 @@ import WhatsAppButton from '../../components/WhatsAppButton';
 import { Analytics } from "@vercel/analytics/next";
 import {
     HomePageProps,
-    ColecaoProps
-} from '../../types/index';
-import Catalog from '../../components/Catalog';
+    ColecaoProps} from '../../types/index';
+import Catalog from 'components/Catalog';
 
-// A função de slugify ainda é útil para gerar os slugs no frontend, caso necessário
+// FUNÇÃO SLUGIFY
 function slugify(text: string): string {
     return text.toString().toLowerCase()
         .trim()
@@ -20,46 +20,53 @@ function slugify(text: string): string {
         .replace(/-+$/, '');
 }
 
-// Acessar as variáveis de ambiente em tempo de execução
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+const prisma = new PrismaClient();
 
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
     try {
-        // Buscando todos os dados necessários através de chamadas de API
-        const [bannersRes, menusRes, testimonialsRes, faqsRes, colecoesRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/api/banners`),
-            fetch(`${API_BASE_URL}/api/menu`),
-            fetch(`${API_BASE_URL}/api/testimonials`),
-            fetch(`${API_BASE_URL}/api/faqs`),
-            // Chamada para a API que criamos. Ela já retorna as coleções ordenadas.
-            fetch(`${API_BASE_URL}/api/colecoes`),
-        ]);
-
         const [banners, menus, testimonials, faqs, colecoes] = await Promise.all([
-            bannersRes.json(),
-            menusRes.json(),
-            testimonialsRes.json(),
-            faqsRes.json(),
-            colecoesRes.json(),
+            prisma.banner.findMany(),
+            prisma.menu.findMany(),
+            prisma.testimonial.findMany({ orderBy: { createdAt: 'desc' } }),
+            prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
+            prisma.colecao.findMany({
+                orderBy: {
+                    order: 'asc', // Ordena as coleções pela ordem definida
+                },
+                include: {
+                    items: {
+                        // CORRIGIDO: Adiciona a ordenação dos itens por likes e views.
+                        orderBy: [
+                            { like: 'desc' },
+                            { view: 'desc' },
+                        ],
+                    },
+                },
+            }),
         ]);
 
-        // A lógica de ordenação agora está centralizada na API, então não é mais necessária aqui.
-        // O mapeamento para adicionar o slug é feito na API e retorna em colecoesRes.json()
-        const colecoesData = colecoes.colecoes;
+        const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: any) => ({
+            ...colecao,
+            slug: slugify(colecao.title),
+            items: colecao.items.map((item: any) => ({
+                ...item,
+                slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+            }))
+        }));
 
         const menu: any | null = menus.length > 0 ? menus[0] : null;
 
         return {
             props: {
-                banners: banners,
-                menu: menu,
-                testimonials: testimonials,
-                faqs: faqs,
-                colecoes: colecoesData,
+                banners: JSON.parse(JSON.stringify(banners)),
+                menu: JSON.parse(JSON.stringify(menu)),
+                testimonials: JSON.parse(JSON.stringify(testimonials)),
+                faqs: JSON.parse(JSON.stringify(faqs)),
+                colecoes: JSON.parse(JSON.stringify(colecoesComSlugs)),
             },
         };
     } catch (error) {
-        console.error("Erro ao buscar dados da API:", error);
+        console.error("Erro ao buscar dados do banco de dados:", error);
         return {
             props: {
                 banners: [],
@@ -69,14 +76,16 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
                 colecoes: [],
             },
         };
+    } finally {
+        await prisma.$disconnect();
     }
 };
 
-export default function Home({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
+export default function Catalogo({ banners, menu, testimonials, faqs, colecoes }: HomePageProps) {
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "LocalBusiness",
-        "name": "My Dress - Catálogo de Vestidos",
+        "name": "My Dress - Aluguel de Vestidos",
         "image": "https://www.mydressbelem.com.br/images/logo.png",
         "address": {
             "@type": "PostalAddress",

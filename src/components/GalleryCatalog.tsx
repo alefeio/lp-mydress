@@ -1,14 +1,7 @@
-// src/components/GalleryCatalog.tsx
-
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { FaWhatsapp, FaShareAlt } from "react-icons/fa";
-import { ColecaoProps } from "types";
-
-interface ColecaoItem {
-    id: string; productMark: string; productModel: string; cor: string;
-    img: string; slug: string; colecaoId: string;
-}
+import { FaWhatsapp, FaShareAlt, FaHeart } from "react-icons/fa";
+import { ColecaoProps, ColecaoItem } from "types";
 
 type GallerySectionProps = {
     collection: ColecaoProps;
@@ -25,29 +18,84 @@ export function GalleryCatalog({
     const [canShare, setCanShare] = useState(false);
     const [isSharing, setIsSharing] = useState(false);
     const [originUrl, setOriginUrl] = useState('');
-
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
     const [showPrev, setShowPrev] = useState(false);
     const [showNext, setShowNext] = useState(false);
 
-    const checkScroll = useCallback(() => {
+    const [itemStats, setItemStats] = useState<{ [key: string]: { like: number | null; view: number | null } }>({});
+    // A referência itemsViewed não é mais necessária, pois a visualização não é mais automática
+    // const itemsViewed = useRef<Set<string>>(new Set());
+
+    const handleView = async (itemId: string) => {
+        // Agora, a lógica da API do backend lida com a verificação de NULL e o incremento.
+        // A lógica do front-end apenas precisa chamar a API.
+        try {
+            const response = await fetch('/api/stats/item-view', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Erro na API de visualização:', response.status, errorText);
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setItemStats(prevStats => ({
+                    ...prevStats,
+                    [data.item.id]: { ...prevStats[data.item.id], view: data.item.view }
+                }));
+            }
+        } catch (error) {
+            console.error('Falha ao registrar visualização:', error);
+        }
+    };
+
+    const handleLike = async (itemId: string) => {
+        try {
+            const response = await fetch('/api/stats/item-like', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Erro na API de curtida:', response.status, errorText);
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                setItemStats(prevStats => ({
+                    ...prevStats,
+                    [data.item.id]: { like: data.item.like, view: data.item.view }
+                }));
+            }
+        } catch (error) {
+            console.error('Falha ao curtir item:', error);
+        }
+    };
+
+    const checkScroll = () => {
         if (galleryRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = galleryRef.current;
-            // Verifica se não está no início
             setShowPrev(scrollLeft > 0);
-            // Verifica se não está no final (com uma pequena margem de erro)
             setShowNext(scrollLeft + clientWidth < scrollWidth - 1);
         }
-    }, []);
+    };
 
     const prev = () => {
         if (galleryRef.current) {
             galleryRef.current.scrollBy({ left: -320, behavior: 'smooth' });
         }
     };
-    
+
     const next = () => {
         if (galleryRef.current) {
             galleryRef.current.scrollBy({ left: 320, behavior: 'smooth' });
@@ -68,12 +116,21 @@ export function GalleryCatalog({
             checkScroll();
         }
 
+        // REMOVIDO: A chamada automática para handleView foi removida daqui.
+        // A visualização agora é registrada apenas na interação do usuário.
+
+        const initialStats = collection.items.reduce((acc, item) => {
+            acc[item.id] = { like: item.like ?? 0, view: item.view ?? 0 };
+            return acc;
+        }, {} as { [key: string]: { like: number | null; view: number | null } });
+        setItemStats(initialStats);
+
         return () => {
             if (currentRef) {
                 currentRef.removeEventListener('scroll', checkScroll);
             }
         };
-    }, [checkScroll]);
+    }, [collection]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (galleryRef.current) {
@@ -116,15 +173,13 @@ export function GalleryCatalog({
         return <p className="text-center py-8">Coleção não encontrada.</p>;
     }
 
-    // ADICIONADO: Pega a URL da última foto da coleção ou usa uma imagem de fallback
     const lastItem = collection.items.length > 0 ? collection.items[collection.items.length - 1] : null;
-    const backgroundImageUrl = lastItem ? lastItem.img : ''; // Substitua '' por uma URL de imagem padrão, se desejar.
+    const backgroundImageUrl = lastItem ? lastItem.img : '';
 
     return (
         <article className="my-16">
             <div
                 className="relative flex flex-col justify-center items-center mx-auto text-center md:max-w-full h-[50vh] bg-fixed bg-cover bg-center"
-                // ADICIONADO: Atributo style dinâmico
                 style={{ backgroundImage: `url('${backgroundImageUrl}')` }}
             >
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
@@ -134,26 +189,24 @@ export function GalleryCatalog({
                     >
                         {collection.title}
                     </h2>
-                    <h3 className="px-2 font-semibold text-xl text-white w-fit">
-                        {collection.subtitle}
-                    </h3>
                 </div>
             </div>
             <div className={`${collection.bgcolor} h-4`}></div>
 
-            {/* ADICIONADO: Contêiner principal com posicionamento relativo */}
-            <div className=" bg-gradient-to-b relative flex items-center justify-center overflow-hidden pt-32 pb-12 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
-                {/* ADICIONADO: Overlays com degradê para simular a sombra */}
-                {/* Sombra da esquerda */}
+            <div></div>
+            <div className="grid bg-gradient-to-b relative flex items-center justify-center overflow-hidden py-16 md:max-w-6xl mx-auto from-background-200 to-transparent md:max-w-full">
                 <div
                     className="absolute left-0 top-0 bottom-0 w-2 z-20 pointer-events-none
-                                bg-gradient-to-r from-graytone-1000/20 to-transparent"
+                                 bg-gradient-to-r from-graytone-1000/20 to-transparent"
                 />
 
                 <div
                     className="absolute right-0 top-0 bottom-0 w-2 z-20 pointer-events-none
-                                bg-gradient-to-l from-graytone-1000/20 to-transparent"
+                                 bg-gradient-to-l from-graytone-1000/20 to-transparent"
                 />
+                <h3 className="w-full px-2 font-semibold text-xl text-textcolor-800 text-center font-serif w-fit pb-12">
+                    {collection.subtitle}
+                </h3>
 
                 <div
                     className="flex gap-2 md:gap-4 overflow-x-scroll scrollbar-hide"
@@ -165,6 +218,7 @@ export function GalleryCatalog({
                 >
                     {collection.items.map(item => {
                         const shareUrl = `${originUrl}/share/${collection.slug}/${item.slug}`;
+                        const currentLikes = itemStats[item.id]?.like ?? item.like ?? 0;
                         return (
                             <div
                                 key={item.slug}
@@ -174,13 +228,14 @@ export function GalleryCatalog({
                                     src={item.img}
                                     alt={`${item.productMark ?? ""} - ${item.productModel ?? ""}`}
                                     className="w-full h-full object-cover cursor-pointer"
-                                    // onClick={() => onOpenModal(collection.slug, item.slug)}
                                 />
 
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onOpenModal(collection.slug, item.slug);
+                                        // ADICIONADO: A chamada para handleView foi movida para aqui
+                                        handleView(item.id);
                                     }}
                                     className="absolute top-2 right-2 cursor-pointer z-50 text-white bg-black/20 hover:bg-black/40 rounded-full p-2 transition"
                                     aria-label="Ver produto"
@@ -199,6 +254,23 @@ export function GalleryCatalog({
                                         />
                                     </svg>
                                 </button>
+
+                                {/* Botão de Curtir - O view é registrado pela API de like */}
+                                <div className="absolute top-2 left-2 z-50">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleLike(item.id);
+                                        }}
+                                        className="inline-flex items-center gap-1 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition"
+                                        aria-label="Curtir foto"
+                                    >
+                                        <FaHeart className="w-5 h-5" />
+                                        {currentLikes > 0 && (
+                                            <span className="text-sm font-bold">{currentLikes}</span>
+                                        )}
+                                    </button>
+                                </div>
 
                                 <div className="absolute flex justify-between items-end gap-2 bottom-0 left-0 w-full max-w-xs bg-gradient-to-t from-graytone-950/60 to-transparent p-4">
                                     <div className="font-semibold text-sm flex-1 text-left">
@@ -275,20 +347,6 @@ export function GalleryCatalog({
                         </svg>
                     </button>
                 )}
-            </div>
-
-            <div className="py-4 w-fit mx-auto text-center flex flex-col">
-                <p className="px-4 leading-6">
-                    {collection.description}
-                </p>
-                <a
-                    href={buttonHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="my-4 inline-flex items-center justify-center mx-auto mb-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-2 px-4 font-bold transition-colors duration-300"
-                >
-                    {collection.buttonText}
-                </a>
             </div>
         </article>
     );

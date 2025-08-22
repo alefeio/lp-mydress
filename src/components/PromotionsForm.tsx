@@ -83,7 +83,7 @@ const PromotionsForm: React.FC = () => {
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Seu nome"
                             required
-                            className="w-full sm:w-1/3 px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
+                            className="w-full sm:w-1/3 px-4 py-3 border border-background-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
                         />
                         <input
                             type="email"
@@ -91,14 +91,14 @@ const PromotionsForm: React.FC = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Seu email"
                             required
-                            className="w-full sm:w-1/3 px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
+                            className="w-full sm:w-1/3 px-4 py-3 border border-background-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
                         />
                         <input
                             type="text" // Alterado para 'text' conforme solicitado
                             value={phone}
                             onChange={handlePhoneChange} // Usando a nova função para aplicar a máscara
                             placeholder="Seu WhatsApp (opcional)"
-                            className="w-full sm:w-1/3 px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
+                            className="w-full sm:w-1/3 px-4 py-3 border border-background-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
                         />
                         <button
                             type="submit"

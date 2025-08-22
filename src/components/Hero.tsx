@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function Hero() {
@@ -19,15 +20,24 @@ export default function Hero() {
         Aqui você pode <strong>visualizar os modelos disponíveis, explorar por cores, tamanhos e estilos</strong> antes mesmo de vir até a loja.
       </p>
       <a
-        href="https://wa.me//5591985810208?text=Olá! Gostaria de agendar uma visita."
+        href="https://wa.me//5591985810208?text=Olá! Gostaria de solicitar o catálogo."
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center justify-center mx-auto mt-12 bg-background-300 hover:bg-background-200 rounded-full shadow-lg py-3 px-8 font-bold text-lg transition-colors duration-300"
         onClick={() => handleClick('/agendar-visita')}
         aria-label="Solicitar catálogo"
       >
-        Solicitar catálogo
+        Solicite nosso Catálogo
       </a>
+      <div>
+        E <Link
+          href="#fique-por-dentro"
+          className="inline-flex mt-12 font-bold transition-colors duration-300"
+          aria-label="Fique por dentro"
+        >
+          Cadastre-se
+        </Link> para receber novidades sobre nossos lançamentos e descontos exclusivos.
+      </div>
     </header>
   )
 }

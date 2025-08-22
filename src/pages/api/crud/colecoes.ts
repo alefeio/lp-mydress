@@ -14,138 +14,191 @@ function slugify(text: string): string {
         .replace(/-+$/, '');
 }
 
-// Tipos auxiliares que correspondem ao que o Prisma retorna.
-// O tipo 'ColecaoItem' já é a sua interface e o Prisma retorna um objeto compatível.
+// O tipo auxiliar foi ajustado para refletir a estrutura do retorno do Prisma
+// A tipagem já é inferida corretamente, então esta definição é mais para clareza
 type PrismaColecaoWithItems = Omit<ColecaoProps, 'slug'> & {
     items: ColecaoItem[];
 };
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const { method } = req;
+    // Bloco try...finally para garantir que o prisma.$disconnect() seja chamado
+    try {
+        const { method } = req;
 
-    switch (method) {
-        case 'GET':
-            try {
-                const colecoes = await prisma.colecao.findMany({
-                    include: {
-                        items: true,
-                    },
-                    orderBy: {
-                        order: 'asc',
-                    },
-                });
-
-                // Tipagem explícita para o parâmetro 'colecao' usando o tipo auxiliar
-                const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao: PrismaColecaoWithItems) => ({
-                    ...colecao,
-                    slug: slugify(colecao.title),
-                    // Tipagem explícita para o parâmetro 'item'
-                    items: colecao.items.map((item: ColecaoItem) => ({ 
-                        ...item,
-                        slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-                    }))
-                }));
-
-                return res.status(200).json({ success: true, colecoes: colecoesComSlugs });
-            } catch (error) {
-                console.error('Erro ao buscar coleções:', error);
-                return res.status(500).json({ success: false, message: 'Erro ao buscar coleções.' });
-            }
-
-        case 'POST':
-            try {
-                // Adicionado 'order' na desestruturação
-                const { title, subtitle, description, bgcolor, buttonText, buttonUrl, order, items } = req.body as ColecaoProps;
-
-                const itemsWithSlugs = (items || []).map((item: ColecaoItem) => ({
-                    ...item,
-                    slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-                }));
-
-                const createdColecao = await prisma.colecao.create({
-                    data: {
-                        title,
-                        subtitle,
-                        description,
-                        bgcolor,
-                        buttonText,
-                        buttonUrl,
-                        // Adicionado 'order' na criação
-                        order,
-                        items: {
-                            create: itemsWithSlugs,
+        switch (method) {
+            case 'GET':
+                try {
+                    const colecoes = await prisma.colecao.findMany({
+                        include: {
+                            items: {
+                                // CORRIGIDO: A ordenação dos itens é feita aqui, no backend.
+                                orderBy: [
+                                    { like: 'desc' }, // Ordena pelos mais curtidos primeiro
+                                    { view: 'desc' }, // Em caso de empate, ordena pelos mais visualizados
+                                ],
+                                select: { // Especifica os campos para incluir de ColecaoItem
+                                    id: true,
+                                    productMark: true,
+                                    productModel: true,
+                                    cor: true,
+                                    img: true,
+                                    slug: true,
+                                    colecaoId: true,
+                                    size: true,
+                                    price: true,
+                                    price_card: true,
+                                    like: true, // Campo 'like'
+                                    view: true,  // Campo 'view'
+                                },
+                            },
                         },
-                    },
-                    include: {
-                        items: true,
-                    },
-                });
-                return res.status(201).json({ success: true, data: createdColecao });
-            } catch (error) {
-                console.error('Erro ao criar coleção:', error);
-                return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
-            }
+                        orderBy: {
+                            order: {
+                                sort: 'asc',
+                                nulls: 'last',
+                            },
+                        },
+                    });
 
-        case 'PUT':
-            try {
-                const { id, items, ...rest } = req.body as ColecaoProps & { id: string };
+                    // Removida a tipagem explícita desnecessária para o parâmetro do .map
+                    const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao) => ({
+                        ...colecao,
+                        slug: slugify(colecao.title),
+                        items: colecao.items.map((item) => ({
+                            ...item,
+                            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+                        }))
+                    }));
 
-                if (!id) {
-                    return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
+                    return res.status(200).json({ success: true, colecoes: colecoesComSlugs });
+                } catch (error) {
+                    console.error('Erro ao buscar coleções:', error);
+                    return res.status(500).json({ success: false, message: 'Erro ao buscar coleções.' });
                 }
 
-                const updatedColecao = await prisma.colecao.update({
-                    where: { id },
-                    data: {
-                        title: rest.title,
-                        subtitle: rest.subtitle,
-                        description: rest.description,
-                        bgcolor: rest.bgcolor,
-                        buttonText: rest.buttonText,
-                        buttonUrl: rest.buttonUrl,
-                        // Adicionado 'order' na atualização
-                        order: rest.order,
-                    },
-                });
+            case 'POST':
+                try {
+                    const { title, subtitle, description, bgcolor, buttonText, buttonUrl, order, items } = req.body as ColecaoProps;
 
-                if (items && Array.isArray(items)) {
-                    const itemsWithSlugs = items.map((item: ColecaoItem) => ({
+                    const itemsWithSlugs = (items || []).map((item: ColecaoItem) => ({
                         ...item,
                         slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
                     }));
-                    
-                    const transaction = itemsWithSlugs.map((item: ColecaoItem) => {
-                        if (item.id) {
-                            return prisma.colecaoItem.update({
-                                where: { id: item.id },
-                                data: { ...item },
-                            });
-                        } else {
-                            return prisma.colecaoItem.create({
-                                data: {
+
+                    const createdColecao = await prisma.colecao.create({
+                        data: {
+                            title,
+                            subtitle,
+                            description,
+                            bgcolor,
+                            buttonText,
+                            buttonUrl,
+                            order,
+                            items: {
+                                create: itemsWithSlugs.map(item => ({
                                     ...item,
-                                    colecaoId: id,
-                                },
-                            });
-                        }
+                                    // Garante que like e view sejam inicializados se não forem fornecidos
+                                    like: item.like ?? 0,
+                                    view: item.view ?? 0,
+                                })),
+                            },
+                        },
+                        include: {
+                            items: true,
+                        },
                     });
-                    await prisma.$transaction(transaction);
+                    return res.status(201).json({ success: true, data: createdColecao });
+                } catch (error) {
+                    console.error('Erro ao criar coleção:', error);
+                    return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
                 }
 
-                const colecaoComItensAtualizados = await prisma.colecao.findUnique({
-                    where: { id },
-                    include: { items: true },
-                });
+            case 'PUT':
+                try {
+                    const { id, items, ...rest } = req.body as ColecaoProps & { id: string };
 
-                return res.status(200).json({ success: true, data: colecaoComItensAtualizados });
-            } catch (error) {
-                console.error('Erro ao atualizar coleção:', error);
-                return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
-            }
+                    if (!id) {
+                        return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
+                    }
 
-        default:
-            res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
-            res.status(405).end(`Método ${method} não permitido`);
+                    const updatedColecao = await prisma.colecao.update({
+                        where: { id },
+                        data: {
+                            title: rest.title,
+                            subtitle: rest.subtitle,
+                            description: rest.description,
+                            bgcolor: rest.bgcolor,
+                            buttonText: rest.buttonText,
+                            buttonUrl: rest.buttonUrl,
+                            order: rest.order,
+                        },
+                    });
+
+                    if (items && Array.isArray(items)) {
+                        const itemsWithSlugs = items.map((item: ColecaoItem) => ({
+                            ...item,
+                            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+                        }));
+
+                        const transaction = itemsWithSlugs.map((item: ColecaoItem) => {
+                            if (item.id) {
+                                return prisma.colecaoItem.update({
+                                    where: { id: item.id },
+                                    data: {
+                                        ...item,
+                                        like: item.like ?? 0,
+                                        view: item.view ?? 0,
+                                    },
+                                });
+                            } else {
+                                return prisma.colecaoItem.create({
+                                    data: {
+                                        ...item,
+                                        colecaoId: id,
+                                        like: item.like ?? 0,
+                                        view: item.view ?? 0,
+                                    },
+                                });
+                            }
+                        });
+                        await prisma.$transaction(transaction);
+                    }
+
+                    const colecaoComItensAtualizados = await prisma.colecao.findUnique({
+                        where: { id },
+                        include: { items: true },
+                    });
+
+                    return res.status(200).json({ success: true, data: colecaoComItensAtualizados });
+                } catch (error) {
+                    console.error('Erro ao atualizar coleção:', error);
+                    return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
+                }
+
+            case 'DELETE':
+                try {
+                    const { id } = req.query;
+
+                    if (!id || typeof id !== 'string') {
+                        return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para exclusão.' });
+                    }
+
+                    await prisma.colecao.delete({
+                        where: { id },
+                    });
+
+                    return res.status(200).json({ success: true, message: 'Coleção excluída com sucesso.' });
+                } catch (error) {
+                    console.error('Erro ao excluir coleção:', error);
+                    return res.status(500).json({ success: false, message: 'Erro ao excluir coleção.' });
+                }
+
+            default:
+                res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+                return res.status(405).end(`Método ${method} não permitido`);
+        }
+    } finally {
+        await prisma.$disconnect();
     }
 }

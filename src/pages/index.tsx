@@ -32,7 +32,6 @@ function slugify(text: string): string {
 
 const prisma = new PrismaClient();
 
-// Função que busca todos os dados necessários no servidor
 export const getServerSideProps: GetServerSideProps<HomePageProps> = async () => {
     try {
         const [banners, menus, testimonials, faqs, colecoes] = await Promise.all([
@@ -41,8 +40,17 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             prisma.testimonial.findMany({ orderBy: { createdAt: 'desc' } }),
             prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
             prisma.colecao.findMany({
+                orderBy: {
+                    order: 'asc', // Ordena as coleções pela ordem definida
+                },
                 include: {
-                    items: true,
+                    items: {
+                        // CORRIGIDO: Adiciona a ordenação dos itens por likes e views.
+                        orderBy: [
+                            { like: 'desc' },
+                            { view: 'desc' },
+                        ],
+                    },
                 },
             }),
         ]);
