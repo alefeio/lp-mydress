@@ -11,10 +11,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     try {
         const [banners, menus, testimonials, faqs, colecoes] = await Promise.all([
             prisma.banner.findMany(), prisma.menu.findMany(),
-            prisma.testimonial.findMany({ orderBy: { createdAt: 'asc' } }),
+            prisma.testimonial.findMany(),
             prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
             prisma.colecao.findMany({
-                include: { items: true }, orderBy: { createdAt: 'asc' },
+                include: { items: true },
             }),
         ]);
         const menu = menus.length > 0 ? menus[0] : null;

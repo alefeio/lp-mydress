@@ -35,9 +35,6 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
                 include: {
                     items: true,
                 },
-                orderBy: {
-                    createdAt: 'asc',
-                },
             }),
         ]);
 
