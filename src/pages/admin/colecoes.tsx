@@ -192,9 +192,13 @@ export default function AdminColecoes() {
       );
   
       const method = form.id ? "PUT" : "POST";
+
+      // Removendo o campo 'colecaoId' dos itens para evitar o erro do Prisma
+      const sanitizedItems = itemsWithUrls.map(({ colecaoId, ...rest }) => rest);
+
       const body = { 
         ...form, 
-        items: itemsWithUrls
+        items: sanitizedItems
       };
       
       const res = await fetch("/api/crud/colecoes", {
