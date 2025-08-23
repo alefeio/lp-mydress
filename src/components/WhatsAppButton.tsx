@@ -9,7 +9,7 @@ export default function WhatsAppButton() {
     };
 
     return (
-        <div className="fixed flex justify-between gap-2 bottom-4 right-4 z-10">
+        <div className="fixed flex justify-between gap-2 bottom-4 right-4 z-30">
             <a
                 href="https://www.instagram.com/mydress.aluguel"
                 target="_blank"

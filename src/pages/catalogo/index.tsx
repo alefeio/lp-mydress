@@ -8,7 +8,6 @@ import {
     HomePageProps,
     ColecaoProps} from '../../types/index';
 import Catalog from 'components/Catalog';
-import FloatingButtons from 'components/FloatingButtons';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -184,7 +183,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div className="min-h-screen">
                 <Analytics />
                 <main className="max-w-full mx-auto">
-                    <FloatingButtons colecoes={colecoes} />
                     <Catalog colecoes={colecoes} />
                 </main>
                 <WhatsAppButton />

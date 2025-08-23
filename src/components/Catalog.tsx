@@ -6,6 +6,7 @@ import ModalPhotos from "./ModalPhotos";
 import { ColecaoProps, ColecaoItem } from "../types";
 import CollectionGalleryCatalog from "./CollectionGalleryCatalog";
 import { FaShareAlt } from "react-icons/fa";
+import FloatingButtons from "./FloatingButtons";
 
 interface DressesGalleryProps {
     colecoes: ColecaoProps[];
@@ -158,6 +159,7 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                         </li>
                     </ul>
                 </div>
+                <FloatingButtons colecoes={colecoes} />
 
                 {colecoes.map((colecao: ColecaoProps) => (
                     <div key={colecao.slug} id={colecao.slug}>
