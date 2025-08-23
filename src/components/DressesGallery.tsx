@@ -6,6 +6,7 @@ import ModalPhotos from "./ModalPhotos";
 import CollectionGallerySection from "./CollectionGallerySection";
 // Certifique-se de que as tipagens estão importadas corretamente
 import { ColecaoProps, ColecaoItem } from "../types";
+import FloatingButtons from "./FloatingButtons";
 
 interface DressesGalleryProps {
     colecoes: ColecaoProps[];
@@ -72,9 +73,9 @@ export default function DressesGallery({ colecoes }: DressesGalleryProps) {
 
     return (
         <>
-            <div id="colecao">&nbsp;</div>
+            <div id="colecao" className='my-16'>&nbsp;</div>
             <section>
-                <div className="my-16 text-center md:max-w-7xl mx-auto">
+                <div className="text-center md:max-w-7xl mx-auto mb-16">
                     <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6">
                         Conheça nossa Coleção
                     </h2>
@@ -84,6 +85,7 @@ export default function DressesGallery({ colecoes }: DressesGalleryProps) {
                         </strong>
                     </p>
                 </div>
+                <FloatingButtons colecoes={colecoes} />
 
                 {colecoes.map((colecao: ColecaoProps) => (
                     <div key={colecao.slug} id={colecao.slug}>

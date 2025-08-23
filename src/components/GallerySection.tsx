@@ -177,7 +177,7 @@ export function GallerySection({
     const backgroundImageUrl = lastItem ? lastItem.img : '';
 
     return (
-        <article className="my-16">
+        <article className="my-4">
             <div
                 className="relative flex flex-col justify-center items-center mx-auto text-center md:max-w-full h-[50vh] bg-fixed bg-cover bg-center"
                 style={{ backgroundImage: `url('${backgroundImageUrl}')` }}

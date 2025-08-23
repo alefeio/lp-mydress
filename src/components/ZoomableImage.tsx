@@ -51,7 +51,7 @@ export function ZoomableImage({ src, alt }: ZoomableImageProps) {
 
     return (
         <div
-            className="bg-background-50 flex-grow flex items-center justify-center relative w-full h-full cursor-zoom-in overflow-hidden"
+            className="bg-background-200 flex-grow flex items-end justify-center relative w-full h-full cursor-zoom-in overflow-hidden"
             onClick={handleToggleZoom}
             onMouseMove={handleInteraction}
             onTouchStart={handleToggleZoom}
