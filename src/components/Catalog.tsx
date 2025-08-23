@@ -125,7 +125,7 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                 </h2>
 
                 {/* Conteúdo da seção de informações importantes */}
-                <div className="bg-white p-6 rounded-lg shadow-lg mx-auto max-w-7xl mt-8">
+                <div className="bg-white p-6 rounded-lg shadow-lg mx-auto max-w-7xl mt-8 mb-16">
                     <h2 className="text-lg font-semibold text-gray-800 text-center">Informações Essenciais para a Sua Experiência</h2>
 
                     <p className="text-gray-600 mb-4 text-center text-sm">
