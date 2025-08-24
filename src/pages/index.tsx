@@ -48,8 +48,8 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
                     items: {
                         // CORRIGIDO: Adiciona a ordenação dos itens por likes e views.
                         orderBy: [
-                            { like: 'desc' },
                             { view: 'desc' },
+                            { like: 'desc' },
                         ],
                     },
                 },
