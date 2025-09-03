@@ -238,7 +238,7 @@ export default function HomepageAdmin() {
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() => setSections([...sections, { id: `new-${Date.now()}`, type: 'custom', order: sections.length, content: { title: "Nova Sessão Personalizada", text: "Este é o conteúdo.", style: {} } }])}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-600"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 hover:bg-blue-600"
             >
               <FaPlus /> Sessão Personalizada
             </button>

@@ -230,7 +230,7 @@ export default function Testimonials() {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => setEditing(testimonial)}
-                    className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition"
+                    className="bg-blue-600 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition"
                   >
                     <MdEdit size={20} className="text-white" />
                   </button>

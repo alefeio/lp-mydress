@@ -334,10 +334,10 @@ export default function AdminColecoes() {
                     <p className="text-sm text-gray-500">{colecao.subtitle}</p>
                   </div>
                   <div className="flex gap-2 mt-4 md:mt-0">
-                    <button onClick={() => handleEdit(colecao)} className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200">
+                    <button onClick={() => handleEdit(colecao)} className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200">
                       <MdEdit size={20} className="text-white" />
                     </button>
-                    <button onClick={() => handleDelete(colecao.id)} className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200">
+                    <button onClick={() => handleDelete(colecao.id)} className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200">
                       <MdDelete size={20} className="text-white" />
                     </button>
                   </div>

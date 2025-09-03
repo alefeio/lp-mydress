@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import AdminLayout from 'components/admin/AdminLayout';
 import { GetServerSideProps } from 'next';
 import { useState, FormEvent, useEffect } from 'react';
+import { MdDelete, MdEdit } from 'react-icons/md';
 
 interface FAQ {
   id: string;
@@ -171,15 +172,15 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
               <div className="flex space-x-2 ml-4">
                 <button
                   onClick={() => handleEditClick(faq)}
-                  className="text-sm text-primary-600 hover:text-primary-800"
+                  className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200"
                 >
-                  Editar
+                  <MdEdit size={20} className="text-white" />
                 </button>
                 <button
                   onClick={() => handleDelete(faq.id)}
-                  className="text-sm text-red-600 hover:text-red-800"
+                  className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200"
                 >
-                  Excluir
+                  <MdDelete size={20} className="text-white" />
                 </button>
               </div>
             </div>
