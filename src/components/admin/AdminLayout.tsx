@@ -42,14 +42,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  // if (status === "loading") {
-  //   return <p className="text-center mt-8">Verificando autenticação...</p>;
-  // }
+  if (status === "loading") {
+    return <p className="text-center mt-8">Verificando autenticação...</p>;
+  }
 
-  // if (status === "unauthenticated") {
-  //   router.push("/");
-  //   return null;
-  // }
+  if (status === "unauthenticated") {
+    router.push("/");
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
