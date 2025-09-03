@@ -144,7 +144,7 @@ export default function Testimonials() {
               id="name"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
               required
             />
           </div>
@@ -158,7 +158,7 @@ export default function Testimonials() {
                 setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
                 setFile(null);
               }}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
             >
               <option value="texto">Texto</option>
               <option value="foto">Foto</option>
@@ -176,7 +176,7 @@ export default function Testimonials() {
                 value={form.content}
                 onChange={(e) => setForm({ ...form, content: e.target.value })}
                 rows={4}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400"
                 required
               ></textarea>
             ) : (
