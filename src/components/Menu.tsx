@@ -45,24 +45,22 @@ export function Menu({ menuData }: MenuProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${
-        isScrolled
-          ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
-          : "bg-background-100 pt-4 pb-2"
-      }`}
+      className={`fixed top-0 left-0 w-full z-30 transition-all duration-300 shadow-lg ${isScrolled
+        ? "bg-background-100/50 backdrop-blur-sm pt-2 pb-1"
+        : "bg-background-100 pt-4 pb-2"
+        }`}
     >
       <div className="mx-auto flex items-center justify-between px-4 md:px-8">
         <Link href="/">
           <img
             src={logoUrl || "/images/logo.png"}
             alt="Logomarca My Dress"
-            className={`transition-all duration-300 ${
-              isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
-            }`}
+            className={`transition-all duration-300 ${isScrolled ? "w-14 md:w-20" : "w-16 md:w-24"
+              }`}
           />
         </Link>
 
-        <nav className="flex gap-8 font-semibold font-serif text-lg">
+        <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
@@ -102,19 +100,16 @@ export function Menu({ menuData }: MenuProps) {
           aria-controls="mobile-menu"
         >
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${
-              menuOpen ? "rotate-45 translate-y-2" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${menuOpen ? "rotate-45 translate-y-2" : ""
+              }`}
           />
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-opacity ${
-              menuOpen ? "opacity-0" : "opacity-100"
-            }`}
+            className={`block h-0.5 w-6 bg-textcolor-700 transition-opacity ${menuOpen ? "opacity-0" : "opacity-100"
+              }`}
           />
           <span
-            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${
-              menuOpen ? "-rotate-45 -translate-y-2" : ""
-            }`}
+            className={`block h-0.5 w-6 bg-textcolor-700 transition-transform ${menuOpen ? "-rotate-45 -translate-y-2" : ""
+              }`}
           />
         </button>
       </div>
@@ -135,6 +130,24 @@ export function Menu({ menuData }: MenuProps) {
               {text}
             </Link>
           ))}
+          {session ? (
+            <>
+              <Link href="/admin" className="hover:text-textcolor-400 transition-colors">Minha conta</Link>
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="hover:text-textcolor-400 transition-colors"
+              >
+                Sair
+              </button>
+            </>
+          ) : (
+            <button
+              className="text-left hover:text-textcolor-400 border-t border-background-200 transition-colors pt-4"
+              onClick={handleSignIn}
+            >
+              Entrar
+            </button>
+          )}
         </nav>
       )}
     </header>
