@@ -62,7 +62,7 @@ export function Menu({ menuData }: MenuProps) {
           />
         </Link>
 
-        <nav className="hidden md:flex gap-8 font-semibold font-serif text-lg">
+        <nav className="flex gap-8 font-semibold font-serif text-lg">
           {links.map(({ text, url, target }) => (
             <Link
               key={url}
