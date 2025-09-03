@@ -211,7 +211,7 @@ export default function Testimonials() {
         </form>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mt-4">
         <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-400">Depoimentos Existentes</h2>
         <ul className="space-y-4 list-none">
           {testimonials.map((testimonial: Testimonial) => (

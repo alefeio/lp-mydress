@@ -168,7 +168,7 @@ export default function MenuForm() {
         <div className="space-y-4 mb-4">
           <form onSubmit={handleLinkAdd} className="p-4 border rounded-md">
             <div className="mb-2">
-              <label htmlFor="link-text" className="block text-gray-700 font-bold mb-1 text-gray-700 dark:text-gray-400">
+              <label htmlFor="link-text" className="block font-bold mb-1 text-gray-700 dark:text-gray-400">
                 Texto do Link
               </label>
               <input
@@ -181,7 +181,7 @@ export default function MenuForm() {
               />
             </div>
             <div className="mb-2">
-              <label htmlFor="link-url" className="block text-gray-700 font-bold mb-1 text-gray-700 dark:text-gray-400">
+              <label htmlFor="link-url" className="block font-bold mb-1 text-gray-700 dark:text-gray-400">
                 URL do Link
               </label>
               <input
@@ -218,7 +218,7 @@ export default function MenuForm() {
             {links.map((link) => (
               <li
                 key={link.id}
-                className="flex items-center justify-between p-3 border rounded-md bg-gray-50"
+                className="flex items-center justify-between p-3 border rounded-md bg-gray-50 dark:bg-gray-700"
               >
                 <div>
                   <p className="font-semibold text-gray-700 dark:text-gray-400">{link.text}</p>
