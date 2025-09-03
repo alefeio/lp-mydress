@@ -76,12 +76,12 @@ const PromotionsForm: React.FC = () => {
                     <p className="text-lg text-textcolor-600 mb-8">
                         Cadastre-se para receber novidades sobre nossos lançamentos e descontos exclusivos.
                     </p>
-                    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <form onSubmit={handleSubmit} className="flex flex-col xl:flex-row items-center justify-center gap-4">
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Seu nome"
+                            placeholder="Nome"
                             required
                             className="w-full sm:w-1/3 px-4 py-3 border border-background-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
                         />
@@ -89,7 +89,7 @@ const PromotionsForm: React.FC = () => {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Seu email"
+                            placeholder="Email"
                             required
                             className="w-full sm:w-1/3 px-4 py-3 border border-background-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
                         />
@@ -97,17 +97,17 @@ const PromotionsForm: React.FC = () => {
                             type="text" // Alterado para 'text' conforme solicitado
                             value={phone}
                             onChange={handlePhoneChange} // Usando a nova função para aplicar a máscara
-                            placeholder="Seu WhatsApp (opcional)"
+                            placeholder="WhatsApp"
                             className="w-full sm:w-1/3 px-4 py-3 border border-background-300 rounded-md focus:outline-none focus:ring-2 focus:ring-A9876D-500"
                         />
-                        <button
-                            type="submit"
-                            disabled={status === 'submitting'}
-                            className="w-full sm:w-auto px-6 py-3 bg-[#A9876D] hover:bg-background-700 text-white font-semibold rounded-md transition-colors duration-200"
-                        >
-                            {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar'}
-                        </button>
                     </form>
+                    <button
+                        type="submit"
+                        disabled={status === 'submitting'}
+                        className="mt-4 w-full sm:w-auto px-6 py-3 bg-[#A9876D] hover:bg-background-700 text-white font-semibold rounded-md transition-colors duration-200"
+                    >
+                        {status === 'submitting' ? 'Cadastrando...' : 'Cadastrar'}
+                    </button>
                     {status === 'success' && (
                         <p className="mt-4 text-green-600 font-medium">
                             Cadastro realizado com sucesso!

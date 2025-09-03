@@ -178,19 +178,33 @@ export function GallerySection({
 
     return (
         <article className="my-4">
-            <div
-                className="relative flex flex-col justify-center items-center mx-auto text-center md:max-w-full h-[50vh] bg-fixed bg-cover bg-center"
-                style={{ backgroundImage: `url('${backgroundImageUrl}')` }}
-            >
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-                <div className="relative z-10 flex flex-col justify-center items-center h-full">
+            <div className="relative w-full h-[50vh] overflow-hidden">
+                {/* Imagem de fundo */}
+                <img
+                    src={backgroundImageUrl}
+                    alt={`Background para ${collection.title}`}
+                    className="absolute w-full h-[120%] object-cover"
+                    style={{
+                        top: "-10%",
+                        transform: "translate3d(0, 0, 0)", // aqui você pode integrar parallax se quiser
+                        willChange: "transform",
+                        zIndex: -1,
+                    }}
+                />
+
+                {/* Camada de sobreposição */}
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-0"></div>
+
+                {/* Conteúdo */}
+                <div className="relative z-10 flex flex-col justify-center items-center h-full text-center">
                     <h2
-                        className={`font-serif text-3xl mb-4 font-bold rounded-xl ${collection.bgcolor} text-background-50 px-4 py-2 w-fit`}
+                        className={`font-title text-3xl md:text-4xl font-light antialiased mb-4 rounded-xl text-background-50 px-4 py-2`}
                     >
                         {collection.title}
                     </h2>
                 </div>
             </div>
+
             <div className={`${collection.bgcolor} h-4`}></div>
 
             <div></div>

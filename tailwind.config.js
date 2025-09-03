@@ -94,7 +94,7 @@ module.exports = {
           800: "#9e1b4c",
           900: "#7d0d36",
           950: "#3a0518",
-        1000: "#1e020c",
+          1000: "#1e020c",
         },
 
         red: {
@@ -151,9 +151,11 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],
         serif: ['Playfair Display', 'ui-serif', 'Georgia'],
+        title: ['Great Vibes', 'cursive'],
       },
     },
   },
+  darkMode: "class",
   plugins: [
     require('tailwind-scrollbar-hide'),
   ],

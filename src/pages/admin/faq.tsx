@@ -113,25 +113,25 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
 
   return (
     <AdminLayout>
-      <h1 className="text-textcolor-900 text-3xl font-bold mb-6 text-textcolor-50">Gerenciar Perguntas Frequentes</h1>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-lg font-semibold mb-4">{editId ? 'Editar FAQ' : 'Adicionar Nova FAQ'}</h2>
+      <h1 className="text-4xl font-extrabold mb-8 text-gray-500">Gerenciar Perguntas Frequentes</h1>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 className="text-lg text-gray-700 dark:text-gray-400 font-semibold mb-4">{editId ? 'Editar FAQ' : 'Adicionar Nova FAQ'}</h2>
         {error && <div className="bg-red-200 text-red-800 p-2 rounded mb-4">{error}</div>}
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="mb-4">
-            <label className="block text-sm font-medium text-graytone-700">Pergunta</label>
+            <label className="block text-sm font-medium text-gray-700">Pergunta</label>
             <input
               type="text"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               value={pergunta}
               onChange={(e) => setPergunta(e.target.value)}
               required
             />
           </div>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-graytone-700">Resposta</label>
+            <label className="block text-sm font-medium text-gray-700">Resposta</label>
             <textarea
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              className="mt-1 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               value={resposta}
               onChange={(e) => setResposta(e.target.value)}
               rows={4}
@@ -140,7 +140,7 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
           </div>
           <button
             type="submit"
-            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-textcolor-50 bg-background-500 hover:bg-background-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+            className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-textcolor-50 bg-blue-600 hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
             disabled={loading}
           >
             {loading ? 'Salvando...' : editId ? 'Salvar Alterações' : 'Adicionar FAQ'}
@@ -160,13 +160,13 @@ const FaqPage = ({ faqs }: FaqPageProps) => {
           )}
         </form>
 
-        <h2 className="text-lg font-semibold mt-8 mb-4">FAQs Existentes</h2>
+        <h2 className="text-lg text-gray-700 dark:text-gray-400 font-semibold mt-8 mb-4">FAQs Existentes</h2>
         <div className="border rounded-md">
           {faqList.map((faq) => (
             <div key={faq.id} className="border-b last:border-b-0 py-4 px-6 flex justify-between items-start">
               <div className="flex-1">
-                <h3 className="text-lg font-bold">{faq.pergunta}</h3>
-                <p className="text-graytone-700 mt-1 whitespace-pre-line">{faq.resposta}</p>
+                <h3 className="text-lg font-bold text-gray-700 dark:text-gray-200">{faq.pergunta}</h3>
+                <p className="text-gray-700 mt-1 whitespace-pre-line dark:text-gray-50">{faq.resposta}</p>
               </div>
               <div className="flex space-x-2 ml-4">
                 <button

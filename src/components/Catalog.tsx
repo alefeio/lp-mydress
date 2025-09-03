@@ -121,18 +121,24 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                 </div>
 
                 <h2 className="font-serif text-3xl md:text-4xl font-bold text-center mt-16">
-                    Catálogo de Produtos
+                    Catálogo de Vestidos
                 </h2>
 
                 {/* Conteúdo da seção de informações importantes */}
                 <div className="bg-white p-6 rounded-lg shadow-lg mx-auto max-w-7xl mt-8 mb-16">
-                    <h2 className="text-lg font-semibold text-gray-800 text-center">Informações Essenciais para a Sua Experiência</h2>
+                    <h2 className="text-xl font-semibold text-gray-800 text-center">Informações Essenciais para a Sua Experiência</h2>
 
                     <p className="text-gray-600 mb-4 text-center text-sm">
                         Para que sua experiência seja a mais tranquila e agradável possível, preparamos alguns detalhes importantes sobre nosso serviço de aluguel.
                     </p>
 
                     <ul className="list-none list-inside text-center space-y-3 text-gray-700">
+                        <li>
+                            <span className="text-lg font-semibold text-gray-800">Corteria</span>
+                        </li>
+                        <li className="text-sm">
+                            Alugue com sua amiga para ganharem o aluguel da clutch (bolsa) de cortesia.
+                        </li>
                         <li>
                             <span className="text-lg font-semibold text-gray-800">Tudo Incluso</span>
                         </li>
@@ -159,7 +165,10 @@ export default function Catalog({ colecoes }: DressesGalleryProps) {
                         </li>
                     </ul>
                 </div>
-                <FloatingButtons colecoes={colecoes} />
+
+                <div className="block sticky top-8 md:top-12 transform -translate-y-1/2 z-20">
+                    <FloatingButtons colecoes={colecoes} />
+                </div>
 
                 {colecoes.map((colecao: ColecaoProps) => (
                     <div key={colecao.slug} id={colecao.slug}>

@@ -116,41 +116,41 @@ export default function BannerForm() {
   };
 
   return (
-    <form onSubmit={handleUploadAndSave} className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form onSubmit={handleUploadAndSave}>
       {message && (
-        <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-green-600" : "text-red-600"}`}>
+        <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-blue-600" : "text-red-600"}`}>
           {message}
         </p>
       )}
 
       {/* Seção para Adicionar Novo Banner */}
-      <div className="mb-4 space-y-4 border p-4 rounded-md">
-        <h3 className="text-xl font-bold">Adicionar Novo Banner</h3>
+      <div className="mb-4 space-y-4">
+        <h3 className="text-xl text-gray-700 dark:text-gray-400 font-bold">Adicionar Novo Banner</h3>
         <div>
-          <label className="block text-gray-700 font-bold mb-2">Imagem</label>
+          <label className="block text-gray-700 dark:text-gray-400 font-bold mb-2">Imagem</label>
           <input
             type="file"
             onChange={handleFileChange}
-            className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+            className="w-full dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 text-gray-700 dark:text-gray-400 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold mb-2">Título (Opcional)</label>
+          <label className="block text-gray-700 dark:text-gray-400 font-bold mb-2">Título (Opcional)</label>
           <input
             type="text"
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            className="w-full dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
             placeholder="Título do Banner"
           />
         </div>
         <div>
-          <label className="block text-gray-700 font-bold mb-2">Link (Opcional)</label>
+          <label className="block text-gray-700 dark:text-gray-400 font-bold mb-2">Link (Opcional)</label>
           <input
             type="text"
             value={newLink}
             onChange={(e) => setNewLink(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+            className="w-full dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 p-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
             placeholder="https://..."
           />
         </div>
@@ -161,13 +161,13 @@ export default function BannerForm() {
             onChange={(e) => setNewTarget(e.target.checked)}
             className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
           />
-          <label className="text-gray-700">Abrir em nova aba?</label>
+          <label className="text-gray-700 dark:text-gray-400">Abrir em nova aba?</label>
         </div>
       </div>
 
       {/* Seção de Banners Atuais */}
       <div className="mb-4">
-        <label className="block text-gray-700 font-bold mb-2">Banners Atuais</label>
+        <label className="block text-gray-700 dark:text-gray-400 font-bold mb-2">Banners Atuais</label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {banners.map((banner) => (
             <div key={banner.id} className="relative group">
@@ -192,7 +192,7 @@ export default function BannerForm() {
 
       <button
         type="submit"
-        className={`w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+        className={`w-full p-3 text-white font-bold rounded-md ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
           }`}
         disabled={loading}
       >

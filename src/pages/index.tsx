@@ -1,3 +1,4 @@
+// pages/index.tsx
 import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -19,6 +20,8 @@ import {
 } from '../types/index';
 import PromotionsForm from 'components/PromotionsForm';
 import FloatingButtons from 'components/FloatingButtons';
+import { useState, useEffect } from 'react';
+import { AiOutlineClose } from 'react-icons/ai';
 
 // FUNÇÃO SLUGIFY
 function slugify(text: string): string {
@@ -42,11 +45,10 @@ export const getServerSideProps: GetServerSideProps<HomePageProps> = async () =>
             prisma.fAQ.findMany({ orderBy: { pergunta: 'asc' } }),
             prisma.colecao.findMany({
                 orderBy: {
-                    order: 'asc', // Ordena as coleções pela ordem definida
+                    order: 'asc',
                 },
                 include: {
                     items: {
-                        // CORRIGIDO: Adiciona a ordenação dos itens por likes e views.
                         orderBy: [
                             { view: 'desc' },
                             { like: 'desc' },
@@ -107,11 +109,34 @@ export default function Home({ banners, menu, testimonials, faqs, colecoes }: Ho
             "addressCountry": "BR"
         }
     };
+    
+    const [showExitModal, setShowExitModal] = useState(false);
+
+    useEffect(() => {
+        const modalShownInSession = sessionStorage.getItem('exitModalShown');
+
+        const handleMouseLeave = (e: MouseEvent) => {
+            // CORREÇÃO: Removida a condição e.clientY <= 0 para tornar a detecção mais robusta.
+            if (!modalShownInSession) {
+                setShowExitModal(true);
+                sessionStorage.setItem('exitModalShown', 'true');
+            }
+        };
+
+        if (typeof window !== 'undefined') {
+            document.documentElement.addEventListener('mouseleave', handleMouseLeave);
+        }
+
+        return () => {
+            if (typeof window !== 'undefined') {
+                document.documentElement.removeEventListener('mouseleave', handleMouseLeave);
+            }
+        };
+    }, []);
 
     return (
         <>
             <Head>
-                {/* Google Analytics (via GTM) - Código para a tag <head> */}
                 <Script
                     strategy="afterInteractive"
                     dangerouslySetInnerHTML={{
@@ -136,6 +161,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <meta name="twitter:image" content="https://www.mydressbelem.com.br/images/banner/banner1.jpg" />
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
                 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+                <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet" />
                 <Script id="google-ads-init" strategy="afterInteractive">
                     {`
                         window.dataLayer = window.dataLayer || [];
@@ -206,6 +232,34 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </main>
                 <WhatsAppButton />
             </div>
+
+            {/* Modal de Saída */}
+            {showExitModal && (
+                <div 
+                    className="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) {
+                            setShowExitModal(false);
+                        }
+                    }}
+                >
+                    <div 
+                        className="bg-background-200 relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Botão de fechar */}
+                        <button
+                            onClick={() => setShowExitModal(false)}
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
+                            aria-label="Fechar"
+                        >
+                            <AiOutlineClose size={24} />
+                        </button>
+                        
+                        <PromotionsForm />
+                    </div>
+                </div>
+            )}
         </>
     );
 }

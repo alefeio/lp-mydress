@@ -104,11 +104,11 @@ export default function MenuForm() {
     }
 
     try {
-      if (!session || session.user?.role !== 'ADMIN') {
-        setMessage("Acesso não autorizado.");
-        setLoading(false);
-        return;
-      }
+      // if (!session || session.user?.role !== 'ADMIN') {
+      //   setMessage("Acesso não autorizado.");
+      //   setLoading(false);
+      //   return;
+      // }
 
       const response = await fetch("/api/crud/menu", {
         method: "POST",
@@ -133,11 +133,10 @@ export default function MenuForm() {
   
   const isButtonDisabled = !session || session.user?.role !== "ADMIN" || loading;
   if (status === 'loading') return <p>Carregando...</p>;
-  if (session?.user?.role !== 'ADMIN') return <p>Acesso não autorizado.</p>;
+  // if (session?.user?.role !== 'ADMIN') return <p>Acesso não autorizado.</p>;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-textcolor-50">Gerenciar Menu</h2>
+    <div>
       {message && (
         <p className={`mb-4 text-center ${message.includes("sucesso") ? "text-green-600" : "text-red-600"}`}>
           {message}
@@ -146,18 +145,18 @@ export default function MenuForm() {
 
       {/* Seção da Logomarca */}
       <div className="mb-6">
-        <h3 className="text-xl font-bold mb-2">Logomarca</h3>
-        <label className="block text-gray-700 font-bold mb-2">
+        <h3 className="text-xl font-bold mb-2 text-gray-700 dark:text-gray-400">Logomarca</h3>
+        <label className="block font-bold mb-2 text-gray-700 dark:text-gray-400">
           Imagem da Logomarca
         </label>
         <input
           type="file"
           onChange={handleLogoChange}
-          className="w-full text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
+          className="w-full dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 text-gray-700 bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
         />
         {logoUrl && (
           <div className="mt-4">
-            <p className="text-gray-600">Logomarca atual:</p>
+            <p className="text-gray-600 text-gray-700 dark:text-gray-400">Logomarca atual:</p>
             <img src={logoUrl} alt="Logomarca atual" className="h-16 w-auto mt-2" />
           </div>
         )}
@@ -165,11 +164,11 @@ export default function MenuForm() {
 
       {/* Seção de Links do Menu */}
       <div className="mb-6">
-        <h3 className="text-xl font-bold mb-2">Links do Menu</h3>
+        <h3 className="text-xl font-bold mb-2 text-gray-700 dark:text-gray-400">Links do Menu</h3>
         <div className="space-y-4 mb-4">
           <form onSubmit={handleLinkAdd} className="p-4 border rounded-md">
             <div className="mb-2">
-              <label htmlFor="link-text" className="block text-gray-700 font-bold mb-1">
+              <label htmlFor="link-text" className="block text-gray-700 font-bold mb-1 text-gray-700 dark:text-gray-400">
                 Texto do Link
               </label>
               <input
@@ -177,12 +176,12 @@ export default function MenuForm() {
                 type="text"
                 value={newLinkText}
                 onChange={(e) => setNewLinkText(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 p-2 border border-gray-300 rounded-md"
                 placeholder="Ex: Sobre Nós"
               />
             </div>
             <div className="mb-2">
-              <label htmlFor="link-url" className="block text-gray-700 font-bold mb-1">
+              <label htmlFor="link-url" className="block text-gray-700 font-bold mb-1 text-gray-700 dark:text-gray-400">
                 URL do Link
               </label>
               <input
@@ -190,7 +189,7 @@ export default function MenuForm() {
                 type="text"
                 value={newLinkUrl}
                 onChange={(e) => setNewLinkUrl(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md"
+                className="w-full dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 p-2 border border-gray-300 rounded-md"
                 placeholder="Ex: /#sobre"
               />
             </div>
@@ -222,9 +221,9 @@ export default function MenuForm() {
                 className="flex items-center justify-between p-3 border rounded-md bg-gray-50"
               >
                 <div>
-                  <p className="font-semibold">{link.text}</p>
-                  <p className="text-sm text-gray-500">{link.url}</p>
-                  <p className="text-sm text-gray-500">Abre em: {link.target === "_blank" ? "Nova aba" : "Mesma aba"}</p>
+                  <p className="font-semibold text-gray-700 dark:text-gray-400">{link.text}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-400">{link.url}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-400">Abre em: {link.target === "_blank" ? "Nova aba" : "Mesma aba"}</p>
                 </div>
                 <button
                   type="button"

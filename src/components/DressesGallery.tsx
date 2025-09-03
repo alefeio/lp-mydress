@@ -85,7 +85,9 @@ export default function DressesGallery({ colecoes }: DressesGalleryProps) {
                         </strong>
                     </p>
                 </div>
-                <FloatingButtons colecoes={colecoes} />
+                <div className="block sticky top-24 md:top-32 transform -translate-y-1/2 z-20">
+                    <FloatingButtons colecoes={colecoes} />
+                </div>
 
                 {colecoes.map((colecao: ColecaoProps) => (
                     <div key={colecao.slug} id={colecao.slug}>

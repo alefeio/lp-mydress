@@ -1,6 +1,7 @@
 // src/pages/admin/testimonials.tsx
 import AdminLayout from 'components/admin/AdminLayout';
 import { useState, useEffect } from 'react';
+import { MdDelete, MdEdit } from 'react-icons/md';
 import useSWR from 'swr';
 
 interface Testimonial {
@@ -89,7 +90,7 @@ export default function Testimonials() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, content: finalContent, id: editing?.id }),
       });
-  
+
       if (res.ok) {
         mutate();
         setEditing(null);
@@ -111,7 +112,7 @@ export default function Testimonials() {
     if (confirm('Tem certeza que deseja excluir este depoimento?')) {
       try {
         const res = await fetch(`/api/crud/testimonials?id=${id}`, { method: 'DELETE' });
-  
+
         if (res.ok) {
           mutate();
           alert('Depoimento excluído com sucesso.');
@@ -130,125 +131,121 @@ export default function Testimonials() {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4 text-textcolor-50">Gerenciar Depoimentos</h1>
+      <h1 className="text-4xl font-extrabold mb-8 text-gray-500">Gerenciar Depoimentos</h1>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-400">
+          {editing ? 'Editar Depoimento' : 'Adicionar Novo Depoimento'}
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-400">Nome do Cliente</label>
+            <input
+              type="text"
+              id="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+              required
+            />
+          </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-semibold mb-4">
-            {editing ? 'Editar Depoimento' : 'Adicionar Novo Depoimento'}
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome do Cliente</label>
-              <input
-                type="text"
-                id="name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+          <div className="mb-4">
+            <label htmlFor="type" className="block text-sm font-medium text-gray-700 dark:text-gray-400">Tipo de Depoimento</label>
+            <select
+              id="type"
+              value={form.type}
+              onChange={(e) => {
+                setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
+                setFile(null);
+              }}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            >
+              <option value="texto">Texto</option>
+              <option value="foto">Foto</option>
+              <option value="video">Vídeo</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-400">
+              {form.type === 'texto' ? 'Conteúdo do Depoimento' : 'Arquivo'}
+            </label>
+            {form.type === 'texto' ? (
+              <textarea
+                id="content"
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                rows={4}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 required
+              ></textarea>
+            ) : (
+              <input
+                type="file"
+                id="file"
+                onChange={handleFileChange}
+                className="mt-1 block w-full"
+                required={!editing || (editing && !file && !editing.content)}
               />
-            </div>
+            )}
+          </div>
 
-            <div className="mb-4">
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700">Tipo de Depoimento</label>
-              <select
-                id="type"
-                value={form.type}
-                onChange={(e) => {
-                  setForm({ ...form, type: e.target.value as 'texto' | 'foto' | 'video', content: '' });
-                  setFile(null);
-                }}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              >
-                <option value="texto">Texto</option>
-                <option value="foto">Foto</option>
-                <option value="video">Vídeo</option>
-              </select>
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-                {form.type === 'texto' ? 'Conteúdo do Depoimento' : 'Arquivo'}
-              </label>
-              {form.type === 'texto' ? (
-                <textarea
-                  id="content"
-                  value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  rows={4}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                  required
-                ></textarea>
-              ) : (
-                <input
-                  type="file"
-                  id="file"
-                  onChange={handleFileChange}
-                  className="mt-1 block w-full"
-                  required={!editing || (editing && !file && !editing.content)}
-                />
-              )}
-            </div>
-            
-            <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`py-2 px-4 rounded-md transition ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+            >
+              {loading ? 'Salvando...' : (editing ? 'Salvar Alterações' : 'Adicionar Depoimento')}
+            </button>
+            {editing && (
               <button
-                type="submit"
-                disabled={loading}
-                className={`py-2 px-4 rounded-md transition ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                type="button"
+                onClick={() => { setEditing(null); setFile(null); }}
+                className="bg-gray-400 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-500 transition"
               >
-                {loading ? 'Salvando...' : (editing ? 'Salvar Alterações' : 'Adicionar Depoimento')}
+                Cancelar
               </button>
-              {editing && (
-                <button
-                  type="button"
-                  onClick={() => { setEditing(null); setFile(null); }}
-                  className="bg-gray-400 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-500 transition"
-                >
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Depoimentos Existentes</h2>
-          <ul className="space-y-4">
-            {testimonials.map((testimonial: Testimonial) => (
-              <li key={testimonial.id} className="border-b pb-4 last:border-b-0">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-lg font-bold">{testimonial.name}</h3>
-                    <p className="text-gray-600 text-sm italic">{testimonial.type}</p>
-                    {testimonial.type === 'texto' ? (
-                      <p className="mt-2">{testimonial.content}</p>
-                    ) : (
-                      <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        Visualizar {testimonial.type}
-                      </a>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setEditing(testimonial)}
-                      className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => handleDelete(testimonial.id)}
-                      className="bg-red-600 text-white py-1 px-3 rounded-md hover:bg-red-700 transition"
-                    >
-                      Excluir
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+            )}
+          </div>
+        </form>
       </div>
-    </AdminLayout>
+
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 className="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-400">Depoimentos Existentes</h2>
+        <ul className="space-y-4 list-none">
+          {testimonials.map((testimonial: Testimonial) => (
+            <li key={testimonial.id} className="border-b pb-4 last:border-b-0">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-700 dark:text-gray-400">{testimonial.name}</h3>
+                  {testimonial.type === 'texto' ? (
+                    <p className="mt-2 text-gray-700 dark:text-gray-400">{testimonial.content}</p>
+                  ) : (
+                    <a href={testimonial.content} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                      Visualizar {testimonial.type}
+                    </a>
+                  )}
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setEditing(testimonial)}
+                    className="bg-yellow-500 text-white py-1 px-3 rounded-md hover:bg-yellow-600 transition"
+                  >
+                    <MdEdit size={20} className="text-white" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(testimonial.id)}
+                    className="bg-red-600 text-white py-1 px-3 rounded-md hover:bg-red-700 transition"
+                  >
+                    <MdDelete size={20} className="text-white" />
+                  </button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </AdminLayout >
   );
 }

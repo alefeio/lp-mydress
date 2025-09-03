@@ -14,7 +14,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({ colecoes }) => {
     };
 
     return (
-        <div className="block sticky top-24 md:top-32 transform -translate-y-1/2 z-20">
+        <>
             {/* Botão para ocultar/visualizar */}
             <div className={`flex justify-center items-center space-x-2 transition-all duration-300 ease-in-out`}>
                 <button
@@ -24,7 +24,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({ colecoes }) => {
                 >
                     {/* Ícone de menu (três pontos) */}
                     {!showButtons ? <FaExpandArrowsAlt className="w-4 h-4 text-background-500" />
-                    : <FaCompressArrowsAlt className="w-4 h-4 text-background-500" />}
+                        : <FaCompressArrowsAlt className="w-4 h-4 text-background-500" />}
                 </button>
                 {showButtons && colecoes.map((colecao) => (
                     <a
@@ -37,7 +37,7 @@ const FloatingButtons: React.FC<FloatingButtonsProps> = ({ colecoes }) => {
                     </a>
                 ))}
             </div>
-        </div>
+        </>
     );
 };
 
