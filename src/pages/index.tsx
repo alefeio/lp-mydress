@@ -234,7 +234,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
 
             {/* Modal de Saída */}
-            {showExitModal && (
+            {/* {showExitModal && (
                 <div 
                     className="fixed inset-0 z-[110] flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm"
                     onClick={(e) => {
@@ -247,7 +247,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         className="bg-background-200 relative rounded-lg shadow-xl p-6 m-4 max-w-lg w-full transform transition-all duration-300 scale-100"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Botão de fechar */}
                         <button
                             onClick={() => setShowExitModal(false)}
                             className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -259,7 +258,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <PromotionsForm />
                     </div>
                 </div>
-            )}
+            )} */}
         </>
     );
 }
