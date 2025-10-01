@@ -51,7 +51,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.error('[BACKEND - GET ERROR] Erro ao buscar coleções:', error);
                     return res.status(500).json({ success: false, message: 'Erro ao buscar coleções.' });
                 }
-                // ... (O restante do GET está ok) ...
                 break;
 
             // ----------------------------------------------------------------------
@@ -59,7 +58,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // ----------------------------------------------------------------------
             case 'POST':
                 try {
-                    // ... (O restante do POST está ok) ...
                     const { title, subtitle, description, bgcolor, buttonText, buttonUrl, order, items } = req.body as ColecaoProps;
 
                     const createdColecao = await prisma.colecao.create({
@@ -109,7 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 break;
 
             // ----------------------------------------------------------------------
-            // PUT: Atualização de Coleção e Itens/Fotos (CORRIGIDO E COM LOGS)
+            // PUT: Atualização de Coleção e Itens/Fotos
             // ----------------------------------------------------------------------
             case 'PUT':
                 try {
@@ -132,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const itemIdsToKeep: string[] = [];
                     const itemSlugsToCheck: { id?: string; slug: string }[] = [];
 
-                    // Ação para Colecao principal (sem os itens, que são tratados abaixo):
+                    // Ação para Colecao principal:
                     transactionActions.push(prisma.colecao.update({
                         where: { id },
                         data: colecaoData,
@@ -166,7 +164,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         for (const item of items) {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
 
-                            // Normalização: Garante que campos opcionais vazios sejam nulos, se o DB permitir.
+                            // Dados base do item (para Update e Create)
                             const baseItemData: any = {
                                 productMark: item.productMark,
                                 productModel: item.productModel,
@@ -180,11 +178,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 like: item.like ?? 0,
                                 view: item.view ?? 0,
                             };
-                            Object.keys(baseItemData).forEach(key => {
+                            // Normalização: Garante que campos opcionais vazios sejam nulos, se o DB permitir.
+                            Object.keys(baseItemData).forEach(key => {
                                 if (baseItemData[key] === '') baseItemData[key] = null;
                             });
-
-
+                            
                             // 🛑 CONSOLE NO BACKEND - ITEM INDIVIDUAL 🛑
                             console.log(`[BACKEND - LOOP] Item: ${item.productModel || 'Sem Modelo'}. ID Recebido: ${item.id || 'NOVO'}.`);
                             // FIM CONSOLE NO BACKEND
@@ -223,6 +221,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             // --- Item Novo: CREATE (com criação aninhada de fotos) ---
                             else {
                                 console.log(`[BACKEND - CREATE] 🟢 Item NOVO detectado: ${item.productModel}. Adicionando CREATE à transação.`);
+                                // console.log('[BACKEND - DADOS CREATE]:', baseItemData); 
                                 
                                 // NOVO ITEM: O ID não existe, usamos 'create'.
                                 transactionActions.push(prisma.colecaoItem.create({
@@ -240,7 +239,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
 
                         // 3. Deleta itens que existiam no DB, mas não estão na lista de 'itemIdsToKeep' 
-                        // ESTE DELETE DEVE SER A ÚLTIMA AÇÃO RELACIONADA A ITENS
                         console.log(`[BACKEND - DELETE] Adicionando ação de DELETE para itens excluídos. IDs a manter: ${itemIdsToKeep.length}`);
                         const deleteItems = prisma.colecaoItem.deleteMany({
                             where: {
@@ -287,12 +285,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.error('\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
                     console.error('[BACKEND - PUT ERRO CRÍTICO] Falha na atualização da coleção (PUT):', error.message);
                     console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    // TRATAMENTO DE ERRO DE UNICIDADE DE SLUG NO UPDATE (P2002)
+                    if (error.code === 'P2002') {
+                        return res.status(409).json({ success: false, message: 'Erro de unicidade: O slug de um item já está em uso. Por favor, ajuste a Marca, Modelo ou Cor.' });
+                    }
                     return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.', error: error.message });
                 }
                 break;
 
             // ----------------------------------------------------------------------
-            // DELETE: Exclusão de Coleção (CORRIGIDO PARA USAR ID DE BODY)
+            // DELETE: Exclusão de Coleção
             // ----------------------------------------------------------------------
             case 'DELETE':
                 try {
