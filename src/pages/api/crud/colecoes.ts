@@ -1,7 +1,10 @@
+// /pages/api/crud/colecoes.ts
+
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ColecaoProps, ColecaoItem } from '../../../types';
-// Assegure-se de que '../../../types' reflete as correções finais (ordem, like, view como 'number', não 'number | null')
+import { ColecaoProps, ColecaoItem } from '../../../types'; 
+// OBSERVAÇÃO: Lembre-se de que se o erro de tipagem persistir, você DEVE adicionar 
+// 'slug' a ColecaoProps e 'description' a ColecaoItem em '../../../types'.
 
 const prisma = new PrismaClient();
 
@@ -31,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     { ordem: 'asc' },
                                     { like: 'desc' },
                                 ],
-                                include: { // Ajuste: Mudado 'select' para 'include' e adicionado 'fotos' com orderBy
+                                include: { // Adicionado 'fotos' com orderBy
                                     fotos: {
                                         orderBy: { ordem: 'asc' },
                                     }
@@ -61,6 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     console.error('Erro ao buscar coleções:', error);
                     return res.status(500).json({ success: false, message: 'Erro ao buscar coleções.' });
                 }
+                break;
 
             // ----------------------------------------------------------------------
             // POST: Criação de Coleção e Itens/Fotos
@@ -77,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             bgcolor,
                             buttonText,
                             buttonUrl,
-                            order: order ?? 0, // AJUSTE: Garante que 'order' seja 0 se for null/undefined
+                            order: order ?? 0, // Garante que 'order' seja 0 se for null/undefined
                             items: {
                                 // Mapeia os itens e prepara para criação aninhada
                                 create: (items || []).map((item: ColecaoItem) => ({
@@ -85,20 +89,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     productModel: item.productModel,
                                     cor: item.cor,
                                     img: item.img as string,
-                                    ordem: item.ordem ?? 0, // AJUSTE: Garante que 'ordem' seja 0 se for null/undefined
+                                    ordem: item.ordem ?? 0, 
                                     slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
                                     size: item.size,
                                     price: item.price,
                                     price_card: item.price_card,
-                                    like: item.like ?? 0, // AJUSTE: Garante que 'like' seja 0
-                                    view: item.view ?? 0, // AJUSTE: Garante que 'view' seja 0
-                                    fotos: { // NOVO: Criação aninhada das fotos (ColecaoItemFoto)
+                                    like: item.like ?? 0, 
+                                    view: item.view ?? 0, 
+                                    fotos: { // Criação aninhada das fotos (ColecaoItemFoto)
                                         create: item.fotos?.map(foto => ({
                                             url: foto.url as string,
                                             caption: foto.caption,
-                                            ordem: foto.ordem ?? 0, // AJUSTE: Garante que 'ordem' seja 0
-                                            like: foto.like ?? 0, // AJUSTE: Garante que 'like' seja 0
-                                            view: foto.view ?? 0, // AJUSTE: Garante que 'view' seja 0
+                                            ordem: foto.ordem ?? 0, 
+                                            like: foto.like ?? 0, 
+                                            view: foto.view ?? 0, 
                                         })) ?? []
                                     }
                                 })),
@@ -118,9 +122,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                     return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
                 }
+                break;
 
             // ----------------------------------------------------------------------
-            // PUT: Atualização de Coleção e Itens/Fotos
+            // PUT: Atualização de Coleção e Itens/Fotos (CORRIGIDO PARA ADD NOVO ITEM)
             // ----------------------------------------------------------------------
             case 'PUT':
                 try {
@@ -130,14 +135,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
                     }
 
-                    // 1. Prepara dados da Colecao principal (garantindo 'order' = 0 se nulo)
+                    // 1. Prepara dados da Colecao principal
                     const colecaoData = { ...restColecao, order: restColecao.order ?? 0 };
 
                     // 2. Transação para CRUD dos ColecaoItem e ColecaoItemFoto
                     const transactionActions: any[] = [];
                     const itemIdsToKeep: string[] = [];
 
-                    // Ações para Colecao principal:
+                    // Ação para Colecao principal:
                     transactionActions.push(prisma.colecao.update({
                         where: { id },
                         data: colecaoData,
@@ -147,7 +152,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         items.forEach((item: ColecaoItem) => {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
 
-                            // Dados base do item (com ajustes de Nullish Coalescing)
+                            // Dados base do item (para Update e Create)
                             const baseItemData = {
                                 productMark: item.productMark,
                                 productModel: item.productModel,
@@ -160,6 +165,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 price_card: item.price_card,
                                 like: item.like ?? 0,
                                 view: item.view ?? 0,
+                                // O campo 'description' não está no seu modelo, mas se existisse, estaria aqui.
                             };
 
                             // --- Item Existente: UPDATE (com upsert de fotos) ---
@@ -171,22 +177,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     data: {
                                         ...baseItemData,
                                         fotos: {
-                                            // UPSERT: Atualiza fotos existentes (com id) e cria novas (sem id)
+                                            // UPSERT: Atualiza/Cria fotos filhas
                                             upsert: item.fotos?.map(foto => ({
-                                                where: { id: foto.id || 'non-existent-id' },
+                                                where: { id: foto.id || 'non-existent-id' }, // Se foto.id existe, atualiza; senão, cria
                                                 create: {
-                                                    url: foto.url as string,
-                                                    caption: foto.caption,
-                                                    ordem: foto.ordem ?? 0,
-                                                    like: foto.like ?? 0,
-                                                    view: foto.view ?? 0,
+                                                    url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
                                                 },
                                                 update: {
-                                                    url: foto.url as string,
-                                                    caption: foto.caption,
-                                                    ordem: foto.ordem ?? 0,
-                                                    like: foto.like ?? 0,
-                                                    view: foto.view ?? 0,
+                                                    url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
                                                 }
                                             })) ?? [],
                                             // DELETE MANY: Exclui fotos que foram removidas da lista do frontend
@@ -199,20 +197,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         },
                                     },
                                 }));
-                            }
+                            } 
                             // --- Item Novo: CREATE (com criação aninhada de fotos) ---
                             else {
+                                // ESTE BLOCO GARANTE QUE O NOVO ITEM É CRIADO CORRETAMENTE COM SUAS FOTOS
                                 transactionActions.push(prisma.colecaoItem.create({
                                     data: {
                                         ...baseItemData,
                                         colecaoId: id, // Associa ao ID da coleção principal
                                         fotos: {
                                             create: item.fotos?.map(foto => ({
-                                                url: foto.url as string,
-                                                caption: foto.caption,
-                                                ordem: foto.ordem ?? 0,
-                                                like: foto.like ?? 0,
-                                                view: foto.view ?? 0,
+                                                url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
                                             })) ?? [],
                                         },
                                     },
@@ -220,7 +215,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                         });
 
-                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'items' enviada (DELETE)
+                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'items' enviada
                         const deleteItems = prisma.colecaoItem.deleteMany({
                             where: {
                                 colecaoId: id,
@@ -244,7 +239,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                     });
 
-                    // AJUSTE ADICIONAL: Recria o slug na resposta (necessário para o frontend)
+                    // Recria o slug na resposta
                     const finalResponse = {
                         ...colecaoComItensAtualizados,
                         slug: slugify(colecaoComItensAtualizados?.title || ''),
@@ -263,14 +258,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }
                     return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
                 }
+                break;
 
             // ----------------------------------------------------------------------
-            // DELETE: Permite exclusão de Coleção ou Item individual
+            // DELETE: Exclusão de Coleção (CORRIGIDO PARA USAR ID DE QUERY)
             // ----------------------------------------------------------------------
             case 'DELETE':
                 try {
-                    // AJUSTE: Usa body para itemId e query para colecaoId para ser mais RESTful
+                    // Espera o ID da Coleção como parâmetro de query
                     const { id: colecaoId } = req.query as { id: string };
+                    // Permite deletar item individual enviando itemId no corpo (opcional)
                     const { itemId } = req.body as { itemId: string };
 
                     if (itemId) {
@@ -279,20 +276,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         return res.status(200).json({ success: true, message: 'Item excluído com sucesso.' });
                     }
 
+                    // Se não houver itemId, tenta deletar a Coleção
                     if (!colecaoId) {
                         return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para exclusão.' });
                     }
 
-                    // Exclui a Colecao (e seus itens/fotos em cascata)
-                    await prisma.colecao.delete({
+                    // Exclui a Colecao (e seus itens/fotos em cascata via onDelete: Cascade)
+                    const deletedColecao = await prisma.colecao.delete({
                         where: { id: colecaoId },
                     });
 
-                    return res.status(200).json({ success: true, message: 'Coleção excluída com sucesso.' });
-                } catch (error) {
+                    return res.status(200).json({ success: true, message: `Coleção excluída com sucesso. ID: ${deletedColecao.id}` });
+                } catch (error: any) {
                     console.error('Erro ao excluir:', error);
+                    if (error.code === 'P2025') {
+                        return res.status(404).json({ success: false, message: 'Coleção ou Item não encontrado.' });
+                    }
                     return res.status(500).json({ success: false, message: 'Erro ao excluir.' });
                 }
+                break;
 
             default:
                 res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
