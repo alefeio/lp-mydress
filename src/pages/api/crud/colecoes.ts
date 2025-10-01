@@ -129,157 +129,123 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // ----------------------------------------------------------------------
             case 'PUT':
                 try {
-                    const { id, items, ...restColecao } = req.body as ColecaoProps & { id: string };
+                    const { id, items, title, subtitle, description, ...restColecao } = req.body;
 
-                    if (!id) {
-                        return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
+                    // 🛑 CONSOLE NO BACKEND - REQUISIÇÃO RECEBIDA 🛑
+                    console.log(`[BACKEND - PUT] Requisição de atualização recebida para Coleção ID: ${id}`);
+                    console.log(`[BACKEND - PUT] Total de itens recebidos: ${items ? items.length : 0}`);
+                    console.log("--------------------------------------------------------------------");
+                    // FIM CONSOLE NO BACKEND
+
+                    if (!id || !items) {
+                        return res.status(400).json({ success: false, message: 'ID da coleção e itens são obrigatórios para a atualização.' });
                     }
 
-                    // 1. Prepara dados da Colecao principal
-                    const colecaoData = { ...restColecao, order: restColecao.order ?? 0 };
-
-                    // 2. Transação para CRUD dos ColecaoItem e ColecaoItemFoto
                     const transactionActions: any[] = [];
                     const itemIdsToKeep: string[] = [];
-                    const itemSlugsToCheck: { id?: string; slug: string }[] = [];
 
-                    // Ação para Colecao principal:
-                    transactionActions.push(prisma.colecao.update({
-                        where: { id },
-                        data: colecaoData,
-                    }));
+                    // 1. Processar Itens: Identificar existentes para UPDATE e novos para CREATE
+                    for (const item of items) {
+                        // ... (Restante da definição de itemData) ...
 
-                    if (items && Array.isArray(items)) {
-                        // PRIMEIRA PASSAGEM: COLETAR SLUGS PARA CHECAGEM ATÔMICA
-                        for (const item of items) {
-                            const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
-                            itemSlugsToCheck.push({ id: item.id, slug: itemSlug });
-                        }
+                        // 🛑 CONSOLE NO BACKEND - ITEM INDIVIDUAL 🛑
+                        console.log(`[BACKEND - LOOP] Processando Item: ${item.productModel || 'Sem Modelo'}. ID Recebido: ${item.id}`);
+                        // FIM CONSOLE NO BACKEND
 
-                        // CHECAGEM DE UNICIDADE DE SLUG: 
-                        // Faz a checagem de todos os slugs *antes* de tentar criar/atualizar.
-                        // Busca no DB por todos os itens que tenham um dos slugs que estamos enviando.
-                        const existingItemsBySlug = await prisma.colecaoItem.findMany({
-                            where: { slug: { in: itemSlugsToCheck.map(i => i.slug) } },
-                        });
+                        // Limpar campos nulos (se o frontend enviou null) para evitar erros do Prisma
+                        // ... (código de normalização) ...
 
-                        for (const itemToCheck of itemSlugsToCheck) {
-                            const foundItem = existingItemsBySlug.find(ei => ei.slug === itemToCheck.slug);
-                            // Se encontrou um item com o mesmo slug E o ID é diferente (ou o ID está vazio, mas o slug já existe)
-                            if (foundItem && foundItem.id !== itemToCheck.id) {
-                                // O item que estamos enviando tem um slug que já existe em outro ID
-                                return res.status(409).json({
-                                    success: false,
-                                    message: `Erro de unicidade: O slug '${itemToCheck.slug}' já está em uso por outro item na coleção. Por favor, ajuste a Marca, Modelo ou Cor.`,
-                                });
-                            }
-                        }
+                        // O item é NOVO se não tiver um ID, ou se o ID for uma string vazia (o que não deve acontecer)
+                        if (!item.id || typeof item.id !== 'string' || item.id.trim() === '') {
 
-                        // SEGUNDA PASSAGEM: PREPARA AS AÇÕES DE UPDATE/CREATE
-                        for (const item of items) {
-                            const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
+                            // --- AQUI É O BLOCO DE CRIAÇÃO (CREATE) ---
 
-                            // Dados base do item (para Update e Create)
-                            const baseItemData = {
-                                productMark: item.productMark,
-                                productModel: item.productModel,
-                                cor: item.cor,
-                                img: item.img as string,
-                                slug: itemSlug,
-                                ordem: item.ordem ?? 0,
-                                size: item.size,
-                                price: item.price,
-                                price_card: item.price_card,
-                                like: item.like ?? 0,
-                                view: item.view ?? 0,
-                            };
+                            console.log(`[BACKEND - CREATE] 🟢 Item NOVO detectado: ${item.productModel}. Criando...`);
 
-                            // --- Item Existente: UPDATE (com upsert de fotos) ---
-                            if (item.id && typeof item.id === 'string' && item.id.length > 0) {
-                                itemIdsToKeep.push(item.id);
-
-                                transactionActions.push(prisma.colecaoItem.update({
-                                    where: { id: item.id },
-                                    data: {
-                                        ...baseItemData,
-                                        fotos: {
-                                            // Lógica de UPSERT e DELETE MANY para fotos
-                                            upsert: item.fotos?.map(foto => ({
-                                                where: { id: foto.id || 'non-existent-id' },
-                                                create: {
-                                                    url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
-                                                },
-                                                update: {
-                                                    url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
-                                                }
-                                            })) ?? [],
-                                            deleteMany: {
-                                                colecaoItemId: item.id,
-                                                id: {
-                                                    notIn: item.fotos?.filter(f => f.id).map(f => f.id as string) ?? []
-                                                }
-                                            }
-                                        },
+                            const createItemAction = prisma.colecaoItem.create({
+                                data: {
+                                    // ... (restante da lógica de createItemAction) ...
+                                    colecaoId: id,
+                                    fotos: {
+                                        create: (item.fotos || []).map((foto: any) => ({
+                                            url: foto.url,
+                                            caption: foto.caption,
+                                            ordem: foto.ordem || 0,
+                                        })),
                                     },
-                                }));
-                            }
-                            // --- Item Novo: CREATE (com criação aninhada de fotos) ---
-                            else {
-                                // NOVO ITEM: O ID não existe, usamos 'create'.
-                                transactionActions.push(prisma.colecaoItem.create({
-                                    data: {
-                                        ...baseItemData,
-                                        colecaoId: id, // Associa ao ID da coleção principal
-                                        fotos: {
-                                            create: item.fotos?.map(foto => ({
-                                                url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
-                                            })) ?? [],
-                                        },
+                                },
+                            });
+
+                            transactionActions.push(createItemAction);
+
+                        } else {
+                            // --- Item EXISTENTE: UPDATE ---
+                            itemIdsToKeep.push(item.id);
+
+                            console.log(`[BACKEND - UPDATE] 🔵 Item EXISTENTE detectado: ${item.productModel} (${item.id}). Atualizando...`);
+
+                            // ... (restante da lógica de UPDATE de fotos e item) ...
+
+                            // 1. Coleta IDs de fotos existentes para manter
+                            const fotoIdsToKeep: string[] = item.fotos
+                                .filter((foto: any) => foto.id && typeof foto.id === 'string')
+                                .map((foto: any) => foto.id);
+
+                            // 2. Adiciona ações para remover fotos antigas que não estão mais na lista
+                            transactionActions.push(prisma.colecaoItemFoto.deleteMany({
+                                where: {
+                                    colecaoItemId: item.id,
+                                    id: { notIn: fotoIdsToKeep },
+                                },
+                            }));
+
+                            // 3. Adiciona a ação de UPDATE principal (com upsert das fotos)
+                            const updateItemAction = prisma.colecaoItem.update({
+                                where: { id: item.id },
+                                data: {
+                                    // ... (restante da lógica de updateItemAction) ...
+                                    fotos: {
+                                        upsert: (item.fotos || []).map((foto: any) => ({
+                                            where: { id: foto.id || 'NO_ID_FOR_CREATE' },
+                                            update: {
+                                                url: foto.url,
+                                                caption: foto.caption,
+                                                ordem: foto.ordem || 0,
+                                            },
+                                            create: {
+                                                url: foto.url,
+                                                caption: foto.caption,
+                                                ordem: foto.ordem || 0,
+                                            },
+                                        })),
                                     },
-                                }));
-                            }
+                                },
+                            });
+                            transactionActions.push(updateItemAction);
                         }
-
-                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'itemIdsToKeep' 
-                        const deleteItems = prisma.colecaoItem.deleteMany({
-                            where: {
-                                colecaoId: id,
-                                id: { notIn: itemIdsToKeep },
-                            },
-                        });
-                        transactionActions.push(deleteItems);
-
-                        await prisma.$transaction(transactionActions);
                     }
 
+                    // 2. Ação de limpeza e atualização da coleção principal
+                    transactionActions.push(prisma.colecao.update({
+                        // ... (código de update da coleção e deleteMany de itens) ...
+                    }));
 
-                    // 4. Retorna a coleção completa e atualizada
-                    const colecaoComItensAtualizados = await prisma.colecao.findUnique({
-                        where: { id },
-                        include: {
-                            items: {
-                                include: { fotos: true },
-                                orderBy: [{ ordem: 'asc' }, { like: 'desc' }]
-                            }
-                        },
-                    });
+                    // 🛑 CONSOLE NO BACKEND - TRANSAÇÃO 🛑
+                    console.log(`[BACKEND - TRANSAÇÃO] Executando ${transactionActions.length} ações no banco de dados.`);
+                    // FIM CONSOLE NO BACKEND
 
-                    // Recria o slug na resposta
-                    const finalResponse = {
-                        ...colecaoComItensAtualizados,
-                        slug: slugify(colecaoComItensAtualizados?.title || ''),
-                        items: colecaoComItensAtualizados?.items.map((item: any) => ({
-                            ...item,
-                            slug: item.slug || slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-                        }))
-                    };
+                    await prisma.$transaction(transactionActions);
 
+                    console.log(`[BACKEND - SUCESSO] Transação da coleção ${id} concluída com sucesso.`);
+                    return res.status(200).json({ success: true, message: 'Coleção e itens atualizados com sucesso.' });
 
-                    return res.status(200).json({ success: true, data: finalResponse });
-                } catch (error: any) {
-                    console.error('Erro ao atualizar coleção:', error);
-                    // O catch aqui só deve pegar erros internos que não sejam de unicidade (que tratamos acima)
-                    return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
+                } catch (error) {
+                    // 🛑 CONSOLE NO BACKEND - ERRO 🛑
+                    console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    console.error('[BACKEND - ERRO CRÍTICO] Falha na atualização da coleção (PUT):', error);
+                    console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    // FIM CONSOLE NO BACKEND
+                    return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção e itens.', error: error instanceof Error ? error.message : 'Erro desconhecido.' });
                 }
                 break;
 

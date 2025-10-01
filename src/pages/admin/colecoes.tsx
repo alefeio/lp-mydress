@@ -284,7 +284,7 @@ export default function AdminColecoes() {
             price_card: finalItem.price_card || null,
             ordem: finalItem.ordem || 0,
           };
-          
+
           // **********************************************
           // 🛑 CORREÇÃO CRÍTICA APLICADA AQUI 🛑
           // Para garantir que novos itens SEM ID de banco de dados
@@ -292,7 +292,7 @@ export default function AdminColecoes() {
           // sejam tratados como CREATE na API (PUT).
           // Se o item.id não é uma string não vazia, ele DEVE ser undefined/omitido.
           // **********************************************
-          
+
           if (!normalizedItem.id || typeof normalizedItem.id !== 'string' || normalizedItem.id.trim() === '') {
             // Se não tem um ID válido, remove o campo 'id' para forçar o CREATE
             // no backend.
@@ -305,13 +305,25 @@ export default function AdminColecoes() {
       );
 
       const method = form.id ? "PUT" : "POST";
-      
+
       // Mapeia novamente para remover colecaoId, se estiver presente no tipo
       const body = {
         ...form,
         // Usamos itemsWithUrls, que já tem a sanitização do ID
-        items: itemsWithUrls.map(({ colecaoId, ...rest }) => rest) 
+        items: itemsWithUrls.map(({ colecaoId, ...rest }) => rest)
       };
+
+      // 🛑 CONSOLE NO FRONTEND 🛑
+      console.log(`[FRONTEND - ${method}] Enviando dados para API:`, body);
+      console.log("--------------------------------------------------------------------------------");
+
+      // Exemplo de inspeção de um item novo (se existir)
+      const newItemExample = body.items.find((item: any) => !item.id);
+      if (newItemExample) {
+        console.log(">>> [FRONTEND] Exemplo de ITEM NOVO enviado (ID deve ser undefined):", newItemExample);
+      }
+      console.log("--------------------------------------------------------------------------------");
+      // FIM CONSOLE NO FRONTEND
 
       const res = await fetch("/api/crud/colecoes", {
         method,
@@ -471,8 +483,8 @@ export default function AdminColecoes() {
                 // A reordenação deve ser feita no estado ou no submit. Aqui, usamos a ordem atual do estado.
                 .map((foto, fotoIndex) => {
 
-                  const fotoUrl = typeof foto.url === 'string' 
-                    ? foto.url 
+                  const fotoUrl = typeof foto.url === 'string'
+                    ? foto.url
                     : (foto.url instanceof File ? URL.createObjectURL(foto.url) : '');
 
                   return (
