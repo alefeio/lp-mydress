@@ -35,12 +35,12 @@ export interface FaqItem {
 
 // NOVO: Interface para as fotos secundárias do item
 export interface ColecaoItemFoto {
-    id?: string;
+    id: string; // Geralmente, ao recuperar do DB, o ID existe
     url: string;
-    caption: string | null;
-    ordem: number;
-    like: number | null;
-    view: number | null;
+    caption: string | null; // String? no Prisma
+    ordem: number; // Int @default(0) no Prisma
+    like: number; // Int @default(0) no Prisma
+    view: number; // Int @default(0) no Prisma
     colecaoItemId: string;
 }
 
@@ -53,18 +53,21 @@ export interface ColecaoItem {
     slug: string;
     colecaoId: string;
     
-    // Campos do Prisma
+    // Campos do Prisma que são opcionais (String? / Int?)
     size: string | null;
     price: number | null;
     price_card: number | null;
-    like: number | null;
-    view: number | null;
     
-    // NOVO: Campo 'ordem' para ordenação do item
-    ordem: number | null;
+    // Campos do Prisma que possuem @default(0) e NÃO são opcionais (?)
+    like: number; 
+    view: number;
     
-    // NOVO: Relação para as fotos secundárias
-    fotos?: ColecaoItemFoto[];
+    // NOVO: Campo 'ordem' para ordenação do item (Int @default(0))
+    ordem: number;
+    
+    // NOVO: Relação para as fotos secundárias (ColecaoItemFoto[])
+    // O Prisma sempre retorna um array (vazio se não houver fotos)
+    fotos: ColecaoItemFoto[];
 }
 
 export interface ColecaoProps {
@@ -75,9 +78,10 @@ export interface ColecaoProps {
     bgcolor: string | null; 
     buttonText: string | null; 
     buttonUrl: string | null;
-    // O campo 'order' na Colecao é Int? no prisma, mas é 'order' no seu código
-    order: number | null;
-    slug: string; 
+    // Campo 'order' (Int @default(0))
+    order: number;
+    // Assumindo que 'slug' virá do BD, mas não está no modelo Colecao. Se estiver faltando, adicione.
+    // slug: string; 
     items: ColecaoItem[];
 }
 

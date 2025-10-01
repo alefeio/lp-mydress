@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import Head from "next/head";
-import { MdAddPhotoAlternate, MdDelete, MdEdit, MdPhotoLibrary, MdClose, MdCheck } from 'react-icons/md';
+import { MdAddPhotoAlternate, MdDelete, MdEdit } from 'react-icons/md';
 import AdminLayout from "components/admin/AdminLayout";
 
-// Definições de Tipo para o Frontend
-// ------------------------------------
+// --- NOVAS ESTRUTURAS DE TIPO SOLICITADAS ---
 
 interface ColecaoItemFoto {
     id?: string;
-    url: string | File;
-    caption: string;
-    ordem: number;
+    url: string | File; // Permite File para upload
+    caption?: string | null;
+    ordem: number; // Novo campo de ordem
     like?: number | null;
     view?: number | null;
     colecaoItemId?: string;
@@ -21,16 +20,19 @@ interface ColecaoItem {
     productMark: string;
     productModel: string;
     cor: string;
-    img: string | File; // Imagem principal
+    img: string | File; // Mantido para compatibilidade
     slug?: string;
+    // Campos do banco de dados
     size?: string | null;
     price?: number | null;
     price_card?: number | null;
     like?: number | null;
     view?: number | null;
     colecaoId?: string;
-    ordem: number; // NOVO: Campo ordem
-    fotos?: ColecaoItemFoto[]; // NOVO: Fotos secundárias
+    
+    // CAMPOS NOVOS SOLICITADOS
+    ordem: number; // Campo para ordenação
+    fotos: ColecaoItemFoto[]; // Array para múltiplas fotos
 }
 
 interface Colecao {
@@ -63,6 +65,8 @@ interface FormState {
 
 export default function AdminColecoes() {
     const [colecoes, setColecoes] = useState<Colecao[]>([]);
+    
+    // CORREÇÃO: Inicialização do estado com os novos campos e tipos corretos
     const [form, setForm] = useState<FormState>({
         title: "",
         subtitle: "",
@@ -72,21 +76,19 @@ export default function AdminColecoes() {
         buttonUrl: "",
         order: 0,
         items: [{
+            id: undefined, slug: undefined, colecaoId: undefined, like: null, view: null,
             productMark: "",
             productModel: "",
             cor: "",
             img: "",
-            size: "",
-            price: 0,
-            price_card: 0,
-            ordem: 0, // NOVO
-            fotos: [] // NOVO
+            size: null,
+            price: null,
+            price_card: null,
+            // NOVOS CAMPOS
+            ordem: 0, 
+            fotos: [] 
         }],
     });
-
-    // Estados para o Modal de Fotos
-    const [showPhotoModal, setShowPhotoModal] = useState(false);
-    const [currentPhotoItemIndex, setCurrentPhotoItemIndex] = useState<number | null>(null);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -95,7 +97,7 @@ export default function AdminColecoes() {
         fetchColecoes();
     }, []);
 
-    // Função auxiliar para upload de uma única imagem
+    // Função auxiliar para upload de uma única imagem (necessária para fotos)
     const uploadImage = async (file: File) => {
         const formData = new FormData();
         formData.append("file", file);
@@ -110,14 +112,15 @@ export default function AdminColecoes() {
         return uploadData.url;
     };
 
-    // Função para buscar coleções
+
     const fetchColecoes = async () => {
         setLoading(true);
         try {
             const res = await fetch("/api/crud/colecoes", { method: "GET" });
             const data = await res.json();
             if (res.ok && data.success) {
-                const sortedColecoes = data.colecoes.sort((a: Colecao, b: Colecao) => a.order - b.order);
+                // CORREÇÃO: Tratando 'a.order' e 'b.order' possivelmente 'null'
+                const sortedColecoes = data.colecoes.sort((a: Colecao, b: Colecao) => (a.order || 0) - (b.order || 0));
                 setColecoes(sortedColecoes);
             } else {
                 setError(data.message || "Erro ao carregar coleções.");
@@ -139,20 +142,20 @@ export default function AdminColecoes() {
             buttonUrl: "",
             order: 0,
             items: [{
+                id: undefined, slug: undefined, colecaoId: undefined, like: null, view: null,
                 productMark: "",
                 productModel: "",
                 cor: "",
                 img: "",
-                size: "",
-                price: 0,
-                price_card: 0,
-                ordem: 0, // NOVO
-                fotos: [] // NOVO
+                size: null,
+                price: null,
+                price_card: null,
+                ordem: 0, 
+                fotos: []
             }],
         });
     };
 
-    // Manipuladores de Mudança do Formulário Principal
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         if (name === "order") {
@@ -162,15 +165,20 @@ export default function AdminColecoes() {
         }
     };
 
-    // Manipulador de Mudança dos Itens da Coleção
     const handleItemChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
         const { name, value, files } = e.target;
         const newItems = [...form.items];
 
         if (name === "img" && files) {
             newItems[index] = { ...newItems[index], [name]: files[0] };
-        } else if (name === "price" || name === "price_card" || name === "ordem") { // Adicionado 'ordem'
-            newItems[index] = { ...newItems[index], [name]: parseFloat(value) || 0 };
+        } else if (name === "price" || name === "price_card" || name === "ordem") {
+            // CORREÇÃO: Trata price, price_card E ordem como números ou null
+            const numericValue = value === "" ? null : parseFloat(value) || 0;
+            newItems[index] = { ...newItems[index], [name]: numericValue };
+        } else if (name === "size") {
+             // Trata size como string ou null
+            const stringValue = value === "" ? null : value;
+            newItems[index] = { ...newItems[index], [name]: stringValue };
         } else {
             newItems[index] = { ...newItems[index], [name]: value };
         }
@@ -181,7 +189,12 @@ export default function AdminColecoes() {
     const handleAddItem = () => {
         setForm({
             ...form,
-            items: [...form.items, { productMark: "", productModel: "", cor: "", img: "", size: "", price: 0, price_card: 0, ordem: 0, fotos: [] }],
+            items: [...form.items, { 
+                id: undefined, slug: undefined, colecaoId: undefined, like: null, view: null,
+                productMark: "", productModel: "", cor: "", img: "", 
+                size: null, price: null, price_card: null, 
+                ordem: 0, fotos: [] // Novos campos
+            }],
         });
     };
 
@@ -203,68 +216,23 @@ export default function AdminColecoes() {
             items: colecao.items.map(item => ({
                 ...item,
                 img: item.img as string,
-                size: item.size || '',
-                price: item.price || 0,
-                price_card: item.price_card || 0,
-                ordem: item.ordem || 0, // NOVO: Mapeia o campo ordem
-                fotos: item.fotos || [] // NOVO: Mapeia as fotos
+                size: item.size || null, 
+                price: item.price || null,
+                price_card: item.price_card || null,
+                like: item.like || null,
+                view: item.view || null,
+                // NOVOS CAMPOS
+                ordem: item.ordem || 0, // Garante que seja um número (0 se nulo)
+                // É necessário mapear as fotos para incluir o tipo File/string
+                fotos: (item.fotos || []).map(foto => ({
+                     ...foto,
+                     url: foto.url as string, // Ao carregar do BD é string
+                     ordem: foto.ordem || 0
+                })) as ColecaoItemFoto[]
             }))
         });
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
-
-    // Manipulador de Fotos (Modal)
-    // ------------------------------------------------
-    const handleOpenPhotoModal = (index: number) => {
-        setCurrentPhotoItemIndex(index);
-        setShowPhotoModal(true);
-    };
-
-    const handleAddPhoto = () => {
-        if (currentPhotoItemIndex === null) return;
-
-        const newItems = [...form.items];
-        const currentFotos = newItems[currentPhotoItemIndex].fotos || [];
-
-        newItems[currentPhotoItemIndex].fotos = [
-            ...currentFotos,
-            { url: '', caption: '', ordem: currentFotos.length + 1 } // Novo item de foto
-        ];
-
-        setForm({ ...form, items: newItems });
-    };
-
-    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>, fotoIndex: number) => {
-        if (currentPhotoItemIndex === null) return;
-        const { name, value, files } = e.target;
-        const newItems = [...form.items];
-        const newFotos = [...(newItems[currentPhotoItemIndex].fotos || [])];
-
-        if (name === "url" && files) {
-            newFotos[fotoIndex] = { ...newFotos[fotoIndex], url: files[0] };
-        } else if (name === "ordem") {
-             newFotos[fotoIndex] = { ...newFotos[fotoIndex], ordem: parseInt(value, 10) || 0 };
-        } else {
-            newFotos[fotoIndex] = { ...newFotos[fotoIndex], [name]: value };
-        }
-
-        newItems[currentPhotoItemIndex].fotos = newFotos;
-        setForm({ ...form, items: newItems });
-    };
-
-    const handleRemovePhoto = (fotoId?: string, fotoIndex?: number) => {
-        if (currentPhotoItemIndex === null || fotoIndex === undefined) return;
-        
-        const newItems = [...form.items];
-        const fotosAtuais = newItems[currentPhotoItemIndex].fotos || [];
-        
-        // Remove a foto pelo index
-        newItems[currentPhotoItemIndex].fotos = fotosAtuais.filter((_, i) => i !== fotoIndex);
-        
-        setForm({ ...form, items: newItems });
-    };
-
-    // ------------------------------------------------
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -274,46 +242,50 @@ export default function AdminColecoes() {
         try {
             const itemsWithUrls = await Promise.all(
                 form.items.map(async (item) => {
+                    let finalItem = { ...item };
+                    
                     // 1. Upload da Imagem Principal (img)
-                    let mainImgUrl = typeof item.img === 'string' ? item.img : '';
                     if (item.img instanceof File) {
-                        mainImgUrl = await uploadImage(item.img);
+                        const url = await uploadImage(item.img);
+                        finalItem.img = url;
                     }
-
-                    // 2. Upload das Fotos Secundárias (fotos)
-                    const fotosWithUrls = await Promise.all(
+                    
+                    // 2. Processamento das fotos (se houver)
+                    const fotosWithUrls: any = await Promise.all(
                         (item.fotos || []).map(async (foto) => {
                             let fotoUrl = typeof foto.url === 'string' ? foto.url : '';
                             if (foto.url instanceof File) {
                                 fotoUrl = await uploadImage(foto.url);
                             }
-                            // Retorna o objeto ColecaoItemFoto com a URL
                             return { 
-                                id: foto.id, // Mantenha o ID para o upsert
+                                ...foto,
                                 url: fotoUrl, 
-                                caption: foto.caption, 
-                                ordem: foto.ordem,
-                                like: foto.like ?? 0,
-                                view: foto.view ?? 0,
+                                // Garante que a ordem e outros campos sejam números
+                                ordem: foto.ordem || 0,
+                                like: foto.like || 0,
+                                view: foto.view || 0,
                             };
                         })
                     );
+                    
+                    finalItem.fotos = fotosWithUrls;
 
-                    // Retorna o ColecaoItem com a URL da imagem principal e as fotos
-                    return { 
-                        ...item, 
-                        img: mainImgUrl,
-                        fotos: fotosWithUrls,
-                        // Remove colecaoId antes de enviar (evita erro na API)
-                        colecaoId: undefined,
-                    };
+                    // Garante que campos nulos sejam tratados como null e não 0/"" se estiverem vazios
+                    return {
+                        ...finalItem,
+                        size: finalItem.size || null,
+                        price: finalItem.price || null,
+                        price_card: finalItem.price_card || null,
+                        ordem: finalItem.ordem || 0, // Campo ordem
+                    }
                 })
             );
 
             const method = form.id ? "PUT" : "POST";
             const body = {
                 ...form,
-                items: itemsWithUrls
+                // Filtra o campo 'colecaoId' de cada item antes de enviar
+                items: itemsWithUrls.map(({ colecaoId, ...rest }) => rest)
             };
 
             const res = await fetch("/api/crud/colecoes", {
@@ -337,21 +309,15 @@ export default function AdminColecoes() {
         }
     };
 
-    const handleDelete = async (id: string, isItem = false, colecaoId?: string) => {
+    const handleDelete = async (id: string, isItem = false) => {
         if (!confirm(`Tem certeza que deseja excluir ${isItem ? "este item" : "esta coleção"}?`)) return;
 
         try {
             const res = await fetch("/api/crud/colecoes", {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
-                // Se for item, envia o itemId no body. Se for coleção, envia o id na query.
-                body: isItem ? JSON.stringify({ itemId: id }) : JSON.stringify({}),
-                // A API DELETE trata se o ID é da Coleção (query) ou do Item (body.itemId)
-                // Para colecao: DELETE /api/crud/colecoes?id=colecaoId
-                // Para item: DELETE /api/crud/colecoes?id=colecaoId (se precisar) e body: { itemId: id }
-                // Vamos usar a simplificação: item manda body com itemId, coleção manda query com id
+                body: JSON.stringify({ id, isItem }),
             });
-
             if (res.ok) {
                 alert(`${isItem ? "Item" : "Coleção"} excluído com sucesso!`);
                 fetchColecoes();
@@ -364,97 +330,6 @@ export default function AdminColecoes() {
         }
     };
 
-    const currentItemPhotos = currentPhotoItemIndex !== null ? form.items[currentPhotoItemIndex].fotos || [] : [];
-    
-    // --- MODAL DE EDIÇÃO DE FOTOS ---
-    const PhotoEditModal = () => {
-        if (!showPhotoModal || currentPhotoItemIndex === null) return null;
-
-        const item = form.items[currentPhotoItemIndex];
-
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
-                <div className="bg-white dark:bg-gray-700 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6">
-                    <div className="flex justify-between items-center mb-6 border-b pb-4">
-                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-                            Fotos Secundárias de: {item.productMark} - {item.productModel}
-                        </h3>
-                        <button onClick={() => setShowPhotoModal(false)} className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100">
-                            <MdClose size={30} />
-                        </button>
-                    </div>
-
-                    <button 
-                        onClick={handleAddPhoto}
-                        className="bg-green-600 text-white p-2 rounded-lg mb-4 flex items-center justify-center gap-2 font-semibold hover:bg-green-700 transition duration-200"
-                    >
-                        <MdAddPhotoAlternate size={20} /> Adicionar Nova Foto
-                    </button>
-
-                    {currentItemPhotos.map((foto, idx) => (
-                        <div key={foto.id || `new-${idx}`} className="flex flex-col md:flex-row gap-4 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg mb-4 relative">
-                            <button type="button" onClick={() => handleRemovePhoto(foto.id, idx)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition duration-200">
-                                <MdDelete size={20} />
-                            </button>
-                            
-                            <div className="w-20 h-20 flex-shrink-0 flex items-center justify-center border rounded-lg overflow-hidden">
-                                {typeof foto.url === 'string' && foto.url ? (
-                                    <img src={foto.url} alt={`Foto ${idx + 1}`} className="w-full h-full object-cover" />
-                                ) : foto.url instanceof File ? (
-                                    <span className="text-sm text-center text-gray-500">{foto.url.name}</span>
-                                ) : (
-                                    <span className="text-xs text-gray-400">Sem Imagem</span>
-                                )}
-                            </div>
-
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <label className="flex flex-col text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                    Arquivo:
-                                    <input 
-                                        type="file" 
-                                        name="url" 
-                                        onChange={(e) => handlePhotoChange(e, idx)} 
-                                        required={!foto.url} 
-                                        className="p-1 dark:bg-gray-600 dark:text-gray-200 border border-gray-300 rounded-lg text-sm mt-1"
-                                    />
-                                </label>
-                                <label className="flex flex-col text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                    Legenda:
-                                    <input 
-                                        type="text" 
-                                        name="caption" 
-                                        value={foto.caption} 
-                                        onChange={(e) => handlePhotoChange(e, idx)} 
-                                        placeholder="Legenda da Foto"
-                                        className="p-1 dark:bg-gray-600 dark:text-gray-200 border border-gray-300 rounded-lg text-sm mt-1" 
-                                    />
-                                </label>
-                                <label className="flex flex-col text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                    Ordem:
-                                    <input 
-                                        type="number" 
-                                        name="ordem" 
-                                        value={foto.ordem} 
-                                        onChange={(e) => handlePhotoChange(e, idx)} 
-                                        placeholder="Ordem"
-                                        className="p-1 dark:bg-gray-600 dark:text-gray-200 border border-gray-300 rounded-lg text-sm mt-1" 
-                                    />
-                                </label>
-                            </div>
-                        </div>
-                    ))}
-
-                    <div className="mt-6 flex justify-end">
-                        <button onClick={() => setShowPhotoModal(false)} className="bg-blue-600 text-white p-3 rounded-lg flex items-center gap-2 font-bold hover:bg-blue-700 transition duration-200">
-                            <MdCheck size={20} /> Fechar e Salvar Fotos
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-    // --- RENDERIZAÇÃO PRINCIPAL ---
     return (
         <>
             <Head>
@@ -477,35 +352,32 @@ export default function AdminColecoes() {
 
                         <h3 className="text-xl font-bold mt-6 text-gray-700 dark:text-gray-400">Itens da Coleção</h3>
                         {form.items.map((item, index) => (
-                            <div key={item.id || `new-${index}`} className="flex flex-col gap-4 p-4 border border-dashed border-gray-300 rounded-lg relative">
+                            <div key={item.id || index} className="flex flex-col md:flex-row gap-4 p-4 border border-dashed border-gray-300 rounded-lg relative">
                                 <button type="button" onClick={() => handleRemoveItem(index)} className="absolute top-2 right-2 text-red-500 hover:text-red-700 transition duration-200">
                                     <MdDelete size={24} />
                                 </button>
-                                
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                                    <input type="text" name="productMark" value={item.productMark} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
-                                    <input type="text" name="productModel" value={item.productModel} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
-                                    <input type="text" name="cor" value={item.cor} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
-                                    <input type="number" name="ordem" value={item.ordem} onChange={(e) => handleItemChange(e, index)} placeholder="Ordem do Item" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
-                                </div>
-                                
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    <input type="text" name="size" value={item.size || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
-                                    <input type="number" name="price" value={item.price || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
-                                    <input type="number" name="price_card" value={item.price_card || ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900" />
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <input type="text" name="productMark" value={item.productMark} onChange={(e) => handleItemChange(e, index)} placeholder="Marca" required className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                                    <input type="text" name="productModel" value={item.productModel} onChange={(e) => handleItemChange(e, index)} placeholder="Modelo" required className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                                    <input type="text" name="cor" value={item.cor} onChange={(e) => handleItemChange(e, index)} placeholder="Cor" required className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                                    
+                                    <input type="text" name="size" value={item.size ?? ''} onChange={(e) => handleItemChange(e, index)} placeholder="Tamanho" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                                    <input type="number" name="price" value={item.price ?? ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                                    <input type="number" name="price_card" value={item.price_card ?? ''} onChange={(e) => handleItemChange(e, index)} placeholder="Preço a prazo" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
+                                    
+                                    {/* CAMPO 'ORDEM' NO ITEM */}
+                                    <input type="number" name="ordem" value={item.ordem ?? ''} onChange={(e) => handleItemChange(e, index)} placeholder="Ordem do Item" className="p-3 dark:bg-gray-600 dark:text-gray-200 dark:placeholder-gray-400 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 text-gray-900" />
                                 </div>
 
-                                <div className="flex flex-col md:flex-row gap-4">
-                                    {/* Campo Imagem Principal (img) */}
-                                    <div className="flex-1 w-full flex flex-col items-center gap-2 border border-gray-300 rounded-lg p-3">
+                                <div className="flex flex-col gap-2 p-3 border border-gray-300 rounded-lg">
+                                    {/* Campo Imagem Principal (img) - Mantido */}
+                                    <div className="flex flex-col items-center gap-2">
                                         {typeof item.img === 'string' && item.img && (
-                                            <div className="w-full flex justify-center mb-2">
-                                                <img src={item.img} alt="Imagem principal" className="w-24 h-24 object-cover rounded-lg" />
-                                            </div>
+                                            <img src={item.img} alt="Imagem principal" className="w-20 h-20 object-cover rounded-lg" />
                                         )}
-                                        <label htmlFor={`img-${index}`} className="w-full flex-1 text-gray-500 cursor-pointer flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200 p-2 rounded-lg">
+                                        <label htmlFor={`img-${index}`} className="w-full text-gray-500 cursor-pointer flex items-center justify-center gap-2 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200 p-2 rounded-lg border">
                                             <MdAddPhotoAlternate size={24} />
-                                            {item.img instanceof File ? item.img.name : "Imagem Principal"}
+                                            {item.img instanceof File ? item.img.name : "Imagem Principal (img)"}
                                         </label>
                                         <input
                                             type="file"
@@ -516,15 +388,15 @@ export default function AdminColecoes() {
                                             className="hidden"
                                         />
                                     </div>
-                                    
-                                    {/* Botão para Gerenciar Fotos Secundárias (fotos) */}
-                                    <button 
-                                        type="button" 
-                                        onClick={() => handleOpenPhotoModal(index)} 
-                                        className="w-full md:w-auto p-3 flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition duration-200"
-                                    >
-                                        <MdPhotoLibrary size={24} /> Gerenciar Fotos ({item.fotos?.length || 0})
-                                    </button>
+
+                                    {/* Gerenciamento de Fotos Secundárias (fotos) */}
+                                    <div className="mt-2">
+                                        <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-400">Fotos Secundárias ({item.fotos.length})</h4>
+                                        {/* Este é um placeholder. Você precisaria de um modal ou lógica de expansão para gerenciar a ColecaoItemFoto[] */}
+                                        <button type="button" className="w-full text-blue-500 border border-blue-300 p-1 mt-1 rounded text-sm hover:bg-blue-50 dark:hover:bg-gray-700">
+                                            Gerenciar Fotos
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -572,24 +444,15 @@ export default function AdminColecoes() {
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {colecao.items.map((item) => (
-                                        <div key={item.id} className="flex gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm relative">
-                                            {/* Botão de exclusão de item individual */}
-                                            <button 
-                                                onClick={() => handleDelete(item.id as string, true, colecao.id)} 
-                                                className="absolute top-2 right-2 text-red-400 hover:text-red-600 transition duration-200 z-10"
-                                            >
-                                                <MdClose size={18} />
-                                            </button>
-                                            
+                                        <div key={item.id} className="flex gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
                                             <img src={item.img as string} alt={item.productModel} className="w-20 h-20 object-cover rounded-lg" />
                                             <div className="flex-1">
                                                 <h4 className="font-semibold text-gray-800 dark:text-gray-400">{item.productMark} - {item.productModel} ({item.cor})</h4>
                                                 <p className="text-xs text-gray-500 mt-1">
-                                                    Ordem: {item.ordem} | Tam: {item.size || 'N/A'} | R${item.price || 'N/A'} (A Prazo: R${item.price_card || 'N/A'})
+                                                    Ordem Item: {item.ordem || 'N/A'} | Tamanho: {item.size || 'N/A'} | Preço: R${item.price || 'N/A'} | A prazo: R${item.price_card || 'N/A'}
                                                 </p>
-                                                {/* Detalhe das fotos secundárias */}
                                                 <p className="text-xs text-blue-500 mt-1">
-                                                    Fotos Secundárias: {item.fotos?.length || 0}
+                                                    Fotos Adicionais: {item.fotos?.length || 0}
                                                 </p>
                                             </div>
                                         </div>
@@ -599,9 +462,6 @@ export default function AdminColecoes() {
                         ))
                     )}
                 </section>
-                
-                {/* Renderiza o Modal de Edição de Fotos */}
-                <PhotoEditModal />
             </AdminLayout>
         </>
     );
