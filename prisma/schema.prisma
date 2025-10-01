@@ -1,16 +1,14 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
 }
 
 model Account {
-  id                String   @id @default(cuid())
+  id                String    @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -22,21 +20,21 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@unique([provider, providerAccountId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
+  id           String    @id @default(cuid())
+  sessionToken String    @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model User {
@@ -48,7 +46,7 @@ model User {
   role          String?   @default("USER")
   accounts      Account[]
   sessions      Session[]
-  site          Site?
+  site          Site?     // Relacionamento com o novo model Site
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -65,13 +63,13 @@ model VerificationToken {
 }
 
 model Menu {
-  id      Int     @id @default(1)
+  id    Int     @id @default(1)
   logoUrl String?
-  links   Json
+  links Json
 }
 
 model Banner {
-  id      Int  @id @default(1)
+  id     Int  @id @default(1)
   banners Json
 }
 
@@ -124,34 +122,36 @@ model ColecaoItem {
   productMark   String
   productModel  String
   cor           String
-  img           String          
+  img           String
   slug          String          @unique
   colecao       Colecao         @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
   colecaoId     String
-  ordem         Int             @default(0) 
-  fotos         ColecaoItemFoto[] 
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   deletedAt     DateTime?
   size          String?
   price         Int?
   price_card    Int?
-  like          Int?
-  view          Int?
+  like          Int?            @default(0) // Ajuste: Adicionado @default(0)
+  view          Int?            @default(0) // Ajuste: Adicionado @default(0)
+  ordem         Int?            @default(0) // NOVO: Campo 'ordem' para ordenação
+  fotos         ColecaoItemFoto[] // NOVO: Relação com as fotos
 }
 
+// NOVO: Model ColecaoItemFoto para fotos secundárias de um item
 model ColecaoItemFoto {
-  id            String          @id @default(cuid())
-  url           String
-  caption       String?
-  colecaoItem   ColecaoItem     @relation(fields: [colecaoItemId], references: [id], onDelete: Cascade)
-  colecaoItemId String
-  ordem         Int             @default(0) 
-  like          Int             @default(0)
-  view          Int             @default(0)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id              String      @id @default(cuid())
+  colecaoItem     ColecaoItem @relation(fields: [colecaoItemId], references: [id], onDelete: Cascade)
+  colecaoItemId   String
+  url             String
+  caption         String?
+  ordem           Int?        @default(0) // Campo 'ordem' para ordenação das fotos
+  like            Int?        @default(0) // Ajuste: Adicionado @default(0)
+  view            Int?        @default(0) // Ajuste: Adicionado @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
+
 
 model Site {
   id                   String    @id @default(cuid())
