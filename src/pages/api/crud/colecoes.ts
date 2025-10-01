@@ -195,7 +195,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             };
 
                             // --- Item Existente: UPDATE (com upsert de fotos) ---
-                            if (item.id) {
+                            if (item.id && typeof item.id === 'string' && item.id.length > 0) {
                                 itemIdsToKeep.push(item.id);
 
                                 transactionActions.push(prisma.colecaoItem.update({
