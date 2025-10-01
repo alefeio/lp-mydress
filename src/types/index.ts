@@ -52,36 +52,37 @@ export interface ColecaoItem {
     img: string;
     slug: string;
     colecaoId: string;
-    
+
     // Campos do Prisma que são opcionais (String? / Int?)
     size: string | null;
     price: number | null;
     price_card: number | null;
-    
+
     // Campos do Prisma que possuem @default(0) e NÃO são opcionais (?)
-    like: number; 
+    like: number;
     view: number;
-    
+
     // NOVO: Campo 'ordem' para ordenação do item (Int @default(0))
     ordem: number;
-    
+
     // NOVO: Relação para as fotos secundárias (ColecaoItemFoto[])
     // O Prisma sempre retorna um array (vazio se não houver fotos)
     fotos: ColecaoItemFoto[];
 }
 
 export interface ColecaoProps {
-    id: string; 
-    title: string; 
-    subtitle: string | null; 
+    id: string;
+    title: string;
+    subtitle: string | null;
     description: string | null;
-    bgcolor: string | null; 
-    buttonText: string | null; 
+    bgcolor: string | null;
+    buttonText: string | null;
     buttonUrl: string | null;
-    // Campo 'order' (Int @default(0))
     order: number;
-    // Assumindo que 'slug' virá do BD, mas não está no modelo Colecao. Se estiver faltando, adicione.
-    // slug: string; 
+
+    // CORREÇÃO OBRIGATÓRIA: Adicione esta linha!
+    slug: string;
+
     items: ColecaoItem[];
 }
 
