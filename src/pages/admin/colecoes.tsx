@@ -1,7 +1,10 @@
+// /pages/admin/colecoes.tsx
+
 import { useState, useEffect } from "react";
 import Head from "next/head";
 import { MdAddPhotoAlternate, MdDelete, MdEdit, MdClose, MdUpload } from 'react-icons/md';
 import AdminLayout from "components/admin/AdminLayout";
+import React from "react"; // Necessário para React.ChangeEvent, React.FormEvent
 
 // --- ESTRUTURAS DE TIPO (MANTIDAS) ---
 
@@ -444,18 +447,9 @@ export default function AdminColecoes() {
                             <p className="text-gray-500 italic">Nenhuma foto secundária adicionada. Adicione uma para começar.</p>
                         ) : (
                             item.fotos
-                                // Ordena as fotos pelo campo 'ordem' antes de renderizar
-                                .sort((a, b) => a.ordem - b.ordem)
+                                // A reordenação deve ser feita no estado ou no submit. Aqui, usamos a ordem atual do estado.
                                 .map((foto, fotoIndex) => {
-                                    
-                                    // Encontra o índice original no array não ordenado para usar nas funções de manipulação
-                                    // IMPORTANTE: Se o array for reordenado, você deve usar o índice original.
-                                    // A forma mais segura é NÃO ordenar *aqui*, e sim no `handleSubmit`, 
-                                    // ou buscar o índice original. Por simplicidade, vamos manter a ordem original
-                                    // na renderização e garantir que o `handleFotoChange` use o `fotoIndex` do array do estado.
-                                    // Se você implementou a lógica de reajuste de ordem no `handleRemoveFoto`, 
-                                    // o índice visual será o índice do estado.
-
+                                        
                                     const fotoUrl = typeof foto.url === 'string' ? foto.url : URL.createObjectURL(foto.url);
 
                                     return (
@@ -503,6 +497,7 @@ export default function AdminColecoes() {
                                             />
                                             
                                             <button 
+                                                type="button"
                                                 onClick={() => handleRemoveFoto(fotoIndex)} 
                                                 className="text-red-500 hover:text-red-700 p-2 rounded transition duration-200"
                                             >
@@ -610,72 +605,86 @@ export default function AdminColecoes() {
                                 </div>
                             </div>
                         ))}
-                        <button type="button" onClick={handleAddItem} className="bg-gray-200 text-gray-800 p-3 rounded-lg mt-2 flex items-center justify-center gap-2 font-semibold hover:bg-gray-300 transition duration-200">
-                            <MdAddPhotoAlternate size={24} /> Adicionar Novo Item
+                        <button 
+                            type="button" 
+                            onClick={handleAddItem} 
+                            className="bg-gray-200 text-gray-800 p-3 rounded-lg mt-2 flex items-center justify-center gap-2 font-semibold hover:bg-gray-300 transition duration-200"
+                        >
+                            <MdAddPhotoAlternate size={20} /> Adicionar Novo Item à Coleção
                         </button>
 
-                        <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                            <button type="submit" disabled={loading} className="bg-blue-600 text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-blue-700 transition duration-200 disabled:bg-gray-400">
-                                {loading ? (form.id ? "Atualizando..." : "Salvando...") : (form.id ? "Atualizar Coleção" : "Salvar Coleção")}
+                        {/* --- AÇÃO DO FORMULÁRIO (A CORREÇÃO ESTÁ AQUI) --- */}
+                        <div className="flex justify-end gap-4 mt-8">
+                            <button
+                                type="button" 
+                                onClick={resetForm} 
+                                className="text-gray-600 dark:text-gray-400 p-3 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200"
+                                disabled={loading}
+                            >
+                                {form.id ? "Cancelar Edição" : "Limpar Formulário"}
                             </button>
-                            {form.id && (
-                                <button type="button" onClick={resetForm} className="bg-red-500 text-white p-4 rounded-lg flex-1 font-bold shadow-md hover:bg-red-600 transition duration-200">
-                                    Cancelar Edição
-                                </button>
-                            )}
+                            <button
+                                type="submit" {/* <<< CORRIGIDO: Este deve ser o 'submit' para disparar o handleSubmit! >>> */}
+                                className="bg-blue-600 text-white p-3 rounded-lg flex items-center gap-2 font-bold hover:bg-blue-700 transition duration-200"
+                                disabled={loading}
+                            >
+                                {loading ? (form.id ? 'Atualizando...' : 'Criando...') : (form.id ? 'Atualizar Coleção' : 'Criar Coleção')}
+                            </button>
                         </div>
+
+                        {error && <p className="text-red-500 mt-4 text-center font-semibold">{error}</p>}
                     </form>
-                    {error && <p className="text-red-500 mt-4 font-medium">{error}</p>}
                 </section>
-                
-                {/* Lista de Coleções (Mantida) */}
-                <section className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg mb-10">
-                    <h2 className="text-2xl font-bold mb-6 text-gray-700 dark:text-gray-400">Coleções Existentes</h2>
-                    {loading ? (
-                        <p className="text-gray-600">Carregando...</p>
-                    ) : colecoes.length === 0 ? (
-                        <p className="text-gray-600">Nenhuma coleção encontrada.</p>
-                    ) : (
-                        colecoes.map((colecao) => (
-                            <div key={colecao.id} className="bg-gray-50 dark:bg-gray-900 p-6 rounded-xl shadow-sm mb-4">
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-400">{colecao.title} (Ordem: {colecao.order})</h3>
-                                        <p className="text-sm text-gray-500">{colecao.subtitle}</p>
-                                    </div>
-                                    <div className="flex gap-2 mt-4 md:mt-0">
-                                        <button onClick={() => handleEdit(colecao)} className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-600 transition duration-200">
-                                            <MdEdit size={20} className="text-white" />
-                                        </button>
-                                        <button onClick={() => handleDelete(colecao.id)} className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-600 transition duration-200">
-                                            <MdDelete size={20} className="text-white" />
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {colecao.items.map((item) => (
-                                        <div key={item.id} className="flex gap-4 items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-                                            <img src={item.img as string} alt={item.productModel} className="w-20 h-20 object-cover rounded-lg" />
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold text-gray-800 dark:text-gray-400">{item.productMark} - {item.productModel} ({item.cor})</h4>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    Ordem Item: {item.ordem || 'N/A'} | Tamanho: {item.size || 'N/A'} | Preço: R${item.price || 'N/A'} | A prazo: R${item.price_card || 'N/A'}
-                                                </p>
-                                                <p className="text-xs text-blue-500 mt-1">
-                                                    Fotos Adicionais: {item.fotos?.length || 0}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))
+
+                {/* Tabela de Coleções Existentes (Mantida) */}
+                <section className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <h2 className="text-2xl font-bold mb-6 text-gray-700 dark:text-gray-400">Coleções Atuais</h2>
+                    {loading && !form.id && <p className="text-center text-blue-500">Carregando coleções...</p>}
+                    
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead className="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ordem</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Itens</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                {colecoes.map((colecao) => (
+                                    <tr key={colecao.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{colecao.order}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{colecao.title}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                            <span className="font-bold">{colecao.items.length}</span> itens
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-2">
+                                            <button 
+                                                onClick={() => handleEdit(colecao)} 
+                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-600 p-1 rounded transition duration-200"
+                                            >
+                                                <MdEdit size={20} />
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDelete(colecao.id)} 
+                                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-600 p-1 rounded transition duration-200"
+                                            >
+                                                <MdDelete size={20} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {colecoes.length === 0 && !loading && (
+                        <p className="text-center py-6 text-gray-500">Nenhuma coleção encontrada.</p>
                     )}
                 </section>
                 
-                {/* Renderiza o Modal de Fotos se o estado permitir */}
-                {showFotoModal && <FotosModal itemIndex={editingItemIndex} />}
-
+                {/* O Modal de Fotos é renderizado aqui, fora da estrutura principal do layout */}
+                <FotosModal itemIndex={editingItemIndex} />
             </AdminLayout>
         </>
     );
