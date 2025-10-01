@@ -164,6 +164,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
 
                     // 2. Transação para criar ou atualizar os itens e suas fotos
+                    // 2. Transação para criar ou atualizar os itens e suas fotos
                     if (items && Array.isArray(items)) {
                         const transaction = items.map((item: ColecaoItem) => {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
@@ -172,26 +173,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 productMark: item.productMark,
                                 productModel: item.productModel,
                                 cor: item.cor,
-                                img: item.img,
+                                img: item.img as string, // OK: Cast da imagem principal
                                 slug: itemSlug,
-                                ordem: item.ordem ?? 0, // NOVO: Campo ordem
+                                ordem: item.ordem ?? 0,
                                 size: item.size,
                                 price: item.price,
                                 price_card: item.price_card,
                                 like: item.like ?? 0,
                                 view: item.view ?? 0,
-                                // Relacionamento com fotos
                                 fotos: {
-                                    // NOVO: Conecta ou cria as fotos
+                                    // CORREÇÃO AQUI: Dentro do upsert, aplicamos o cast nas operações
                                     upsert: item.fotos.map(foto => ({
-                                        where: { id: foto.id || 'new-id' }, // Usa ID real para update, ou 'new-id' para create
+                                        where: { id: foto.id || 'new-id' },
                                         create: {
-                                            url: foto.url,
+                                            url: foto.url as string, // CORRIGIDO: Cast para string na criação
                                             caption: foto.caption,
                                             ordem: foto.ordem ?? 0,
                                         },
                                         update: {
-                                            url: foto.url,
+                                            url: foto.url as string, // CORRIGIDO: Cast para string na atualização
                                             caption: foto.caption,
                                             ordem: foto.ordem ?? 0,
                                         }
@@ -199,7 +199,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 },
                             };
 
-                            // 2a. Se o item tem ID, atualiza (ou upSert nas fotos)
+                            // 2a. Se o item tem ID, atualiza
                             if (item.id) {
                                 return prisma.colecaoItem.update({
                                     where: { id: item.id },
