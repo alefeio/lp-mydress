@@ -130,23 +130,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
                     }
 
-                    // AJUSTE: Garante que 'order' da Colecao seja 0 se for null/undefined
+                    // 1. Prepara dados da Colecao principal (garantindo 'order' = 0 se nulo)
                     const colecaoData = { ...restColecao, order: restColecao.order ?? 0 };
 
-                    // 1. Atualiza a coleção principal
-                    const updateColecao = prisma.colecao.update({
+                    // 2. Transação para CRUD dos ColecaoItem e ColecaoItemFoto
+                    const transactionActions: any[] = [];
+                    const itemIdsToKeep: string[] = [];
+
+                    // Ações para Colecao principal:
+                    transactionActions.push(prisma.colecao.update({
                         where: { id },
                         data: colecaoData,
-                    });
-
-                    const transactionActions: any[] = [updateColecao];
-                    const itemIdsToKeep: string[] = [];
+                    }));
 
                     if (items && Array.isArray(items)) {
                         items.forEach((item: ColecaoItem) => {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
 
-                            // Dados base do item
+                            // Dados base do item (com ajustes de Nullish Coalescing)
                             const baseItemData = {
                                 productMark: item.productMark,
                                 productModel: item.productModel,
@@ -161,18 +162,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 view: item.view ?? 0,
                             };
 
-                            // --- Item Existente: Update (com upsert de fotos) ---
+                            // --- Item Existente: UPDATE (com upsert de fotos) ---
                             if (item.id) {
                                 itemIdsToKeep.push(item.id);
 
-                                const action = prisma.colecaoItem.update({
+                                transactionActions.push(prisma.colecaoItem.update({
                                     where: { id: item.id },
                                     data: {
                                         ...baseItemData,
                                         fotos: {
-                                            // Usa UPSERT para gerenciar fotos existentes/novas
+                                            // UPSERT: Atualiza fotos existentes (com id) e cria novas (sem id)
                                             upsert: item.fotos?.map(foto => ({
-                                                where: { id: foto.id || 'non-existent-id' }, // Se não tem ID, 'create' será usado
+                                                where: { id: foto.id || 'non-existent-id' },
                                                 create: {
                                                     url: foto.url as string,
                                                     caption: foto.caption,
@@ -188,7 +189,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                                     view: foto.view ?? 0,
                                                 }
                                             })) ?? [],
-                                            // Exclui fotos que existiam mas não foram enviadas na lista atual
+                                            // DELETE MANY: Exclui fotos que foram removidas da lista do frontend
                                             deleteMany: {
                                                 colecaoItemId: item.id,
                                                 id: {
@@ -197,12 +198,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                             }
                                         },
                                     },
-                                });
-                                transactionActions.push(action);
+                                }));
                             }
-                            // --- Item Novo: Create (com aninhamento de fotos) ---
+                            // --- Item Novo: CREATE (com criação aninhada de fotos) ---
                             else {
-                                const action = prisma.colecaoItem.create({
+                                transactionActions.push(prisma.colecaoItem.create({
                                     data: {
                                         ...baseItemData,
                                         colecaoId: id, // Associa ao ID da coleção principal
@@ -216,12 +216,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                             })) ?? [],
                                         },
                                     },
-                                });
-                                transactionActions.push(action);
+                                }));
                             }
                         });
 
-                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'items' enviada
+                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'items' enviada (DELETE)
                         const deleteItems = prisma.colecaoItem.deleteMany({
                             where: {
                                 colecaoId: id,
@@ -231,9 +230,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         transactionActions.push(deleteItems);
 
                         await prisma.$transaction(transactionActions);
-                    } else {
-                        // Se não houver itens, garante que o update da coleção ainda seja executado
-                        await updateColecao;
                     }
 
 
@@ -243,13 +239,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         include: {
                             items: {
                                 include: { fotos: true },
-                                // Adiciona a ordenação
                                 orderBy: [{ ordem: 'asc' }, { like: 'desc' }]
                             }
                         },
                     });
 
-                    return res.status(200).json({ success: true, data: colecaoComItensAtualizados });
+                    // AJUSTE ADICIONAL: Recria o slug na resposta (necessário para o frontend)
+                    const finalResponse = {
+                        ...colecaoComItensAtualizados,
+                        slug: slugify(colecaoComItensAtualizados?.title || ''),
+                        items: colecaoComItensAtualizados?.items.map((item: any) => ({
+                            ...item,
+                            slug: item.slug || slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+                        }))
+                    };
+
+
+                    return res.status(200).json({ success: true, data: finalResponse });
                 } catch (error: any) {
                     console.error('Erro ao atualizar coleção:', error);
                     if (error.code === 'P2002') {
