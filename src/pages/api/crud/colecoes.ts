@@ -2,7 +2,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ColecaoProps, ColecaoItem } from '../../../types'; 
+import { ColecaoProps, ColecaoItem } from '../../../types';
 // OBSERVAÇÃO: Lembre-se de que se o erro de tipagem persistir, você DEVE adicionar 
 // 'slug' a ColecaoProps e 'description' a ColecaoItem em '../../../types'.
 
@@ -89,20 +89,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     productModel: item.productModel,
                                     cor: item.cor,
                                     img: item.img as string,
-                                    ordem: item.ordem ?? 0, 
+                                    ordem: item.ordem ?? 0,
                                     slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
                                     size: item.size,
                                     price: item.price,
                                     price_card: item.price_card,
-                                    like: item.like ?? 0, 
-                                    view: item.view ?? 0, 
+                                    like: item.like ?? 0,
+                                    view: item.view ?? 0,
                                     fotos: { // Criação aninhada das fotos (ColecaoItemFoto)
                                         create: item.fotos?.map(foto => ({
                                             url: foto.url as string,
                                             caption: foto.caption,
-                                            ordem: foto.ordem ?? 0, 
-                                            like: foto.like ?? 0, 
-                                            view: foto.view ?? 0, 
+                                            ordem: foto.ordem ?? 0,
+                                            like: foto.like ?? 0,
+                                            view: foto.view ?? 0,
                                         })) ?? []
                                     }
                                 })),
@@ -197,7 +197,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         },
                                     },
                                 }));
-                            } 
+                            }
                             // --- Item Novo: CREATE (com criação aninhada de fotos) ---
                             else {
                                 // ESTE BLOCO GARANTE QUE O NOVO ITEM É CRIADO CORRETAMENTE COM SUAS FOTOS
@@ -265,19 +265,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // ----------------------------------------------------------------------
             case 'DELETE':
                 try {
-                    // Espera o ID da Coleção como parâmetro de query
-                    const { id: colecaoId } = req.query as { id: string };
-                    // Permite deletar item individual enviando itemId no corpo (opcional)
-                    const { itemId } = req.body as { itemId: string };
+                    // LÊ O ID DA COLEÇÃO OU ITEM DO CORPO (req.body)
+                    const { id, isItem } = req.body as { id: string; isItem: boolean };
 
-                    if (itemId) {
+                    // Caso o ID seja de um Item (ColecaoItem)
+                    if (isItem && id) {
                         // Deleta o ColecaoItem (e suas fotos em cascata)
-                        await prisma.colecaoItem.delete({ where: { id: itemId } });
+                        await prisma.colecaoItem.delete({ where: { id } });
                         return res.status(200).json({ success: true, message: 'Item excluído com sucesso.' });
                     }
 
-                    // Se não houver itemId, tenta deletar a Coleção
+                    // Caso o ID seja da Coleção (Colecao)
+                    const colecaoId = id;
+
                     if (!colecaoId) {
+                        // Este é o bloco que estava sendo ativado por erro
                         return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para exclusão.' });
                     }
 
