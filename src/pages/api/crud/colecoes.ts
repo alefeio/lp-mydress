@@ -140,6 +140,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     // 2. Transação para CRUD dos ColecaoItem e ColecaoItemFoto
                     const transactionActions: any[] = [];
+                    // >>> CORREÇÃO: Apenas IDs de itens EXISTENTES devem ser mantidos. Novos itens (sem ID) serão criados.
                     const itemIdsToKeep: string[] = [];
 
                     // Ação para Colecao principal:
@@ -149,8 +150,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }));
 
                     if (items && Array.isArray(items)) {
-                        items.forEach((item: ColecaoItem) => {
+                        for (const item of items) {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
+
+                            // PASSO 1: CHECAGEM DE UNICIDADE DE SLUG NA ATUALIZAÇÃO
+                            // Checa se o slug já existe em outro item que NÃO seja o que estamos atualizando.
+                            const existingItem = await prisma.colecaoItem.findUnique({
+                                where: { slug: itemSlug },
+                            });
+
+                            if (existingItem && existingItem.id !== item.id) {
+                                return res.status(409).json({
+                                    success: false,
+                                    message: `Erro de unicidade: O item ${item.productMark} ${item.productModel} já existe em outra coleção (slug: ${itemSlug}). Por favor, ajuste a Marca, Modelo ou Cor.`
+                                });
+                            }
 
                             // Dados base do item (para Update e Create)
                             const baseItemData = {
@@ -165,7 +179,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 price_card: item.price_card,
                                 like: item.like ?? 0,
                                 view: item.view ?? 0,
-                                // O campo 'description' não está no seu modelo, mas se existisse, estaria aqui.
                             };
 
                             // --- Item Existente: UPDATE (com upsert de fotos) ---
@@ -179,7 +192,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                         fotos: {
                                             // UPSERT: Atualiza/Cria fotos filhas
                                             upsert: item.fotos?.map(foto => ({
-                                                where: { id: foto.id || 'non-existent-id' }, // Se foto.id existe, atualiza; senão, cria
+                                                where: { id: foto.id || 'non-existent-id' },
                                                 create: {
                                                     url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
                                                 },
@@ -200,7 +213,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                             // --- Item Novo: CREATE (com criação aninhada de fotos) ---
                             else {
-                                // ESTE BLOCO GARANTE QUE O NOVO ITEM É CRIADO CORRETAMENTE COM SUAS FOTOS
+                                // NOVO ITEM: O ID não existe, então usamos 'create'. 
+                                // Ele não é adicionado a itemIdsToKeep, mas isso é OK,
+                                // pois o item de exclusão (deleteItems) só busca por IDs EXISTENTES
+                                // que não estão na lista de IDs existentes mantidos.
                                 transactionActions.push(prisma.colecaoItem.create({
                                     data: {
                                         ...baseItemData,
@@ -213,13 +229,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     },
                                 }));
                             }
-                        });
+                        }
 
-                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'items' enviada
+                        // 3. Deleta itens que existiam no DB, mas não estão na lista de 'itemIdsToKeep' 
+                        // (ou seja, itens existentes que foram removidos pelo usuário no frontend)
                         const deleteItems = prisma.colecaoItem.deleteMany({
                             where: {
                                 colecaoId: id,
-                                id: { notIn: itemIdsToKeep },
+                                id: { notIn: itemIdsToKeep }, // Esta lista contém APENAS IDs de itens EXISTENTES
                             },
                         });
                         transactionActions.push(deleteItems);
@@ -253,9 +270,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(200).json({ success: true, data: finalResponse });
                 } catch (error: any) {
                     console.error('Erro ao atualizar coleção:', error);
-                    if (error.code === 'P2002') {
-                        return res.status(409).json({ success: false, message: 'Erro de unicidade: Já existe um item com este slug. Por favor, ajuste a Marca, Modelo ou Cor.' });
-                    }
+                    // O catch aqui só deve pegar erros internos que não sejam de unicidade (que tratamos acima)
                     return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
                 }
                 break;
