@@ -164,16 +164,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     });
 
                     // 2. Transação para criar ou atualizar os itens e suas fotos
-                    // 2. Transação para criar ou atualizar os itens e suas fotos
                     if (items && Array.isArray(items)) {
                         const transaction = items.map((item: ColecaoItem) => {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
 
-                            const baseData = {
+                            // BaseData SEM a chave 'fotos'
+                            const baseItemData = {
                                 productMark: item.productMark,
                                 productModel: item.productModel,
                                 cor: item.cor,
-                                img: item.img as string, // OK: Cast da imagem principal
+                                img: item.img as string,
                                 slug: itemSlug,
                                 ordem: item.ordem ?? 0,
                                 size: item.size,
@@ -181,43 +181,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 price_card: item.price_card,
                                 like: item.like ?? 0,
                                 view: item.view ?? 0,
-                                fotos: {
-                                    // CORREÇÃO AQUI: Dentro do upsert, aplicamos o cast nas operações
-                                    upsert: item.fotos.map(foto => ({
-                                        where: { id: foto.id || 'new-id' },
-                                        create: {
-                                            url: foto.url as string, // CORRIGIDO: Cast para string na criação
-                                            caption: foto.caption,
-                                            ordem: foto.ordem ?? 0,
-                                        },
-                                        update: {
-                                            url: foto.url as string, // CORRIGIDO: Cast para string na atualização
-                                            caption: foto.caption,
-                                            ordem: foto.ordem ?? 0,
-                                        }
-                                    })),
-                                },
                             };
 
-                            // 2a. Se o item tem ID, atualiza
+                            // Cria as operações de fotos (create/update) de forma reusável
+                            const fotoOperations = item.fotos.map(foto => ({
+                                url: foto.url as string,
+                                caption: foto.caption,
+                                ordem: foto.ordem ?? 0,
+                            }));
+
+                            // 2a. Se o item tem ID, atualiza (usa upsert para as fotos)
                             if (item.id) {
                                 return prisma.colecaoItem.update({
                                     where: { id: item.id },
-                                    data: baseData,
+                                    data: {
+                                        ...baseItemData,
+                                        fotos: {
+                                            // Usa UPSERT para atualizar ou criar fotos existentes
+                                            upsert: item.fotos.map(foto => ({
+                                                where: { id: foto.id || 'non-existent-id' }, // Usa ID ou ID fictício para criar
+                                                create: {
+                                                    url: foto.url as string,
+                                                    caption: foto.caption,
+                                                    ordem: foto.ordem ?? 0,
+                                                },
+                                                update: {
+                                                    url: foto.url as string,
+                                                    caption: foto.caption,
+                                                    ordem: foto.ordem ?? 0,
+                                                }
+                                            })),
+                                        },
+                                    },
                                 });
                             }
                             // 2b. Se o item NÃO tem ID, cria ele com suas fotos
                             else {
                                 return prisma.colecaoItem.create({
                                     data: {
-                                        ...baseData,
+                                        ...baseItemData,
                                         colecaoId: id,
+                                        fotos: {
+                                            // Usa CREATE para fotos de um novo item
+                                            create: fotoOperations,
+                                        },
                                     },
                                 });
                             }
                         });
 
-                        // 3. Obtém IDs de itens a serem mantidos e deleta os que não foram enviados (soft delete é recomendado)
+                        // 3. Obtém IDs de itens a serem mantidos e deleta os que não foram enviados (mantido)
                         const itemIdsToKeep = items.filter(i => i.id).map(i => i.id as string);
 
                         const deleteItems = prisma.colecaoItem.deleteMany({
