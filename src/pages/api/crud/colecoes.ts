@@ -33,9 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                 // NOVO: Ordenar os ColecaoItem pelo novo campo 'ordem'
                                 orderBy: [
                                     { ordem: 'asc' }, // Ordena pela ordem definida no formulário
-                                    { like: 'desc' }, 
+                                    { like: 'desc' },
                                 ],
-                                select: { 
+                                select: {
                                     id: true,
                                     productMark: true,
                                     productModel: true,
@@ -46,8 +46,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     size: true,
                                     price: true,
                                     price_card: true,
-                                    like: true, 
-                                    view: true, 
+                                    like: true,
+                                    view: true,
                                     ordem: true, // NOVO: Campo ordem
                                     fotos: { // NOVO: Incluir as fotos adicionais
                                         orderBy: { ordem: 'asc' }, // Ordena as fotos pelo campo 'ordem'
@@ -90,7 +90,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             // ----------------------------------------------------------------------
             case 'POST':
                 try {
-                    // Tipagem 'ColecaoProps' deve refletir 'ordem' e 'fotos' nos items
                     const { title, subtitle, description, bgcolor, buttonText, buttonUrl, order, items } = req.body as ColecaoProps;
 
                     const createdColecao = await prisma.colecao.create({
@@ -103,23 +102,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             buttonUrl,
                             order,
                             items: {
+                                // CORREÇÃO AQUI: Garante que estamos usando apenas o subset de dados esperado pelo Prisma.
                                 create: (items || []).map(item => ({
                                     productMark: item.productMark,
                                     productModel: item.productModel,
                                     cor: item.cor,
-                                    img: item.img,
-                                    ordem: item.ordem ?? 0, // NOVO: Campo ordem
+                                    img: item.img as string, // Cast para string, pois o upload foi feito
+                                    ordem: item.ordem ?? 0,
                                     slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
                                     size: item.size,
                                     price: item.price,
                                     price_card: item.price_card,
                                     like: item.like ?? 0,
                                     view: item.view ?? 0,
-                                    fotos: { // NOVO: Criação aninhada das fotos adicionais
+                                    fotos: {
                                         create: item.fotos.map(foto => ({
-                                            url: foto.url,
+                                            // NOVO: Garante que 'url' é uma string e remove a propriedade 'id'
+                                            url: foto.url as string,
                                             caption: foto.caption,
-                                            ordem: foto.ordem ?? 0, // NOVO: Campo ordem da foto
+                                            ordem: foto.ordem ?? 0,
                                         }))
                                     }
                                 })),
@@ -127,7 +128,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                         include: {
                             items: {
-                                include: { fotos: true } // Inclui fotos no retorno
+                                include: { fotos: true }
                             },
                         },
                     });
@@ -197,14 +198,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     })),
                                 },
                             };
-                            
+
                             // 2a. Se o item tem ID, atualiza (ou upSert nas fotos)
                             if (item.id) {
                                 return prisma.colecaoItem.update({
                                     where: { id: item.id },
                                     data: baseData,
                                 });
-                            } 
+                            }
                             // 2b. Se o item NÃO tem ID, cria ele com suas fotos
                             else {
                                 return prisma.colecaoItem.create({
@@ -218,7 +219,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                         // 3. Obtém IDs de itens a serem mantidos e deleta os que não foram enviados (soft delete é recomendado)
                         const itemIdsToKeep = items.filter(i => i.id).map(i => i.id as string);
-                        
+
                         const deleteItems = prisma.colecaoItem.deleteMany({
                             where: {
                                 colecaoId: id,
@@ -232,7 +233,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     // 4. Retorna a coleção completa e atualizada
                     const colecaoComItensAtualizados = await prisma.colecao.findUnique({
                         where: { id },
-                        include: { 
+                        include: {
                             items: {
                                 include: { fotos: true }
                             }
@@ -252,7 +253,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 try {
                     // O seu frontend envia { id, isItem: true } no corpo, não no query. Ajustando para o corpo:
                     const { id, isItem } = req.body;
-                    
+
                     if (isItem) {
                         if (!id || typeof id !== 'string') {
                             return res.status(400).json({ success: false, message: 'ID do item é obrigatório para exclusão.' });
