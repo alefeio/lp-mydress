@@ -23,8 +23,8 @@ model Account {
   id_token          String?
   session_state     String?
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt         DateTime @default(now()) // Adicionado
-  updatedAt         DateTime @updatedAt // Adicionado
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([provider, providerAccountId])
 }
@@ -35,8 +35,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now()) // Adicionado
-  updatedAt    DateTime @updatedAt // Adicionado
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model User {
@@ -48,9 +48,9 @@ model User {
   role          String?   @default("USER")
   accounts      Account[]
   sessions      Session[]
-  site          Site?     // Relacionamento com o novo model Site
-  createdAt     DateTime  @default(now()) // Adicionado
-  updatedAt     DateTime  @updatedAt // Adicionado
+  site          Site?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model VerificationToken {
@@ -58,8 +58,8 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-  createdAt  DateTime @default(now()) // Adicionado
-  updatedAt  DateTime @updatedAt // Adicionado
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
 }
@@ -120,25 +120,39 @@ model Colecao {
 }
 
 model ColecaoItem {
-  id           String    @id @default(cuid())
-  productMark  String
-  productModel String
-  cor          String
-  img          String
-  slug         String    @unique
-  colecao      Colecao   @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
-  colecaoId    String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
-  size         String?
-  price        Int?
-  price_card   Int?
-  like         Int?
-  view         Int?
+  id            String          @id @default(cuid())
+  productMark   String
+  productModel  String
+  cor           String
+  img           String          
+  slug          String          @unique
+  colecao       Colecao         @relation(fields: [colecaoId], references: [id], onDelete: Cascade)
+  colecaoId     String
+  ordem         Int             @default(0) 
+  fotos         ColecaoItemFoto[] 
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime?
+  size          String?
+  price         Int?
+  price_card    Int?
+  like          Int?
+  view          Int?
 }
 
-// Novo model 'Site'
+model ColecaoItemFoto {
+  id            String          @id @default(cuid())
+  url           String
+  caption       String?
+  colecaoItem   ColecaoItem     @relation(fields: [colecaoItemId], references: [id], onDelete: Cascade)
+  colecaoItemId String
+  ordem         Int             @default(0) 
+  like          Int             @default(0)
+  view          Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
 model Site {
   id                   String    @id @default(cuid())
   userId               String    @unique
