@@ -243,7 +243,6 @@ export default function AdminColecoes() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Lógica de handleSubmit (mantida)
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -270,28 +269,48 @@ export default function AdminColecoes() {
                 ...foto,
                 url: fotoUrl,
                 ordem: foto.ordem || 0,
-                like: foto.like || 0,
-                view: foto.view || 0,
+                // O backend deve lidar com like/view para itens novos/existentes
               };
             })
           );
 
           finalItem.fotos = fotosWithUrls;
 
-          return {
+          // 3. Normalização de campos numéricos/nulos
+          let normalizedItem = {
             ...finalItem,
             size: finalItem.size || null,
             price: finalItem.price || null,
             price_card: finalItem.price_card || null,
             ordem: finalItem.ordem || 0,
+          };
+          
+          // **********************************************
+          // 🛑 CORREÇÃO CRÍTICA APLICADA AQUI 🛑
+          // Para garantir que novos itens SEM ID de banco de dados
+          // (seja ele undefined ou uma string vazia/null/temporária)
+          // sejam tratados como CREATE na API (PUT).
+          // Se o item.id não é uma string não vazia, ele DEVE ser undefined/omitido.
+          // **********************************************
+          
+          if (!normalizedItem.id || typeof normalizedItem.id !== 'string' || normalizedItem.id.trim() === '') {
+            // Se não tem um ID válido, remove o campo 'id' para forçar o CREATE
+            // no backend.
+            const { id, ...itemWithoutId } = normalizedItem;
+            return itemWithoutId;
           }
+
+          return normalizedItem;
         })
       );
 
       const method = form.id ? "PUT" : "POST";
+      
+      // Mapeia novamente para remover colecaoId, se estiver presente no tipo
       const body = {
         ...form,
-        items: itemsWithUrls.map(({ colecaoId, ...rest }) => rest)
+        // Usamos itemsWithUrls, que já tem a sanitização do ID
+        items: itemsWithUrls.map(({ colecaoId, ...rest }) => rest) 
       };
 
       const res = await fetch("/api/crud/colecoes", {
@@ -357,7 +376,9 @@ export default function AdminColecoes() {
     const newItems = [...form.items];
     const newItem = { ...newItems[editingItemIndex] };
 
+    // Para novos itens, o ID DEVE ser undefined. Não atribua IDs temporários aqui.
     newItem.fotos = [...newItem.fotos, {
+      id: undefined, // Garante que o ID é undefined para forçar o CREATE no backend
       url: "",
       caption: null,
       ordem: newItem.fotos.length + 1, // Sugere uma ordem inicial
@@ -450,16 +471,20 @@ export default function AdminColecoes() {
                 // A reordenação deve ser feita no estado ou no submit. Aqui, usamos a ordem atual do estado.
                 .map((foto, fotoIndex) => {
 
-                  const fotoUrl = typeof foto.url === 'string' ? foto.url : URL.createObjectURL(foto.url);
+                  const fotoUrl = typeof foto.url === 'string' 
+                    ? foto.url 
+                    : (foto.url instanceof File ? URL.createObjectURL(foto.url) : '');
 
                   return (
                     <div key={foto.id || fotoIndex} className="flex flex-col md:flex-row gap-4 p-4 border border-gray-300 rounded-lg mb-4 items-start md:items-center">
                       <div className="flex items-center gap-4 w-full md:w-auto">
-                        <img
-                          src={fotoUrl}
-                          alt={`Foto ${fotoIndex + 1}`}
-                          className="w-16 h-16 object-cover rounded-lg"
-                        />
+                        {fotoUrl && (
+                          <img
+                            src={fotoUrl}
+                            alt={`Foto ${fotoIndex + 1}`}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                        )}
                         <div className="flex flex-col flex-1">
                           <label htmlFor={`foto-file-${itemIndex}-${fotoIndex}`} className="text-blue-500 border border-blue-300 p-2 rounded text-sm cursor-pointer flex items-center justify-center gap-2 hover:bg-blue-50 dark:hover:bg-gray-700">
                             <MdUpload size={16} />
