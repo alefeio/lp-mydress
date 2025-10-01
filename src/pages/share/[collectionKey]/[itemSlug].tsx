@@ -105,7 +105,7 @@ const SharePage = ({ product, collectionTitle, shareUrl }: ShareProps) => {
           />
         </div>
         <div className="p-4 flex flex-col items-center">
-          <p className="text-center text-sm text-gray-700 mb-4">{product.description}</p>
+          {/* <p className="text-center text-sm text-gray-700 mb-4">{product.description}</p> */}
           <div className="flex space-x-4">
             <button
               onClick={handleWhatsappClick}
