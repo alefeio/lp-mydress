@@ -140,8 +140,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                     // 2. Transação para CRUD dos ColecaoItem e ColecaoItemFoto
                     const transactionActions: any[] = [];
-                    // >>> CORREÇÃO: Apenas IDs de itens EXISTENTES devem ser mantidos. Novos itens (sem ID) serão criados.
                     const itemIdsToKeep: string[] = [];
+                    const itemSlugsToCheck: { id?: string; slug: string }[] = [];
 
                     // Ação para Colecao principal:
                     transactionActions.push(prisma.colecao.update({
@@ -150,21 +150,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     }));
 
                     if (items && Array.isArray(items)) {
+                        // PRIMEIRA PASSAGEM: COLETAR SLUGS PARA CHECAGEM ATÔMICA
                         for (const item of items) {
                             const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
+                            itemSlugsToCheck.push({ id: item.id, slug: itemSlug });
+                        }
 
-                            // PASSO 1: CHECAGEM DE UNICIDADE DE SLUG NA ATUALIZAÇÃO
-                            // Checa se o slug já existe em outro item que NÃO seja o que estamos atualizando.
-                            const existingItem = await prisma.colecaoItem.findUnique({
-                                where: { slug: itemSlug },
-                            });
+                        // CHECAGEM DE UNICIDADE DE SLUG: 
+                        // Faz a checagem de todos os slugs *antes* de tentar criar/atualizar.
+                        // Busca no DB por todos os itens que tenham um dos slugs que estamos enviando.
+                        const existingItemsBySlug = await prisma.colecaoItem.findMany({
+                            where: { slug: { in: itemSlugsToCheck.map(i => i.slug) } },
+                        });
 
-                            if (existingItem && existingItem.id !== item.id) {
+                        for (const itemToCheck of itemSlugsToCheck) {
+                            const foundItem = existingItemsBySlug.find(ei => ei.slug === itemToCheck.slug);
+                            // Se encontrou um item com o mesmo slug E o ID é diferente (ou o ID está vazio, mas o slug já existe)
+                            if (foundItem && foundItem.id !== itemToCheck.id) {
+                                // O item que estamos enviando tem um slug que já existe em outro ID
                                 return res.status(409).json({
                                     success: false,
-                                    message: `Erro de unicidade: O item ${item.productMark} ${item.productModel} já existe em outra coleção (slug: ${itemSlug}). Por favor, ajuste a Marca, Modelo ou Cor.`
+                                    message: `Erro de unicidade: O slug '${itemToCheck.slug}' já está em uso por outro item na coleção. Por favor, ajuste a Marca, Modelo ou Cor.`,
                                 });
                             }
+                        }
+
+                        // SEGUNDA PASSAGEM: PREPARA AS AÇÕES DE UPDATE/CREATE
+                        for (const item of items) {
+                            const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
 
                             // Dados base do item (para Update e Create)
                             const baseItemData = {
@@ -190,7 +203,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                     data: {
                                         ...baseItemData,
                                         fotos: {
-                                            // UPSERT: Atualiza/Cria fotos filhas
+                                            // Lógica de UPSERT e DELETE MANY para fotos
                                             upsert: item.fotos?.map(foto => ({
                                                 where: { id: foto.id || 'non-existent-id' },
                                                 create: {
@@ -200,7 +213,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                                                     url: foto.url as string, caption: foto.caption, ordem: foto.ordem ?? 0, like: foto.like ?? 0, view: foto.view ?? 0,
                                                 }
                                             })) ?? [],
-                                            // DELETE MANY: Exclui fotos que foram removidas da lista do frontend
                                             deleteMany: {
                                                 colecaoItemId: item.id,
                                                 id: {
@@ -213,10 +225,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             }
                             // --- Item Novo: CREATE (com criação aninhada de fotos) ---
                             else {
-                                // NOVO ITEM: O ID não existe, então usamos 'create'. 
-                                // Ele não é adicionado a itemIdsToKeep, mas isso é OK,
-                                // pois o item de exclusão (deleteItems) só busca por IDs EXISTENTES
-                                // que não estão na lista de IDs existentes mantidos.
+                                // NOVO ITEM: O ID não existe, usamos 'create'.
                                 transactionActions.push(prisma.colecaoItem.create({
                                     data: {
                                         ...baseItemData,
@@ -232,11 +241,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         }
 
                         // 3. Deleta itens que existiam no DB, mas não estão na lista de 'itemIdsToKeep' 
-                        // (ou seja, itens existentes que foram removidos pelo usuário no frontend)
                         const deleteItems = prisma.colecaoItem.deleteMany({
                             where: {
                                 colecaoId: id,
-                                id: { notIn: itemIdsToKeep }, // Esta lista contém APENAS IDs de itens EXISTENTES
+                                id: { notIn: itemIdsToKeep },
                             },
                         });
                         transactionActions.push(deleteItems);
