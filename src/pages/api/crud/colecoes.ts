@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ColecaoProps, ColecaoItem } from '../../../types';
+import { ColecaoProps, ColecaoItem } from '../../../types'; // Assumindo que você atualizou 'types.ts'
 
 const prisma = new PrismaClient();
 
@@ -15,14 +15,12 @@ function slugify(text: string): string {
 }
 
 // O tipo auxiliar foi ajustado para refletir a estrutura do retorno do Prisma
-// A tipagem já é inferida corretamente, então esta definição é mais para clareza
 type PrismaColecaoWithItems = Omit<ColecaoProps, 'slug'> & {
     items: ColecaoItem[];
 };
 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    // Bloco try...finally para garantir que o prisma.$disconnect() seja chamado
     try {
         const { method } = req;
 
@@ -32,24 +30,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const colecoes = await prisma.colecao.findMany({
                         include: {
                             items: {
-                                // CORRIGIDO: A ordenação dos itens é feita aqui, no backend.
+                                // NOVO: Ordenar os ColecaoItem pelo novo campo 'ordem'
                                 orderBy: [
-                                    { like: 'desc' }, // Ordena pelos mais curtidos primeiro
-                                    { view: 'desc' }, // Em caso de empate, ordena pelos mais visualizados
+                                    { ordem: 'asc' }, // Ordena pela ordem definida no formulário
+                                    { like: 'desc' }, 
                                 ],
-                                select: { // Especifica os campos para incluir de ColecaoItem
+                                select: { 
                                     id: true,
                                     productMark: true,
                                     productModel: true,
                                     cor: true,
-                                    img: true,
+                                    img: true, // Imagem principal mantida
                                     slug: true,
                                     colecaoId: true,
                                     size: true,
                                     price: true,
                                     price_card: true,
-                                    like: true, // Campo 'like'
-                                    view: true,  // Campo 'view'
+                                    like: true, 
+                                    view: true, 
+                                    ordem: true, // NOVO: Campo ordem
+                                    fotos: { // NOVO: Incluir as fotos adicionais
+                                        orderBy: { ordem: 'asc' }, // Ordena as fotos pelo campo 'ordem'
+                                        select: {
+                                            id: true,
+                                            url: true,
+                                            caption: true,
+                                            ordem: true,
+                                        }
+                                    }
                                 },
                             },
                         },
@@ -61,7 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                     });
 
-                    // Removida a tipagem explícita desnecessária para o parâmetro do .map
+                    // Cria slugs dinamicamente (como já estava)
                     const colecoesComSlugs: ColecaoProps[] = colecoes.map((colecao) => ({
                         ...colecao,
                         slug: slugify(colecao.title),
@@ -77,14 +85,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(500).json({ success: false, message: 'Erro ao buscar coleções.' });
                 }
 
+            // ----------------------------------------------------------------------
+            // POST: Criação de Coleção e Itens
+            // ----------------------------------------------------------------------
             case 'POST':
                 try {
+                    // Tipagem 'ColecaoProps' deve refletir 'ordem' e 'fotos' nos items
                     const { title, subtitle, description, bgcolor, buttonText, buttonUrl, order, items } = req.body as ColecaoProps;
-
-                    const itemsWithSlugs = (items || []).map((item: ColecaoItem) => ({
-                        ...item,
-                        slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-                    }));
 
                     const createdColecao = await prisma.colecao.create({
                         data: {
@@ -96,16 +103,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                             buttonUrl,
                             order,
                             items: {
-                                create: itemsWithSlugs.map(item => ({
-                                    ...item,
-                                    // Garante que like e view sejam inicializados se não forem fornecidos
+                                create: (items || []).map(item => ({
+                                    productMark: item.productMark,
+                                    productModel: item.productModel,
+                                    cor: item.cor,
+                                    img: item.img,
+                                    ordem: item.ordem ?? 0, // NOVO: Campo ordem
+                                    slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
+                                    size: item.size,
+                                    price: item.price,
+                                    price_card: item.price_card,
                                     like: item.like ?? 0,
                                     view: item.view ?? 0,
+                                    fotos: { // NOVO: Criação aninhada das fotos adicionais
+                                        create: item.fotos.map(foto => ({
+                                            url: foto.url,
+                                            caption: foto.caption,
+                                            ordem: foto.ordem ?? 0, // NOVO: Campo ordem da foto
+                                        }))
+                                    }
                                 })),
                             },
                         },
                         include: {
-                            items: true,
+                            items: {
+                                include: { fotos: true } // Inclui fotos no retorno
+                            },
                         },
                     });
                     return res.status(201).json({ success: true, data: createdColecao });
@@ -114,6 +137,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
                 }
 
+            // ----------------------------------------------------------------------
+            // PUT: Atualização de Coleção e Itens (Complexo devido à aninhamento)
+            // ----------------------------------------------------------------------
             case 'PUT':
                 try {
                     const { id, items, ...rest } = req.body as ColecaoProps & { id: string };
@@ -122,7 +148,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para atualização.' });
                     }
 
-                    const updatedColecao = await prisma.colecao.update({
+                    // 1. Atualiza a coleção principal
+                    await prisma.colecao.update({
                         where: { id },
                         data: {
                             title: rest.title,
@@ -135,39 +162,81 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         },
                     });
 
+                    // 2. Transação para criar ou atualizar os itens e suas fotos
                     if (items && Array.isArray(items)) {
-                        const itemsWithSlugs = items.map((item: ColecaoItem) => ({
-                            ...item,
-                            slug: slugify(`${item.productMark}-${item.productModel}-${item.cor}`),
-                        }));
+                        const transaction = items.map((item: ColecaoItem) => {
+                            const itemSlug = slugify(`${item.productMark}-${item.productModel}-${item.cor}`);
 
-                        const transaction = itemsWithSlugs.map((item: ColecaoItem) => {
+                            const baseData = {
+                                productMark: item.productMark,
+                                productModel: item.productModel,
+                                cor: item.cor,
+                                img: item.img,
+                                slug: itemSlug,
+                                ordem: item.ordem ?? 0, // NOVO: Campo ordem
+                                size: item.size,
+                                price: item.price,
+                                price_card: item.price_card,
+                                like: item.like ?? 0,
+                                view: item.view ?? 0,
+                                // Relacionamento com fotos
+                                fotos: {
+                                    // NOVO: Conecta ou cria as fotos
+                                    upsert: item.fotos.map(foto => ({
+                                        where: { id: foto.id || 'new-id' }, // Usa ID real para update, ou 'new-id' para create
+                                        create: {
+                                            url: foto.url,
+                                            caption: foto.caption,
+                                            ordem: foto.ordem ?? 0,
+                                        },
+                                        update: {
+                                            url: foto.url,
+                                            caption: foto.caption,
+                                            ordem: foto.ordem ?? 0,
+                                        }
+                                    })),
+                                },
+                            };
+                            
+                            // 2a. Se o item tem ID, atualiza (ou upSert nas fotos)
                             if (item.id) {
                                 return prisma.colecaoItem.update({
                                     where: { id: item.id },
-                                    data: {
-                                        ...item,
-                                        like: item.like ?? 0,
-                                        view: item.view ?? 0,
-                                    },
+                                    data: baseData,
                                 });
-                            } else {
+                            } 
+                            // 2b. Se o item NÃO tem ID, cria ele com suas fotos
+                            else {
                                 return prisma.colecaoItem.create({
                                     data: {
-                                        ...item,
+                                        ...baseData,
                                         colecaoId: id,
-                                        like: item.like ?? 0,
-                                        view: item.view ?? 0,
                                     },
                                 });
                             }
                         });
-                        await prisma.$transaction(transaction);
+
+                        // 3. Obtém IDs de itens a serem mantidos e deleta os que não foram enviados (soft delete é recomendado)
+                        const itemIdsToKeep = items.filter(i => i.id).map(i => i.id as string);
+                        
+                        const deleteItems = prisma.colecaoItem.deleteMany({
+                            where: {
+                                colecaoId: id,
+                                id: { notIn: itemIdsToKeep },
+                            },
+                        });
+
+                        await prisma.$transaction([...transaction, deleteItems]);
                     }
 
+                    // 4. Retorna a coleção completa e atualizada
                     const colecaoComItensAtualizados = await prisma.colecao.findUnique({
                         where: { id },
-                        include: { items: true },
+                        include: { 
+                            items: {
+                                include: { fotos: true }
+                            }
+                        },
                     });
 
                     return res.status(200).json({ success: true, data: colecaoComItensAtualizados });
@@ -176,22 +245,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     return res.status(500).json({ success: false, message: 'Erro ao atualizar coleção.' });
                 }
 
+            // ----------------------------------------------------------------------
+            // DELETE: Mantido igual (exclui Colecao, a exclusão dos itens é feita em cascata)
+            // ----------------------------------------------------------------------
             case 'DELETE':
                 try {
-                    const { id } = req.query;
+                    // O seu frontend envia { id, isItem: true } no corpo, não no query. Ajustando para o corpo:
+                    const { id, isItem } = req.body;
+                    
+                    if (isItem) {
+                        if (!id || typeof id !== 'string') {
+                            return res.status(400).json({ success: false, message: 'ID do item é obrigatório para exclusão.' });
+                        }
+                        // Se for um item, exclui o ColecaoItem (e suas fotos em cascata)
+                        await prisma.colecaoItem.delete({ where: { id } });
+                        return res.status(200).json({ success: true, message: 'Item excluído com sucesso.' });
+                    }
 
                     if (!id || typeof id !== 'string') {
                         return res.status(400).json({ success: false, message: 'ID da coleção é obrigatório para exclusão.' });
                     }
 
+                    // Se não for um item, exclui a Colecao (e seus itens/fotos em cascata)
                     await prisma.colecao.delete({
                         where: { id },
                     });
 
                     return res.status(200).json({ success: true, message: 'Coleção excluída com sucesso.' });
                 } catch (error) {
-                    console.error('Erro ao excluir coleção:', error);
-                    return res.status(500).json({ success: false, message: 'Erro ao excluir coleção.' });
+                    console.error('Erro ao excluir:', error);
+                    return res.status(500).json({ success: false, message: 'Erro ao excluir.' });
                 }
 
             default:
